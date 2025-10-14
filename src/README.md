@@ -1,5 +1,5 @@
 # Source Code (`src/`)
-
+```
 src/
 ├── core/ → zentrale Logik, State-Machine, Ablaufsteuerung
 ├── common/ → Alle notwendigen Module
@@ -8,7 +8,7 @@ src/
 ├── common/mqtt/ → Kommunikation über MQTT
 ├── common/opcua/ → Kommunikation über OPC-UA
 └── common/utils/ → Hilfsfunktionen, Logging, Config Loader, Fehlerhandling
-
+```
 
 ## Entwicklungsrichtlinien
 
