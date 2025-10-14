@@ -1,0 +1,65 @@
+# --- Environment files (important!) ---
+# Ignore all .env files in the entire repo
+**/.env
+**/.env.*
+.env
+.env.*
+
+# --- Python cache & compiled files ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+*.env.bak
+pip-wheel-metadata/
+pip-log.txt
+
+# --- Build & distribution ---
+build/
+dist/
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Logs, Temp & Debug ---
+logs/
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# --- Notebooks / Data ---
+*.ipynb_checkpoints
+datasets/
+tmp/
+*.csv
+*.jsonl
+
+# --- Coverage / Test outputs ---
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# --- Local Configs ---
+configs/local_*.yaml
+configs/local_*.json
+
+# --- OS-specific ---
+ehthumbs.db
+Icon?
