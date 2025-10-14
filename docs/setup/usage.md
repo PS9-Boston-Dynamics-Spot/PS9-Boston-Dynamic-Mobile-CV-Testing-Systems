@@ -1,3 +1,18 @@
+# Initial Setup
+
+Run the following commands in the terminal:
+
+```bash
+docker compose build --no-cache
+
+docker compose up -d
+
+docker compose exec app bash
+
+make run
+```
+
+
 # Quick Start
 
 ## Start Docker Container
