@@ -15,7 +15,7 @@ src/
 - Jede neue Funktionalität bekommt ein eigenes Modul oder eine Klasse  
 - Keine Hardcodierung von Pfaden oder IP-Adressen → stattdessen Configs aus `/configs`
 - Neue Unterordner immer mit:
-  - einer `__init__.py` (leer reicht)#
+  - einer `__init__.py` (leer reicht aus)
 
 ## Beispiel: Neuer Bestandteil
 
