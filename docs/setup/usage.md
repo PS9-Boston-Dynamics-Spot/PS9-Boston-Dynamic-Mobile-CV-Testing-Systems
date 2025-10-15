@@ -6,6 +6,7 @@
 2. Wait for the container to build and start (first time may take a few minutes)
 
 **Your bottom bar should include a similar element.**
+
 ![./image.png](image.png)
 
 ## Configure Python Interpreter
