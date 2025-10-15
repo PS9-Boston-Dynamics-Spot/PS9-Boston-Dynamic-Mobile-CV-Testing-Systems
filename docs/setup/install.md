@@ -35,8 +35,6 @@
    - Python
    - Pylance
    - Remote - SSH
-   - Remote - SSH
-
 
 ## Linux (not tested)
 1. **Install Python**
@@ -78,6 +76,7 @@
 
 6. **Install Extensions**
    - Dev Containers
-   - Remote - SSH
    - Docker
+   - Python
+   - Pylance
    - Remote - SSH
