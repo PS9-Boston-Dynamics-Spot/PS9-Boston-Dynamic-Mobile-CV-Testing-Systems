@@ -16,11 +16,10 @@ create-venv:
 		echo "Virtual environment already exists."; \
 	fi
 
-# Im Docker-Container: Startet neue Shell-Session in vorhandenem Terminal
 use-venv: create-venv
 	@echo "Starting new shell with virtual environment..."
 	@echo "-----------------------------------------------"
-	@bash -c "source $(ACTIVATE) && exec bash"
+	@. $(ACTIVATE) && exec bash
 
 check-venv-using:
 	@if [ -n "$$VIRTUAL_ENV" ]; then \

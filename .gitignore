@@ -28,7 +28,6 @@ dist/
 *.spec
 
 # --- IDEs & Editors ---
-.vscode/
 .idea/
 *.swp
 *.swo

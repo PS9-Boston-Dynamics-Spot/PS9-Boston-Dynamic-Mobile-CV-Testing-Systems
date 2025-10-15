@@ -1,0 +1,24 @@
+{
+    "name": "Python Boston Dynamics Environment",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "settings": {
+        "python.defaultInterpreterPath": "/app/.venv/bin/python"
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+    ],
+    "remoteUser": "root",
+    "postCreateCommand": "python -m venv .venv && pip install -r requirements.txt",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/app/.venv/bin/python",
+                "python.pythonPath": "/app/.venv/bin/python"
+            }
+        }
+    }
+}

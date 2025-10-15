@@ -24,6 +24,18 @@
    python --version
    docker --version
    wsl --list --verbose
+   ```
+
+5. **Install VS Code**
+   - Download and install [VS Code](https://code.visualstudio.com/download)
+
+6. **Install Extensions**
+   - Dev Containers
+   - Docker
+   - Python
+   - Pylance
+   - Remote - SSH
+   - Remote - SSH
 
 
 ## Linux (not tested)
@@ -60,3 +72,12 @@
     python3 --version
     docker run hello-world
     ```
+
+5. **Install VS Code**
+   - Download and install [VS Code](https://code.visualstudio.com/download)
+
+6. **Install Extensions**
+   - Dev Containers
+   - Remote - SSH
+   - Docker
+   - Remote - SSH

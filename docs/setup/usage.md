@@ -1,51 +1,35 @@
 # Initial Setup
 
-Run the following commands in the terminal:
+## Start Container
 
+1. Press F1 and select **"Dev Containers: Reopen in Container"**
+2. Wait for the container to build and start (first time may take a few minutes)
+
+**Your bottom bar should include a similar element.**
+![./image.png](image.png)
+
+## Configure Python Interpreter
+After the container is running:
+1. Open a terminal in VS Code
+2. Run `which python` to check the current Python interpreter
+3. **If the output is NOT** `/app/.venv/bin/python`
+    - Press F1
+    - Select **"Python: Select Interpreter"**
+    - Choose `/app/.venv/bin/python` from the list
+
+## Verify Setup
+Confirm everything is working:
 ```bash
-docker compose build --no-cache
+which python
+# Should show: /app/.venv/bin/python
 
-docker compose up -d
-
-docker compose exec app bash
-
-make run
+make qa-check
+# Should run your quality checks
 ```
 
-
-# Quick Start
-
-## Start Docker Container
-
-```bash
-docker compose up -d
-
-docker compose exec app bash
-```
-
-## Option 1: One-Command Setup (Recommended)
-
-``` bash
-make run
-```
-
-This single command will:
-- Create virtual environment (if needed)
-- Install all dependencies
-- Start a shell with activated virtual environment
-
-## Option 2: Step-by-Step Setup
-```bash
-# 1. Create virtual environment
-make create-venv
-
-# 2. Install dependencies
-make install
-
-# 3. Enter development environment
-make use-venv
-```
-
+## Troubleshooting
+- If Python features don't work, reload VS Code: **F1 → "Developer: Reload Window"**
+- To rebuild the container: **F1 → "Dev Containers: Rebuild Container"**
 ---
 
 ## Development Commands

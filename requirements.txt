@@ -1,4 +1,10 @@
-flake8
-black
-pytest
-pytest-sugar
+flake8==7.3.0
+black==25.9.0
+pytest==8.4.2
+pytest-sugar==1.1.1
+pyyaml==6.0.3
+bosdyn-client==5.0.1.1
+bosdyn-mission==5.0.1.1
+bosdyn-choreography-client==5.0.1.1
+bosdyn-orbit==5.0.1.1
+logging==0.4.9.6
