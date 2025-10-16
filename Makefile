@@ -74,18 +74,14 @@ clean:
 	rm -rf .coverage
 	@echo "Clean done."
 
-# Haupt-Command: Führt alle Schritte aus und startet die virtuelle Umgebung
-run: create-venv install
-	@echo ""
-	@echo "All checks passed! Starting virtual environment..."
-	@echo "You can now start developing!"
-	@echo "-----------------------------------------------"
-	@bash -c "source $(ACTIVATE) && exec bash"
+run:
+	@python src/core/app.py
+
 
 help:
 	@echo ""
 	@echo "Available make commands:"
-	@echo "  make run         - Complete setup (venv + install + tests + lint) and start shell"
+	@echo "  make run         - Start development environment"
 	@echo "  make check-venv-using  - Check if virtual environment is active"
 	@echo "  make create-venv - Create virtual environment"
 	@echo "  make use-venv    - Activate virtual environment"

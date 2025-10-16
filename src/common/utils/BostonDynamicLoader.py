@@ -1,27 +1,23 @@
+from typing import Dict, Any, Optional
 from common.utils.ConfigLoader import ConfigLoader
+from common.utils.ConfigEnum import ConfigEnum, ROBOT_KEYS
 
-
-class BostonDynamicLoader(ConfigLoader):
+class BostonDynamicsConfigLoader(ConfigLoader):
     def __init__(self):
         super().__init__()
-        self.config = self.load_config("configs/robot-credentials.yaml")
+        self.__config = self.load_config(ConfigEnum.ROBOT)
 
-    def checkConfig(self):
-        if self.config is None:
-            raise Exception("Config not found")
+    def _get_robot(self) -> Dict[str, Any]:
+        return self.__config.get(ROBOT_KEYS.ROBOT, {})
 
-    def _get_robot(self):
-        return
+    def getIP(self) -> Optional[str]:
+        return self._get_robot().get(ROBOT_KEYS.IP)
 
-    def getIP(self):
+    def getWifi(self) -> Optional[str]:
+        return self._get_robot().get(ROBOT_KEYS.WIFI)
 
-        pass
-
-    def getWifi(self):
-        pass
-
-    def getUser(self):
-        pass
-
+    def getUser(self) -> Optional[str]:
+        return self._get_robot().get(ROBOT_KEYS.USER)
+    
     def getPassword(self):
-        pass
+        return
