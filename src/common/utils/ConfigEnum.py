@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ROBOT_KEYS(str, Enum):
     ROBOT = "robot"
     IP = "ip"

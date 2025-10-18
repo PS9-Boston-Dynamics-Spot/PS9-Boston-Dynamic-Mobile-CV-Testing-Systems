@@ -47,24 +47,16 @@ test:
 	fi
 
 fix:
-	@echo "Running linter (flake8)..."
+	@echo "Fixing and formatting code (ruff + black)..."
 	@if [ -f "$(ACTIVATE)" ]; then \
-		bash -c "source $(ACTIVATE) && flake8 $(SRC_DIR) $(TEST_DIR) --count --select=E9,F63,F7,F82 --show-source --statistics"; \
-	else \
-		echo "Virtual environment not found. Please run 'make create-venv' first."; \
-		exit 1; \
-	fi
-
-format:
-	@echo "Formatting code (black)..."
-	@if [ -f "$(ACTIVATE)" ]; then \
+		bash -c "source $(ACTIVATE) && ruff check $(SRC_DIR) $(TEST_DIR) --fix"; \
 		bash -c "source $(ACTIVATE) && black $(SRC_DIR) $(TEST_DIR) scripts"; \
 	else \
 		echo "Virtual environment not found. Please run 'make create-venv' first."; \
 		exit 1; \
 	fi
 
-qa-check: format lint test
+qa-check: fix test
 	@echo "QA check completed successfully."
 
 clean:
@@ -77,18 +69,17 @@ clean:
 run:
 	@python src/core/app.py
 
-
 help:
 	@echo ""
 	@echo "Available make commands:"
-	@echo "  make run         - Start development environment"
-	@echo "  make check-venv-using  - Check if virtual environment is active"
-	@echo "  make create-venv - Create virtual environment"
-	@echo "  make use-venv    - Activate virtual environment"
-	@echo "  make install     - Install Python dependencies"
-	@echo "  make test        - Run all unit tests"
-	@echo "  make fix        - Run static code analysis"
-	@echo "  make format      - Auto-format code with black"
-	@echo "  make qa-check    - Run lint + tests (quality assurance)"
-	@echo "  make clean       - Remove cache and temp files"
+	@echo "  make run              - Start development environment"
+	@echo "  make check-venv-using - Check if virtual environment is active"
+	@echo "  make create-venv      - Create virtual environment"
+	@echo "  make use-venv         - Activate virtual environment"
+	@echo "  make install          - Install Python dependencies"
+	@echo "  make test             - Run all unit tests"
+	@echo "  make fix              - Auto-fix issues using Ruff and Black"
+	@echo "  make qa-check         - Run fix + tests (quality assurance)"
+	@echo "  make clean            - Remove cache and temp files"
 	@echo ""
+

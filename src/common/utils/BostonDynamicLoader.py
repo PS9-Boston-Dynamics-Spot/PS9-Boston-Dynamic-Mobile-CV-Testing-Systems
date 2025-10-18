@@ -2,6 +2,7 @@ from typing import Dict, Any, Optional
 from common.utils.ConfigLoader import ConfigLoader
 from common.utils.ConfigEnum import ConfigEnum, ROBOT_KEYS
 
+
 class BostonDynamicsConfigLoader(ConfigLoader):
     def __init__(self):
         super().__init__()
@@ -18,6 +19,8 @@ class BostonDynamicsConfigLoader(ConfigLoader):
 
     def getUser(self) -> Optional[str]:
         return self._get_robot().get(ROBOT_KEYS.USER)
-    
+
     def getPassword(self):
-        return self._get_robot().get(ROBOT_KEYS.PASSWORD) # TODO: outsource into a .env file (e.g. .env/robot-credentials.env)
+        return self._get_robot().get(
+            ROBOT_KEYS.PASSWORD
+        )  # TODO: outsource into a .env file (e.g. .env/robot-credentials.env)
