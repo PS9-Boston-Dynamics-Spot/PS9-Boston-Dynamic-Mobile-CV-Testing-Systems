@@ -24,6 +24,8 @@
 4. **Install VS Code**
    - Download and install [VS Code](https://code.visualstudio.com/download)
 
+5. **Install Extension**
+   - Install Dev Containers (ms-vscode-remote.remote-containers)
 
 ## Linux (not tested)
 
@@ -54,3 +56,6 @@
 
 4. **Install VS Code**
    - Download and install [VS Code](https://code.visualstudio.com/download)
+  
+5. **Install Extension**
+   - Install Dev Containers (ms-vscode-remote.remote-containers)
