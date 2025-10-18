@@ -9,7 +9,7 @@ class LogHandler:
     @classmethod
     def initialize(cls, log_file: str = "app.log", level=logging.INFO, 
                    log_format: str = None, date_format: str = None):
-        """Initialisiert den Logger einmalig"""
+        """Initialized the logger once"""
         if cls._initialized:
             return
             
@@ -47,26 +47,37 @@ class LogHandler:
     
     @classmethod
     def log_info(cls, message: str) -> None:
+        """Log an info message, which is a normal program operation."""
         cls._ensure_initialized()
         cls._logger.info(message)
     
     @classmethod
     def log_debug(cls, message: str) -> None:
+        """Log a debug message, which is useful for debugging purposes."""
         cls._ensure_initialized()
         cls._logger.debug(message)
     
     @classmethod
     def log_warning(cls, message: str) -> None:
+        """Log a warning message, which is not critical to the program's operation."""
         cls._ensure_initialized()
         cls._logger.warning(message)
     
     @classmethod
     def log_error(cls, message: str) -> None:
+        """
+        Log an error message, which is a fatal issue that prevents the program from working correctly.
+        This should be used for errors that are critical to the program's operation.
+        """
         cls._ensure_initialized()
         cls._logger.error(message)
     
     @classmethod
     def log_exception(cls, message: str, exc: Optional[Exception] = None) -> None:
+        """
+        Log an exception message, which is a fatal issue that prevents the program from working correctly.
+        This should be used for exceptions that are critical to the program's operation.
+        """
         cls._ensure_initialized()
         if exc:
             cls._logger.error(f"{message}: {str(exc)}", exc_info=exc)

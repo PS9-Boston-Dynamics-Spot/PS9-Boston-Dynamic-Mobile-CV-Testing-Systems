@@ -46,7 +46,7 @@ test:
 		exit 1; \
 	fi
 
-lint:
+fix:
 	@echo "Running linter (flake8)..."
 	@if [ -f "$(ACTIVATE)" ]; then \
 		bash -c "source $(ACTIVATE) && flake8 $(SRC_DIR) $(TEST_DIR) --count --select=E9,F63,F7,F82 --show-source --statistics"; \
@@ -87,7 +87,7 @@ help:
 	@echo "  make use-venv    - Activate virtual environment"
 	@echo "  make install     - Install Python dependencies"
 	@echo "  make test        - Run all unit tests"
-	@echo "  make lint        - Run static code analysis"
+	@echo "  make fix        - Run static code analysis"
 	@echo "  make format      - Auto-format code with black"
 	@echo "  make qa-check    - Run lint + tests (quality assurance)"
 	@echo "  make clean       - Remove cache and temp files"

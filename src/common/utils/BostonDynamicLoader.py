@@ -20,4 +20,4 @@ class BostonDynamicsConfigLoader(ConfigLoader):
         return self._get_robot().get(ROBOT_KEYS.USER)
     
     def getPassword(self):
-        return
+        return self._get_robot().get(ROBOT_KEYS.PASSWORD) # TODO: outsource into a .env file (e.g. .env/robot-credentials.env)

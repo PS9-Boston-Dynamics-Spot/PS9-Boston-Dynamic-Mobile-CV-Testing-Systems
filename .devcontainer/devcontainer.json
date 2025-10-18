@@ -5,7 +5,7 @@
         "context": ".."
     },
     "settings": {
-        "python.defaultInterpreterPath": "/app/.venv/bin/python"
+        "python.defaultInterpreterPath": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python"
     },
     "extensions": [
         "ms-python.python",
@@ -16,8 +16,8 @@
     "customizations": {
         "vscode": {
             "settings": {
-                "python.defaultInterpreterPath": "/app/.venv/bin/python",
-                "python.pythonPath": "/app/.venv/bin/python"
+                "python.defaultInterpreterPath": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python",
+                "python.pythonPath": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python"
             }
         }
     }

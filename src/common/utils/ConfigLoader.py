@@ -1,27 +1,21 @@
 import yaml
 from pathlib import Path
-from common.exceptions.ConfigErrors import ConfigNotFound, ConfigParseError
+from common.exceptions.ConfigErrors import ConfigNotFound, ConfigParseError, ConfigLoadError
 
 class ConfigLoader:
 
-    def load_config(self, file_path: str) -> dict | None:
+    def load_config(self, file_path: str) -> dict:
         path = Path(file_path)
         if not path.exists():
-            message = f"Configuration file not found: {path}"
-            ConfigNotFound.log_error(message=message)
-            return None
+            raise ConfigNotFound(exception=FileNotFoundError, path=file_path, error_code=1760794750)
         try:
             with path.open("r", encoding="utf-8") as file:
                 config = yaml.safe_load(file)
                 if not isinstance(config, dict):
-                    message = f"Invalid configuration format in {path}"
-                    ConfigParseError.log_error(message=message)
+                    raise ConfigParseError(exception=NotADirectoryError, error_code=1760794770)
                 return config
         except yaml.YAMLError as e:
-            message = f"Error parsing YAML file {path}: {e}"
-            ConfigParseError.log_exception(message=message)
-            return None
+            raise ConfigLoadError(exception=e, error_code=1760794780)
         except Exception as e:
-            message = f"Error loading configuration file {path}: {e}"
-            ConfigParseError.log_exception(message=message)
-            return None
+            raise ConfigLoadError(exception=e, error_code=1760794790)
+

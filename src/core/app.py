@@ -6,3 +6,4 @@ if __name__ == "__main__":
     print(robot_config.getIP())
     print(robot_config.getUser())
     print(robot_config.getWifi())
+    print(robot_config.getPassword())
