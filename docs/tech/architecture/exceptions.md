@@ -5,7 +5,7 @@ Bis zur Implementierung einer sauberen Lösung verwenden wir [**temporär Unix-T
 
 ### Hintergrund
 Unix-Timestamps bieten den Vorteil, dass sie:
-- **eindeutig** sind (Sekundenpräzision)
+- **eindeutig** sind
 - **leicht rückverfolgbar** sind im Code
 
 Diese Vorgehensweise erleichtert die Fehlersuche während der gesamten Entwicklungsphase.

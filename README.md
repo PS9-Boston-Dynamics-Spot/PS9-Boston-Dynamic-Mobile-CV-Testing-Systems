@@ -27,3 +27,12 @@ Aufgrund verschiedener Sensoren, integrierten Manipulatoren und vorhandenen Kame
 6. Sie validieren ihre Bilderkennung durch die Abfrage der erkannten Messwerte über eine Schnittstelle wie MQTT/OPC-UA mit der Steuerung der Maschine.
 
 7. Sie konzipieren und implementieren eine Anomalie-Erkennung bei Abweichungen von definierten Messwertbereichen.
+
+---
+
+## Setup
+
+Um das Projekt einzurichten und zu nutzen, folge den Anleitungen in den jeweiligen Dokumenten:
+
+- **Installation:** [Install](./docs/setup/install.md) – beschreibt, wie das Projekt in einer Container-Umgebung eingerichtet wird.  
+- **Nutzung:** [Usage](./docs/setup/usage.md) – zeigt, wie du das Projekt startest, testest und betreibst.

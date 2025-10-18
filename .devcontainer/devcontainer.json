@@ -9,7 +9,9 @@
     },
     "extensions": [
         "ms-python.python",
-        "ms-python.vscode-pylance"
+        "ms-python.vscode-pylance",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-mermaid"
     ],
     "remoteUser": "root",
     "postCreateCommand": "python -m venv .venv && pip install -r requirements.txt",

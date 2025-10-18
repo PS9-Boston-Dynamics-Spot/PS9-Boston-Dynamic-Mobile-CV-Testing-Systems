@@ -5,7 +5,7 @@
 1. Press F1 and select **"Dev Containers: Reopen in Container"**
 2. Wait for the container to build and start (first time may take a few minutes)
 
-**Your bottom bar should include a similar element.**
+**Your bottom bar should include a similar element**
 
 ![./image.png](image.png)
 
@@ -13,16 +13,16 @@
 After the container is running:
 1. Open a terminal in VS Code
 2. Run `which python` to check the current Python interpreter
-3. **If the output is NOT** `/app/.venv/bin/python`
+3. **If the output is NOT** `/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python`
     - Press F1
     - Select **"Python: Select Interpreter"**
-    - Choose `/app/.venv/bin/python` from the list
+    - Choose `./.venv/bin/python` from the list
 
 ## Verify Setup
 Confirm everything is working:
 ```bash
 which python
-# Should show: /app/.venv/bin/python
+# Should show: /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python
 
 make qa-check
 # Should run your quality checks
@@ -48,8 +48,7 @@ make qa-check
 | Command                                  | Description                                    |
 |------------------------------------------|------------------------------------------------|
 | ```make test```                          | Run all tests with pytest                      |
-| ```make lint```                          | Run code quality checks (flake8)               |
-| ```make format```                        | Auto-format code with black                    |
+| ```make fix```                           | Run code quality checks (ruff, Black)          |
 | ```make qa-check```                      | Run format + lint + tests (full quality check) |
 
 ### Maintenance
@@ -62,12 +61,7 @@ make qa-check
 
 ## Daily Development Workflow
 
-**Starting work**
-```bash
-make use-venv
-```
-
-or 
+**Run App**
 
 ```bash
 make run
@@ -96,13 +90,13 @@ make test
 
 ```bash
 # Check which Python is being used
-which python # Expected output: /app/.venv/bin/python
+which python # Expected output: /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python
 
 # OR check if the virtual environment is active
 make check-venv-using # Expected output: Virtual environment is active.
 
-# Run a test script
-python test.py # Expected output: Hello World!
+# Run the App
+make run
 ```
 ---
 
@@ -111,7 +105,7 @@ python test.py # Expected output: Hello World!
 ### Virtual Environment Issues
 + **Not activated:** Run `make use-venv`
 + **Check status:** Run `make check-venv-using`
-+ **Recreate:** Delet `.venv` folder and run `make create-venv`
++ **Recreate:** Delete `.venv` folder and run `make create-venv`
 
 ### Dependency Issues
 ```bash
