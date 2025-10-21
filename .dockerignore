@@ -1,0 +1,23 @@
+# Ignoriere lokale Python-Umgebungen
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignoriere lokale Build- und Cache-Verzeichnisse
+build/
+dist/
+.cache/
+.coverage
+pytest_cache/
+*.egg-info/
+
+# Git
+.git/
+.gitignore
+
+# OS-spezifisches
+.DS_Store
+Thumbs.db

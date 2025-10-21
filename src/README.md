@@ -4,10 +4,11 @@ src/
 ├── core/ → zentrale Logik, State-Machine, Ablaufsteuerung
 ├── common/ → Alle notwendigen Module
 ├── common/cvision/ → Computer-Vision-Modelle und Bildverarbeitung
+├── common/exceptions/ → Fehlerbehandlung
 ├── common/sdk/ → Steuerung und Missionshandling für den Laufroboter
 ├── common/mqtt/ → Kommunikation über MQTT
 ├── common/opcua/ → Kommunikation über OPC-UA
-└── common/utils/ → Hilfsfunktionen, Logging, Config Loader, Fehlerhandling
+└── common/utils/ → Hilfsfunktionen, Logging, Config Loader
 ```
 
 ## Entwicklungsrichtlinien
