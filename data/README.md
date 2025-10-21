@@ -6,6 +6,8 @@ Dieses Verzeichnis `/data` dient als zentrale Ablage für alle Daten, die im Rah
 ```
 /data
 │
+├── ArUco/ # ArUco Marker von der Produktionsanlage
+|
 ├── images/ # Kamerabilder für Prüfungen
 │ ├── train/ # Trainingsdaten für CV-Modelle
 │ ├── val/ # Validierungsdaten
