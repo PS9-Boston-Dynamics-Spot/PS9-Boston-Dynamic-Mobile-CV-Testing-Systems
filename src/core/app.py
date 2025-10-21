@@ -1,4 +1,5 @@
 from common.utils.BostonDynamicLoader import BostonDynamicsConfigLoader
+from minio import Minio
 
 if __name__ == "__main__":
     robot_config = BostonDynamicsConfigLoader()
@@ -7,3 +8,17 @@ if __name__ == "__main__":
     print(robot_config.getUser())
     print(robot_config.getWifi())
     print(robot_config.getPassword())
+
+
+
+    client = Minio(
+        "minio:9000",
+        access_key="minioadmin",
+        secret_key="minioadmin",
+        secure=False
+    )
+
+    # Liste Buckets
+    buckets = client.list_buckets()
+    for b in buckets:
+        print(b.name)

@@ -1,4 +1,0 @@
-{
-  "python.defaultInterpreterPath": "/app/.venv/bin/python",
-  "makefile.configureOnOpen": false
-}
