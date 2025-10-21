@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     make \
     build-essential \
     git \
+    curl \
+    sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -16,6 +18,8 @@ RUN python3 -m venv /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.ve
 
 COPY . .
 
-ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin:$PATH"
+ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bTH"
 ENV VIRTUAL_ENV="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv"
-ENV PYTHONPATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src" 
+ENV PYTHONPATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src"
+
+RUN sqlite3 /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/db/ps9.db < ./scripts/db/init.sql
