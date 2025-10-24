@@ -1,8 +1,9 @@
+import ssl
 from minio import Minio
 from configs.reader.MinioConfigReader import MinioConfigReader
 from minio.error import S3Error
-from db.minio.exceptions.MinioConnectionError import MinioConnectionError
-from db.minio.exceptions.MinioInitError import MinioInitError
+from db.media.exceptions.MinioConnectionError import MinioConnectionError
+from db.media.exceptions.MinioInitError import MinioInitError
 
 class MinioConnector:
 
@@ -29,7 +30,7 @@ class MinioConnector:
             
         self.endpoint = f"{self.host}:{self.port}"
 
-    def _connect(self):
+    def _connect(self) -> None:
         try:
             self.client = Minio(
                 endpoint=self.endpoint, 
@@ -38,13 +39,15 @@ class MinioConnector:
                 secure=self.tls
             )
         except (S3Error, ConnectionError) as e:
-            raise MinioConnectionError(e, 1761164520)
+            raise MinioConnectionError(exception=e, error_code=1761164520)
+        except ssl.SSLError as e:
+            raise MinioConnectionError(exception=e, error_code=1761164540)
         except Exception as e:
-            raise MinioConnectionError(e, 1761164530)
-
+            raise MinioConnectionError(exception=e, error_code=1761164530) 
+        
     def __enter__(self):
         self._connect()
         return self.client
-    
+
     def __exit__(self, exc_type, exc_value, traceback):
-        pass
+        self.client = None

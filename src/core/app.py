@@ -1,6 +1,6 @@
 from configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
-from db.minio.connector.MinioConnector import MinioConnector
-from minio import Minio
+from db.media.repository.MediaRepository import MediaRepository
+import os
 
 if __name__ == "__main__":
     robot_config = BostonDynamicsConfigReader()
@@ -10,5 +10,6 @@ if __name__ == "__main__":
     print(robot_config.getWifi())
     print(robot_config.getPassword())
 
-    with MinioConnector() as minio:
-        print("minio.client")
+    path = os.path.join(os.path.dirname(__file__), "test.png")
+    print(MediaRepository(bucket_name="ps9-analyzer-bucket").get_media(object_name="test"))
+    #MediaRepository().put_media(object_name="test", file_path=path)

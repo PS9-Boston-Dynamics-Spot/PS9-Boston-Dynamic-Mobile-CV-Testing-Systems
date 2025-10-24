@@ -1,11 +1,8 @@
-from common.exceptions.handler.LogHandler import LogHandler
+from common.exceptions.BaseAppException import BaseAppException
 
-
-class ConfigNotFound(BaseException):
+class ConfigNotFound(BaseAppException):
 
     def __init__(self, exception: Exception, path: str, error_code: int):
 
         self.message = f"Error: '{error_code}', Config not found for path '{path}', Exception: '{exception}'"
-        LogHandler.log_exception(self.message)
-
         super().__init__(self.message)
