@@ -2,37 +2,20 @@ from db.media.read.MinioReader import MinioReader
 from db.media.write.MinioWriter import MinioWriter
 from db.media.infrastructure.BucketCreator import BucketCreator
 from db.media.infrastructure.MinioBucketInitializer import MinioBucketInitializer
+from db.media.read.MinioHelper import MinioHelper
 
 from db.media.exceptions.MinioWriterError import MinioWriterError
 from db.media.exceptions.MinioReaderError import MinioReaderError
 from db.media.exceptions.BucketCreatorError import BucketCreatorError
 from db.media.exceptions.BucketInitializerError import BucketInitializerError
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
+from db.media.exceptions.MinioHelperError import MinioHelperError
 
 class MediaRepository:
     def __init__(self, bucket_name: str):
-        """
-        Initializes the MediaRepository object with the given bucket name.
-
-        Parameters:
-        bucket_name (str): The name of the bucket to be used.
-
-        Returns:
-        None
-        """
         self.bucket_name = bucket_name
 
     def __initialize_bucket(self) -> str:
-        """
-        Initializes the bucket by checking if it exists and creating it if not.
-        
-        Raises:
-        MediaRepositoryError: If the bucket cannot be initialized.
-        """
-        print("BUCKET NAME", self.bucket_name)
-        if self.bucket_name is None:
-            raise ValueError("Bucket name is None")
-
         try:
             return MinioBucketInitializer(self.bucket_name).initalize_bucket()
         except BucketInitializerError as e:
@@ -42,18 +25,6 @@ class MediaRepository:
             raise MediaRepositoryError(exception=e, error_code=1761337600)
 
     def get_media(self, object_name: str) -> bytes:
-        """
-        Downloads a file from the specified bucket with the given name.
-        
-        Parameters:
-        object_name (str): The name of the object to be downloaded.
-        
-        Returns:
-        bytes: The content of the object.
-        
-        Raises:
-        MediaRepositoryError: If there is an issue with the bucket or the object.
-        """
         try:
             bucket_name = self.__initialize_bucket()
             with MinioReader(bucket_name) as minio:
@@ -65,17 +36,6 @@ class MediaRepository:
             raise MediaRepositoryError(exception=e, error_code=1761332270)
 
     def put_media(self, object_name: str, file_path: str, content_type: str = "application/octet-stream") -> None:
-        """
-        Uploads a file to the specified bucket with the given name and content type.
-        
-        Parameters:
-        object_name (str): The name of the object to be uploaded.
-        file_path (str): The path to the file to be uploaded.
-        content_type (str): The content type of the file to be uploaded.
-
-        Raises:
-        MediaRepositoryError: If there is an issue with the bucket or the object.
-        """
         try:
             bucket_name = self.__initialize_bucket()
             with MinioWriter(bucket_name) as minio:
@@ -87,3 +47,35 @@ class MediaRepository:
             raise MediaRepositoryError(exception=e, error_code=1761332290)
         
         # TODO: list buckets / objects / all
+
+    @staticmethod
+    def get_buckets() -> list:
+        try:
+            with MinioHelper() as minio:
+                return minio.list_buckets()
+        except MinioHelperError as e:
+            # TODO: Improve error handling, e.g. try again? 
+            raise MediaRepositoryError(exception=e, error_code=1761401990)
+        except Exception as e:
+            raise MediaRepositoryError(exception=e, error_code=1761402000)
+        
+    def get_objects(self) -> list:
+        try:
+            with MinioHelper() as minio:
+                return minio.list_objects(self.bucket_name)
+        except MinioHelperError as e:
+            # TODO: Improve error handling, e.g. try again? 
+            raise MediaRepositoryError(exception=e, error_code=1761402010)
+        except Exception as e:
+            raise MediaRepositoryError(exception=e, error_code=1761402020)
+    
+    @staticmethod
+    def get_everything_recursive(recursive: bool = True) -> dict:
+        try:
+            with MinioHelper() as minio:
+                return minio.list_all(recursive=recursive)
+        except MinioHelperError as e:
+            # TODO: Improve error handling, e.g. try again? 
+            raise MediaRepositoryError(exception=e, error_code=1761402030)
+        except Exception as e:
+            raise MediaRepositoryError(exception=e, error_code=1761402040)

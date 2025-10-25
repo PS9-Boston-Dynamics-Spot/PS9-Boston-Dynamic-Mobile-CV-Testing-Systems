@@ -1,0 +1,3 @@
+buckets:
+  cvision_raw_bucket: "ps9-raw"
+  cvision_analyzed_bucket: "ps9-analyzed"

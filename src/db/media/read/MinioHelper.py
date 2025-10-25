@@ -26,10 +26,10 @@ class MinioHelper(MinioConnector):
             return [obj.object_name for obj in objects]
         except Exception as e:
             raise MinioHelperError(exception=e, error_code=1761341440)
-        
-    def list_all(self):
+    
+    def list_all(self, recursive: bool = True) -> dict:
         result = {}
         buckets = self.list_buckets()
         for bucket in buckets:
-            result[bucket] = self.list_objects(bucket, recursive=True)
+            result[bucket] = self.list_objects(bucket, recursive=recursive)
         return result

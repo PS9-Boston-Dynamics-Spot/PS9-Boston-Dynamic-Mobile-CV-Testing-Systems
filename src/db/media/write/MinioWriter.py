@@ -1,5 +1,6 @@
 from db.media.connector.MinioConnector import MinioConnector
 from db.media.exceptions.MinioWriterError import MinioWriterError
+from minio.error import S3Error
 
 class MinioWriter(MinioConnector):
     def __init__(self, bucket_name: str):
@@ -21,11 +22,15 @@ class MinioWriter(MinioConnector):
         if not content_type:
             raise MinioWriterError(exception=ValueError("Content type is empty"), error_code=1761328810)
 
-    def __check_object_already_exists(self, object_name: str):
+    def __check_object_already_exists(self, object_name: str) -> bool:
         try:
-            return self.client.stat_object(bucket_name=self.bucket_name, object_name=object_name)
-        except Exception as e:
-            raise MinioWriterError(exception=e, error_code=1761328840)
+            self.client.stat_object(bucket_name=self.bucket_name, object_name=object_name)
+            return True
+        except S3Error as e:
+            if e.code == "NoSuchKey":
+                return False
+            else:
+                raise MinioWriterError(exception=e, error_code=1761328840)
 
     def put_media(self, object_name: str, file_path: str, content_type: str = "application/octet-stream") -> None:
 
