@@ -6,7 +6,7 @@ class MinioHelper(MinioConnector):
     def __init__(self):
         super().__init__()
 
-    def __enter__(self) -> 'MinioHelper':
+    def __enter__(self) -> "MinioHelper":
         self._connect()
         return self
 
@@ -19,14 +19,14 @@ class MinioHelper(MinioConnector):
             return [bucket.name for bucket in buckets]
         except Exception as e:
             raise MinioHelperError(exception=e, error_code=1761341430)
-        
+
     def list_objects(self, bucket_name: str, recursive: bool = True) -> list:
         try:
             objects = self.client.list_objects(bucket_name, recursive=recursive)
             return [obj.object_name for obj in objects]
         except Exception as e:
             raise MinioHelperError(exception=e, error_code=1761341440)
-    
+
     def list_all(self, recursive: bool = True) -> dict:
         result = {}
         buckets = self.list_buckets()

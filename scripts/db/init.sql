@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
     compressed BOOLEAN,
     compression_method TEXT,
     category TEXT NOT NULL, -- category: e.g. temperature, pressure
-    quality REAL, -- any value between 0 and 1, --> 1 is the best
+    quality REAL, -- means the image quality, any value between 0 and 1, --> 1 is the best
     value REAL NOT NULL, -- e.g. 20.0 °C
     unit TEXT NOT NULL, -- e.g. °C
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -1,5 +1,6 @@
 from common.exceptions.BaseAppException import BaseAppException
 
+
 class ConfigParseError(BaseAppException):
 
     def __init__(self, exception: Exception, error_code: int):

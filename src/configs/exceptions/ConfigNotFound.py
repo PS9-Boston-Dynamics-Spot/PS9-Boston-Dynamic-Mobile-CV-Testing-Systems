@@ -1,5 +1,6 @@
 from common.exceptions.BaseAppException import BaseAppException
 
+
 class ConfigNotFound(BaseAppException):
 
     def __init__(self, exception: Exception, path: str, error_code: int):

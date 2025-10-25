@@ -1,6 +1,7 @@
 from db.media.connector.MinioConnector import MinioConnector
 from db.media.exceptions.BucketCreatorError import BucketCreatorError
 
+
 class BucketCreator(MinioConnector):
 
     def __init__(self):

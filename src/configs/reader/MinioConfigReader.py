@@ -10,18 +10,20 @@ class MinioConfigReader(ConfigLoader):
 
     def _getMinio(self) -> Dict[str, Any]:
         return self.__config.get(MINIO_KEYS.MINIO, {})
-    
+
     def getHost(self) -> Optional[str]:
         return self._getMinio().get(MINIO_KEYS.HOST)
 
     def getPort(self) -> Optional[str]:
         return self._getMinio().get(MINIO_KEYS.PORT)
 
-    def getAccessKey(self) -> Optional[str]:  
+    def getAccessKey(self) -> Optional[str]:
         return self._getMinio().get(MINIO_KEYS.ACCESS_KEY)
 
     def getSecretKey(self) -> Optional[str]:
-        return self._getMinio().get(MINIO_KEYS.SECRET_KEY) # TODO: outsource into a .env file
-    
+        return self._getMinio().get(
+            MINIO_KEYS.SECRET_KEY
+        )  # TODO: outsource into a .env file
+
     def getTls(self) -> Optional[bool]:
         return self._getMinio().get(MINIO_KEYS.TLS)

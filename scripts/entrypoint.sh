@@ -10,6 +10,7 @@ mkdir -p "$DB_DIR"
 echo "Recreating SQLite database..."
 rm -f "$DB_PATH"
 sqlite3 "$DB_PATH" < "$INIT_SQL" || echo "SQLite init script had warnings but continuing..."
+echo "Done!"
 
 # Keep container running
 tail -f /dev/null

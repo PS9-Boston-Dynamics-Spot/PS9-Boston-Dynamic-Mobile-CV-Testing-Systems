@@ -11,8 +11,10 @@ if __name__ == "__main__":
     print(robot_config.getPassword())
 
     path = os.path.join(os.path.dirname(__file__), "test.png")
-    print(MediaRepository(bucket_name="ps9-analyzer-bucket").get_media(object_name="test"))
-    MediaRepository(bucket_name="asd").put_media(object_name="test", file_path=path)
+    print(
+        MediaRepository(bucket_name="ps9-analyzer-bucket").get_media(object_name="test")
+    )
+    #MediaRepository(bucket_name="asd").put_media(object_name="test", file_path=path)
     print(MediaRepository.get_buckets())
     print(MediaRepository(bucket_name="ps9-analyzer-bucket").get_objects())
     print(MediaRepository.get_everything_recursive())

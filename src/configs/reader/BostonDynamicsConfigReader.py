@@ -14,7 +14,7 @@ class BostonDynamicsConfigReader(ConfigLoader):
     def getIP(self) -> Optional[str]:
         return self._getRobot().get(ROBOT_KEYS.IP)
 
-    def getWifi(self) -> Optional[str]:  
+    def getWifi(self) -> Optional[str]:
         return self._getRobot().get(ROBOT_KEYS.WIFI)
 
     def getUser(self) -> Optional[str]:

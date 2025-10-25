@@ -2,12 +2,13 @@ from db.media.connector.MinioConnector import MinioConnector
 from db.media.exceptions.MinioReaderError import MinioReaderError
 from minio.error import S3Error
 
+
 class MinioReader(MinioConnector):
     def __init__(self, bucket_name: str):
         self.bucket_name = bucket_name
         super().__init__()
 
-    def __enter__(self) -> 'MinioReader':
+    def __enter__(self) -> "MinioReader":
         self._connect()
         return self
 
@@ -27,8 +28,10 @@ class MinioReader(MinioConnector):
             # Speziell NoSuchKey behandeln
             if e.code == "NoSuchKey":
                 raise MinioReaderError(
-                    exception=ValueError(f"Object '{object_name}' does not exist in bucket '{self.bucket_name}'"),
-                    error_code=1761339540
+                    exception=ValueError(
+                        f"Object '{object_name}' does not exist in bucket '{self.bucket_name}'"
+                    ),
+                    error_code=1761339540,
                 )
         except Exception as e:
             raise MinioReaderError(exception=e, error_code=176132754)
