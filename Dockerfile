@@ -18,8 +18,9 @@ RUN python3 -m venv /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.ve
 
 COPY . .
 
-ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bTH"
+ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv"
 ENV PYTHONPATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src"
 
-RUN sqlite3 /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/db/ps9.db < ./scripts/db/init.sql
+COPY /scripts/entrypoint.sh /scripts/entrypoint.sh
+ENTRYPOINT ["/scripts/entrypoint.sh"]
