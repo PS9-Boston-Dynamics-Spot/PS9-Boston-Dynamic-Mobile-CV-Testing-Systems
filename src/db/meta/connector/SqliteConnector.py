@@ -4,6 +4,7 @@ from sqlite3 import (
     OperationalError,
     DatabaseError,
     ProgrammingError,
+    Row
 )
 from configs.reader.SqliteConfigReader import SqliteConfigReader
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
@@ -46,6 +47,7 @@ class SqliteConnector:
                 cached_statements=self.cached_statements,
                 uri=self.uri,
             )
+            self.connection.row_factory = Row
             self.cursor = self.connection.cursor()
             return self.cursor
         except OperationalError as e:
