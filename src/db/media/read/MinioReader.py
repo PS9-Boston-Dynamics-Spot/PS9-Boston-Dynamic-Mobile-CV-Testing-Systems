@@ -17,9 +17,6 @@ class MinioReader(MinioConnector):
 
     def get_media(self, object_name: str) -> bytes:
 
-        if not object_name:
-            raise MinioReaderError(ValueError("Object name is missing"), 1761328580)
-
         try:
             response = self.client.get_object(self.bucket_name, object_name)
             data = response.read()

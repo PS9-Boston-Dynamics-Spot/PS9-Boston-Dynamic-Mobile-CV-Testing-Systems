@@ -5,6 +5,14 @@ class DatabaseReader:
     def __init__(self):
         self.connector = SqliteConnector()
 
+
+    def get_new_id(self) -> int:
+        query = "SELECT MAX(id) FROM cvision_images_raw;"
+        with self.connector as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()[0]
+            return (result or 0) + 1
+
     def _fetch_all(self, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
         with self.connector as cursor:
             cursor.execute(query, params)

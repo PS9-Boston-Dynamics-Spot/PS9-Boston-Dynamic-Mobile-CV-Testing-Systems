@@ -1,6 +1,5 @@
 from sqlite3 import (
     connect,
-    _IsolationLevel,
     OperationalError,
     DatabaseError,
     ProgrammingError,
@@ -8,8 +7,11 @@ from sqlite3 import (
 )
 from configs.reader.SqliteConfigReader import SqliteConfigReader
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
+from typing import Optional, Literal
 
-VALID_ISOLATION_LEVELS: set[_IsolationLevel] = {
+IsolationLevel = Optional[Literal["DEFERRED", "IMMEDIATE", "EXCLUSIVE"]]
+
+VALID_ISOLATION_LEVELS: set[IsolationLevel] = {
     "DEFERRED",
     "IMMEDIATE",
     "EXCLUSIVE",

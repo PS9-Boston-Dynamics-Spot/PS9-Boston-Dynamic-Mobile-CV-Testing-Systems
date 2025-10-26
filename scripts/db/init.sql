@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS cvision_images_raw (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE ,
+    name TEXT NOT NULL UNIQUE,
     format TEXT NOT NULL, -- e.g. png ,jpg
     bucket TEXT NOT NULL,
     size INTEGER NOT NULL,
