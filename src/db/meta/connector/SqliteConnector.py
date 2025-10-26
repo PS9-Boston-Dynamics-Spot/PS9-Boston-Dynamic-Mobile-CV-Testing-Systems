@@ -1,10 +1,4 @@
-from sqlite3 import (
-    connect,
-    OperationalError,
-    DatabaseError,
-    ProgrammingError,
-    Row
-)
+from sqlite3 import connect, OperationalError, DatabaseError, ProgrammingError, Row
 from configs.reader.SqliteConfigReader import SqliteConfigReader
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from typing import Optional, Literal

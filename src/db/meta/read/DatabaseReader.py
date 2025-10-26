@@ -1,10 +1,10 @@
 from db.meta.connector.SqliteConnector import SqliteConnector
 from typing import Any, Dict, List, Optional
 
+
 class DatabaseReader:
     def __init__(self):
         self.connector = SqliteConnector()
-
 
     def get_new_id(self) -> int:
         query = "SELECT MAX(id) FROM cvision_images_raw;"
@@ -32,7 +32,7 @@ class DatabaseReader:
         query = "SELECT * FROM cvision_images_raw WHERE name = ?;"
         rows = self._fetch_all(query, (name,))
         return rows[0] if rows else None
-    
+
     def get_all_analyzed_images(self) -> List[Dict[str, Any]]:
         query = "SELECT * FROM cvision_images_analyzed ORDER BY timestamp DESC;"
         return self._fetch_all(query)

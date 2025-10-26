@@ -11,7 +11,9 @@ class ConfigLoader:
         path = Path(file_path)
         if not path.exists():
             raise ConfigNotFound(
-                exception=FileNotFoundError, path=file_path, error_code=1760794750
+                exception=FileNotFoundError("Config file not found"),
+                path=file_path,
+                error_code=1760794750,
             )
         try:
             with path.open("r", encoding="utf-8") as file:

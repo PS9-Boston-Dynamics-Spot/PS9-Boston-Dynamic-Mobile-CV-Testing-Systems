@@ -1,5 +1,4 @@
 from configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
-from db.media.repository.MediaRepository import MediaRepository
 import os
 from db.dal.DataAccessLayer import DataAccessLayer
 
@@ -28,7 +27,7 @@ if __name__ == "__main__":
         "bucket": "raw-images",
         "size": 204800,  # in Bytes
         "compressed": False,
-        "compression_method": None
+        "compression_method": None,
     }
 
     with DataAccessLayer() as dal:
