@@ -18,7 +18,7 @@ import json
 
 # === Lokale Pfade konfigurieren ===
 CVISION_PATH = Path(__file__).resolve().parent
-DATA_PATH = CVISION_PATH.parents[3] / 'data' / 'images'  # ../data/images
+DATA_PATH = CVISION_PATH.parents[2] / 'data' / 'images' / 'train' # ../data/images/train
 
 # Alle Outputs in denselben Ordner wie dieses Skript
 OUTPUT_PATH = CVISION_PATH
