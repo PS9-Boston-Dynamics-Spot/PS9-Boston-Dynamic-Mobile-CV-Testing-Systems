@@ -44,7 +44,6 @@ Thumbs.db
 *.ipynb_checkpoints
 datasets/
 tmp/
-*.csv
 *.jsonl
 
 # --- Coverage / Test outputs ---
