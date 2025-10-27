@@ -22,5 +22,8 @@ ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin:$PA
 ENV VIRTUAL_ENV="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv"
 ENV PYTHONPATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src"
 
-COPY /scripts/entrypoint.sh /scripts/entrypoint.sh
+COPY scripts/entrypoint.sh /scripts/entrypoint.sh
+RUN chmod +x /scripts/entrypoint.sh \
+    && apt-get update && apt-get install -y dos2unix \
+    && dos2unix /scripts/entrypoint.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]
