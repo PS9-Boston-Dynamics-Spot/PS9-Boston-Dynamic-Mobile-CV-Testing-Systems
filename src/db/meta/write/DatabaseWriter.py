@@ -12,19 +12,20 @@ class DatabaseWriter(SqliteConnector):
         self,
         name: str,
         format: str,
+        content_type: str,
         bucket: str,
         size: int,
         compressed: bool,
         compression_method: str,
     ) -> tuple:
         query = """
-            INSERT INTO cvision_images_raw (name, format, bucket, size, compressed, compression_method)
-            VALUES (?, ?, ?, ?, ?, ?);
+            INSERT INTO cvision_images_raw (name, format, content_type, bucket, size, compressed, compression_method)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
         """
         try:
             with self.connector as cursor:
                 cursor.execute(
-                    query, (name, format, bucket, size, compressed, compression_method)
+                    query, (name, format, content_type, bucket, size, compressed, compression_method)
                 )
                 return cursor.lastrowid, name
         except IntegrityError as e:

@@ -30,7 +30,8 @@ class ROBOT_KEYS(str, Enum):
 
 
 class ConfigEnum(str, Enum):
-    CONFIG_DIR = "configs/"
+    WORKSPACE_DIR = "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/"
+    CONFIG_DIR = WORKSPACE_DIR + "configs/"
     ROBOT_CONFIG = CONFIG_DIR + "robot-credentials.yaml"
     MINIO_CONFIG = CONFIG_DIR + "minio-credentials.yaml"
     SQLITE_CONFIG = CONFIG_DIR + "sqlite-credentials.yaml"

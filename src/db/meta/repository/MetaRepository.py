@@ -14,6 +14,7 @@ class MetaRepository:
         self,
         name: str,
         format: str,
+        content_type: str,
         bucket: str,
         size: int,
         compressed: bool,
@@ -21,7 +22,7 @@ class MetaRepository:
     ) -> int:
         try:
             return self.writer.insert_raw_image(
-                name, format, bucket, size, compressed, compression_method
+                name=name, format=format, content_type=content_type, bucket=bucket, size=size, compressed=compressed, compression_method=compression_method
             )
         except DatabaseWriterError as e:
             raise MetaRepositoryError(exception=e, error_code=1761492730)

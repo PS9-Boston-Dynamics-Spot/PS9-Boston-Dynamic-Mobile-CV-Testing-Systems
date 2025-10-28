@@ -19,29 +19,32 @@ class DataAccessLayer:
 
     # TODO: exception handling
     def __extract_metadata_raw_image(self, metadata: dict) -> tuple:
-        file_path = metadata["file_path"]
+        image_data = metadata["image_data"]
         name = metadata["name"]
         format = metadata["format"]
         bucket = metadata["bucket"]
         size = metadata["size"]
         compressed = metadata["compressed"]
         compression_method = metadata["compression_method"]
-        return file_path, name, format, bucket, size, compressed, compression_method
+        return image_data, name, format, bucket, size, compressed, compression_method
 
     def insert_raw_image(self, metadata: dict) -> None:
         try:
-            file_path, name, format, bucket, size, compressed, compression_method = (
+            image_data, name, format, bucket, size, compressed, compression_method = (
                 self.__extract_metadata_raw_image(metadata)
             )
             self.media_repository = MediaRepository(bucket_name=bucket)
 
+            content_type = self.media_repository.guess_content_type(image_data=image_data)
+
             new_id = self.meta_repository.get_new_id()
             print("New ID: ", new_id)
-            object_name = f"{new_id}_{name}.png"
+            object_name = f"{new_id}_{name}.{format}"
 
             id, name = self.meta_repository.insert_raw_image(
                 name=object_name,
                 format=format,
+                content_type=content_type,
                 bucket=bucket,
                 size=size,
                 compressed=compressed,
@@ -50,7 +53,7 @@ class DataAccessLayer:
             print("ID: ", id)
             print("Name: ", name)
             self.media_repository.put_media(
-                object_name=object_name, file_path=file_path
+                object_name=object_name, image_data=image_data, content_type=content_type
             )
         except MetaRepositoryError as e:
             raise DataAccessLayerError(exception=e, error_code=1761502460)

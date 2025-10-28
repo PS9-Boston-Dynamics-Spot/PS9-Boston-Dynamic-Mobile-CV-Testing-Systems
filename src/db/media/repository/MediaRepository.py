@@ -2,12 +2,15 @@ from db.media.read.MinioReader import MinioReader
 from db.media.write.MinioWriter import MinioWriter
 from db.media.infrastructure.MinioBucketInitializer import MinioBucketInitializer
 from db.media.read.MinioHelper import MinioHelper
+import imghdr
 
 from db.media.exceptions.MinioWriterError import MinioWriterError
 from db.media.exceptions.MinioReaderError import MinioReaderError
 from db.media.exceptions.BucketInitializerError import BucketInitializerError
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
 from db.media.exceptions.MinioHelperError import MinioHelperError
+
+import mimetypes
 
 
 class MediaRepository:
@@ -34,16 +37,33 @@ class MediaRepository:
         except Exception as e:
             raise MediaRepositoryError(exception=e, error_code=1761332270)
 
+    def guess_content_type(self, image_data: bytes) -> str:
+        if image_data:
+            detected = imghdr.what(None, h=image_data)
+            if detected == "jpeg":
+                return "image/jpeg"
+            elif detected == "png":
+                return "image/png"
+            elif detected == "bmp":
+                return "image/bmp"
+            elif detected == "tiff":
+                return "image/tiff"
+            else:
+                return "application/octet-stream"
+
+        return "application/octet-stream"
+
     def put_media(
         self,
         object_name: str,
-        file_path: str,
-        content_type: str = "application/octet-stream",
+        image_data: bytes,
+        content_type: str
     ) -> None:
         try:
             bucket_name = self.__initialize_bucket()
             with MinioWriter(bucket_name) as minio:
-                minio.put_media(object_name, file_path, content_type)
+                print("Conten Type:", content_type)
+                minio.put_media(object_name=object_name, image_data=image_data, content_type=content_type)
         except MinioWriterError as e:
             # TODO: Improve error handling, e.g. try again?
             raise MediaRepositoryError(exception=e, error_code=1761332280)

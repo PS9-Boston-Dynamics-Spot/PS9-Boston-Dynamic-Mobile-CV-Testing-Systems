@@ -1,3 +1,4 @@
+import io
 from db.media.connector.MinioConnector import MinioConnector
 from db.media.exceptions.MinioWriterError import MinioWriterError
 from minio.error import S3Error
@@ -15,20 +16,6 @@ class MinioWriter(MinioConnector):
     def __exit__(self, exc_type, exc_value, traceback):
         self.client = None
 
-    def __check_parameter(self, object_name: str, file_path: str, content_type: str):
-        if not object_name:
-            raise MinioWriterError(
-                exception=ValueError("Object name is empty"), error_code=1761328790
-            )
-        if not file_path:
-            raise MinioWriterError(
-                exception=ValueError("File path is empty"), error_code=1761328800
-            )
-        if not content_type:
-            raise MinioWriterError(
-                exception=ValueError("Content type is empty"), error_code=1761328810
-            )
-
     def __check_object_already_exists(self, object_name: str) -> bool:
         try:
             self.client.stat_object(
@@ -44,11 +31,9 @@ class MinioWriter(MinioConnector):
     def put_media(
         self,
         object_name: str,
-        file_path: str,
-        content_type: str = "application/octet-stream",
+        image_data: bytes,
+        content_type: str,
     ) -> None:
-
-        self.__check_parameter(object_name, file_path, content_type)
 
         if self.__check_object_already_exists(object_name):
             raise MinioWriterError(
@@ -59,10 +44,12 @@ class MinioWriter(MinioConnector):
             )
 
         try:
-            self.client.fput_object(
+            data_stream = io.BytesIO(image_data)
+            self.client.put_object(
                 bucket_name=self.bucket_name,
                 object_name=object_name,
-                file_path=file_path,
+                data=data_stream,
+                length=len(image_data),
                 content_type=content_type,
             )
         except Exception as e:
