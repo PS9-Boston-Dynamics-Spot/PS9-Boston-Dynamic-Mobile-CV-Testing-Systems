@@ -10,8 +10,6 @@ from db.media.exceptions.BucketInitializerError import BucketInitializerError
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
 from db.media.exceptions.MinioHelperError import MinioHelperError
 
-import mimetypes
-
 
 class MediaRepository:
     def __init__(self, bucket_name: str):
@@ -53,17 +51,16 @@ class MediaRepository:
 
         return "application/octet-stream"
 
-    def put_media(
-        self,
-        object_name: str,
-        image_data: bytes,
-        content_type: str
-    ) -> None:
+    def put_media(self, object_name: str, image_data: bytes, content_type: str) -> None:
         try:
             bucket_name = self.__initialize_bucket()
             with MinioWriter(bucket_name) as minio:
                 print("Conten Type:", content_type)
-                minio.put_media(object_name=object_name, image_data=image_data, content_type=content_type)
+                minio.put_media(
+                    object_name=object_name,
+                    image_data=image_data,
+                    content_type=content_type,
+                )
         except MinioWriterError as e:
             # TODO: Improve error handling, e.g. try again?
             raise MediaRepositoryError(exception=e, error_code=1761332280)

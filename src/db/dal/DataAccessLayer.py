@@ -35,7 +35,9 @@ class DataAccessLayer:
             )
             self.media_repository = MediaRepository(bucket_name=bucket)
 
-            content_type = self.media_repository.guess_content_type(image_data=image_data)
+            content_type = self.media_repository.guess_content_type(
+                image_data=image_data
+            )
 
             new_id = self.meta_repository.get_new_id()
             print("New ID: ", new_id)
@@ -53,7 +55,9 @@ class DataAccessLayer:
             print("ID: ", id)
             print("Name: ", name)
             self.media_repository.put_media(
-                object_name=object_name, image_data=image_data, content_type=content_type
+                object_name=object_name,
+                image_data=image_data,
+                content_type=content_type,
             )
         except MetaRepositoryError as e:
             raise DataAccessLayerError(exception=e, error_code=1761502460)

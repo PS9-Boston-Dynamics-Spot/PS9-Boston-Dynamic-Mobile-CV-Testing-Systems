@@ -25,7 +25,16 @@ class DatabaseWriter(SqliteConnector):
         try:
             with self.connector as cursor:
                 cursor.execute(
-                    query, (name, format, content_type, bucket, size, compressed, compression_method)
+                    query,
+                    (
+                        name,
+                        format,
+                        content_type,
+                        bucket,
+                        size,
+                        compressed,
+                        compression_method,
+                    ),
                 )
                 return cursor.lastrowid, name
         except IntegrityError as e:
