@@ -1,6 +1,8 @@
 from configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
 import os
 from db.dal.DataAccessLayer import DataAccessLayer
+from db.mapping.RawImageMapper import RawImageMapper
+from configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
 
 if __name__ == "__main__":
     robot_config = BostonDynamicsConfigReader()
@@ -21,16 +23,16 @@ if __name__ == "__main__":
     """
     with open(path, "rb") as f:
         image_bytes = f.read()
-        metadata_raw = {
-            "image_data": image_bytes,
-            "name": "sensor_captusaasasddsdasdre_001",
-            "format": "jpg",
-            "bucket": "raw-images",
-            "size": len(image_bytes),  # in Bytes
-            "compressed": False,
-            "compression_method": None,
-        }
+        bucket_config_reader = MinioBucketConfigReader()
+        raw_bucket = bucket_config_reader.getRawBucket()
+        raw_image_mapper = RawImageMapper()
+
+        dto_raw_image = raw_image_mapper.map_image(
+            image_data=image_bytes,
+            name="sensor_captusaasasddsfdsdasdre_001",  # TODO: generate name automatically through uuid or hash
+            bucket=raw_bucket,
+        )
 
         with DataAccessLayer() as dal:
-            result = dal.insert_raw_image(metadata_raw)
+            result = dal.insert_raw_image(image_with_metadata=dto_raw_image)
             print("Inserted raw image:", result)

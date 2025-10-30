@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS cvision_images_raw (
     size INTEGER NOT NULL, -- bytes
     compressed BOOLEAN NOT NULL DEFAULT 0,
     compression_method TEXT,
-    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
@@ -25,6 +25,6 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
     value REAL, -- e.g. 20.0 °C (NOT NULL)
     unit TEXT, -- e.g. °C (NOT NULL)
     information TEXT, -- e.g. JSON-String with all extracted information (NOT NULL)
-    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (raw_image_id) REFERENCES cvision_images_raw(id) ON DELETE CASCADE
 );

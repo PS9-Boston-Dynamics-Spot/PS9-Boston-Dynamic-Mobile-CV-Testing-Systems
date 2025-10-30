@@ -16,6 +16,9 @@ class MinioWriter(MinioConnector):
     def __exit__(self, exc_type, exc_value, traceback):
         self.client = None
 
+    def __get_bytes_length(self, image_data: bytes) -> int:
+        return len(image_data)
+
     def __check_object_already_exists(self, object_name: str) -> bool:
         try:
             self.client.stat_object(
@@ -49,7 +52,7 @@ class MinioWriter(MinioConnector):
                 bucket_name=self.bucket_name,
                 object_name=object_name,
                 data=data_stream,
-                length=len(image_data),
+                length=self.__get_bytes_length(image_data=image_data),
                 content_type=content_type,
             )
         except Exception as e:

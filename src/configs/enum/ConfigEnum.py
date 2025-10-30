@@ -1,6 +1,12 @@
 from enum import Enum
 
 
+class MINIO_BUCKETS(str, Enum):
+    BUCKETS = "buckets"
+    RAW_BUCKET = "raw_bucket"
+    ANALYZED_BUCKET = "analyzed_bucket"
+
+
 class SQLITE_KEYS(str, Enum):
     SQLITE = "sqlite"
     DATABASE = "database"
@@ -35,6 +41,7 @@ class ConfigEnum(str, Enum):
     ROBOT_CONFIG = CONFIG_DIR + "robot-credentials.yaml"
     MINIO_CONFIG = CONFIG_DIR + "minio-credentials.yaml"
     SQLITE_CONFIG = CONFIG_DIR + "sqlite-credentials.yaml"
+    BUCKETS_CONFIG = CONFIG_DIR + "minio-buckets.yaml"
 
     def __str__(self) -> str:
         return self.value

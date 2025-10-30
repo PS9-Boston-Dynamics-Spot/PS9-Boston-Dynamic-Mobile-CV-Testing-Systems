@@ -4,6 +4,8 @@ from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 
+from db.mapping.RawImageMapper import RawImageDTO
+
 
 class MetaRepository:
     def __init__(self):
@@ -12,23 +14,17 @@ class MetaRepository:
 
     def insert_raw_image(
         self,
-        name: str,
-        format: str,
-        content_type: str,
-        bucket: str,
-        size: int,
-        compressed: bool,
-        compression_method: str,
-    ) -> int:
+        metadata: RawImageDTO,
+    ) -> tuple[int, str]:
         try:
             return self.writer.insert_raw_image(
-                name=name,
-                format=format,
-                content_type=content_type,
-                bucket=bucket,
-                size=size,
-                compressed=compressed,
-                compression_method=compression_method,
+                name=metadata.name,
+                format=metadata.format,
+                content_type=metadata.content_type,
+                bucket=metadata.bucket,
+                size=metadata.size,
+                compressed=metadata.compressed,
+                compression_method=metadata.compression_method,
             )
         except DatabaseWriterError as e:
             raise MetaRepositoryError(exception=e, error_code=1761492730)

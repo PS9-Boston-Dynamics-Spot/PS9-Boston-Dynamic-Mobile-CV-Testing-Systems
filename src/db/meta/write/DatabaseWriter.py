@@ -17,7 +17,7 @@ class DatabaseWriter(SqliteConnector):
         size: int,
         compressed: bool,
         compression_method: str,
-    ) -> tuple:
+    ) -> tuple[int, str]:
         query = """
             INSERT INTO cvision_images_raw (name, format, content_type, bucket, size, compressed, compression_method)
             VALUES (?, ?, ?, ?, ?, ?, ?);
