@@ -34,5 +34,5 @@ if __name__ == "__main__":
         )
 
         with DataAccessLayer() as dal:
-            result = dal.insert_raw_image(image_with_metadata=dto_raw_image)
+            result = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
             print("Inserted raw image:", result)

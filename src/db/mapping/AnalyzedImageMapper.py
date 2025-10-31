@@ -4,7 +4,7 @@ from db.mapping.MapperHelper import MapperHelper
 
 
 @dataclass
-class RawImageDTO:
+class AnalyzedImageDTO:
 
     image_data: bytes
     name: str
@@ -12,11 +12,15 @@ class RawImageDTO:
     content_type: str
     bucket: str
     size: int
+    sensor_type: str
+    category: str
+    quality: float
+    value: float
+    unit: str
     compressed: bool = False
     compression_method: Optional[str] = None
 
     def __post_init__(self):
-
         not_null_fields = [
             "image_data",
             "name",
@@ -24,6 +28,11 @@ class RawImageDTO:
             "bucket",
             "size",
             "content_type",
+            "sensor_type",
+            "category",
+            "quality",
+            "value",
+            "unit",
         ]
 
         for field_name in not_null_fields:
@@ -58,6 +67,21 @@ class RawImageDTO:
         ):
             raise TypeError("'compression_method' must be a string")
 
+        if not isinstance(self.sensor_type, str):
+            raise TypeError("'sensor_type' must be a string")
+
+        if not isinstance(self.category, str):
+            raise TypeError("'category' must be a string")
+
+        if not isinstance(self.quality, float):
+            raise TypeError("'quality' must be a float")
+
+        if not isinstance(self.value, float):
+            raise TypeError("'value' must be a float")
+
+        if not isinstance(self.unit, str):
+            raise TypeError("'unit' must be a string")
+
         self.format = self.format.lower()
 
     def to_dict(self) -> Dict[str, Any]:
@@ -65,25 +89,30 @@ class RawImageDTO:
         return d
 
 
-class RawImageMapper:
+class AnalyzedImageMapper:
 
     def map_image(
         self,
         image_data: bytes,
         name: str,
         bucket: str,
+        sensor_type: str,
+        category: str,
+        quality: float,
+        value: float,
+        unit: str,
         format: Optional[str] = None,
         content_type: Optional[str] = None,
         size: Optional[int] = None,
         compressed: bool = False,
         compression_method: Optional[str] = None,
-    ) -> RawImageDTO:
+    ) -> AnalyzedImageDTO:
 
         format = format or MapperHelper.guess_file_extension(image_data)
         content_type = content_type or MapperHelper.guess_content_type(image_data)
         size = size or MapperHelper.get_bytes_length(image_data)
 
-        dto = RawImageDTO(
+        dto = AnalyzedImageDTO(
             image_data=image_data,
             name=name,
             format=format,
@@ -92,6 +121,11 @@ class RawImageMapper:
             compressed=compressed,
             compression_method=compression_method,
             content_type=content_type,
+            sensor_type=sensor_type,
+            category=category,
+            quality=quality,
+            value=value,
+            unit=unit,
         )
 
         return dto
