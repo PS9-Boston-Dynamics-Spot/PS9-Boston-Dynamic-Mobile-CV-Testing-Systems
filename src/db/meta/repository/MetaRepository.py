@@ -13,8 +13,11 @@ class MetaRepository:
         self.reader = DatabaseReader()
         self.writer = DatabaseWriter()
 
-    def get_new_id(self):
-        return self.reader.get_new_id()
+    def get_new_id_raw_images(self) -> int:
+        return self.reader.get_new_id_raw_images()
+    
+    def get_new_id_analyzed_images(self) -> int:
+        return self.reader.get_new_id_analyzed_images()
 
     def insert_raw_image_metadata(
         self,
@@ -41,6 +44,7 @@ class MetaRepository:
         try:
             return self.writer.insert_analyzed_image_metadata(
                 name=metadata.name,
+                raw_image_id=metadata.raw_image_id,
                 format=metadata.format,
                 content_type=metadata.content_type,
                 bucket=metadata.bucket,

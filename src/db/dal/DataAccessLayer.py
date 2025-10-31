@@ -24,13 +24,13 @@ class DataAccessLayer:
         safe_name = name.replace(" ", "_").lower()
         return f"{id}_{safe_name}.{format}"
 
-    def insert_raw_image(self, raw_image_with_metadata: RawImageDTO) -> None:
+    def insert_raw_image(self, raw_image_with_metadata: RawImageDTO) -> int:
         try:
             self.media_repository = MediaRepository(
                 bucket_name=raw_image_with_metadata.bucket
             )
 
-            new_id = self.meta_repository.get_new_id()
+            new_id = self.meta_repository.get_new_id_raw_images()
             object_name = self.create_object_name(
                 id=new_id,
                 name=raw_image_with_metadata.name,
@@ -47,6 +47,7 @@ class DataAccessLayer:
                 image_data=raw_image_with_metadata.image_data,
                 content_type=raw_image_with_metadata.content_type,
             )
+            return id
         except MetaRepositoryError as e:
             raise DataAccessLayerError(exception=e, error_code=1761502460)
         except MediaRepositoryError as e:
@@ -62,7 +63,7 @@ class DataAccessLayer:
                 bucket_name=anaylzed_image_with_metadata.bucket
             )
 
-            new_id = self.meta_repository.get_new_id()
+            new_id = self.meta_repository.get_new_id_analyzed_images()
             object_name = self.create_object_name(
                 id=new_id,
                 name=anaylzed_image_with_metadata.name,

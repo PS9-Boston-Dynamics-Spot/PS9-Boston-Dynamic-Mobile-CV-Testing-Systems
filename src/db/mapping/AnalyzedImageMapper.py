@@ -7,6 +7,7 @@ from db.mapping.MapperHelper import MapperHelper
 class AnalyzedImageDTO:
 
     image_data: bytes
+    raw_image_id: int
     name: str
     format: str
     content_type: str
@@ -23,6 +24,7 @@ class AnalyzedImageDTO:
     def __post_init__(self):
         not_null_fields = [
             "image_data",
+            "raw_image_id",
             "name",
             "format",
             "bucket",
@@ -42,6 +44,9 @@ class AnalyzedImageDTO:
 
         if not isinstance(self.image_data, bytes):
             raise TypeError("'image_data' must be bytes")
+        
+        if not isinstance(self.raw_image_id, int):
+            raise TypeError("'raw_image_id' must be an integer")
 
         if not isinstance(self.name, str):
             raise TypeError("'name' must be a string")
@@ -94,6 +99,7 @@ class AnalyzedImageMapper:
     def map_image(
         self,
         image_data: bytes,
+        raw_image_id: int,
         name: str,
         bucket: str,
         sensor_type: str,
@@ -114,6 +120,7 @@ class AnalyzedImageMapper:
 
         dto = AnalyzedImageDTO(
             image_data=image_data,
+            raw_image_id=raw_image_id,
             name=name,
             format=format,
             bucket=bucket,

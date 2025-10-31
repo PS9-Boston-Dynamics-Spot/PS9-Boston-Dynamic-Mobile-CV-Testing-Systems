@@ -58,6 +58,7 @@ class DatabaseWriter:
     def insert_analyzed_image_metadata(
         self,
         name: str,
+        raw_image_id: int,
         format: str,
         content_type: str,
         bucket: str,
@@ -71,7 +72,8 @@ class DatabaseWriter:
         unit: str,
     ) -> tuple[int, str]:
         query = """
-            INSERT INTO cvision_images_raw (
+            INSERT INTO cvision_images_analyzed (
+                raw_image_id,
                 name, 
                 format, 
                 content_type, 
@@ -84,7 +86,7 @@ class DatabaseWriter:
                 quality, 
                 value, 
                 unit)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         try:
@@ -92,6 +94,7 @@ class DatabaseWriter:
                 cursor.execute(
                     query,
                     (
+                        raw_image_id,
                         name,
                         format,
                         content_type,
