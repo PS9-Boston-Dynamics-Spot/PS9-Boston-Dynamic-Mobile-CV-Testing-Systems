@@ -2,6 +2,7 @@ from sqlite3 import connect, OperationalError, DatabaseError, ProgrammingError, 
 from configs.reader.SqliteConfigReader import SqliteConfigReader
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from typing import Optional, Literal
+import threading
 
 IsolationLevel = Optional[Literal["DEFERRED", "IMMEDIATE", "EXCLUSIVE"]]
 
@@ -13,69 +14,79 @@ VALID_ISOLATION_LEVELS: set[IsolationLevel] = {
 }
 
 
-class SqliteConnector:
-    def __init__(self):
-        self.sqlite_config_reader = SqliteConfigReader()
-        self.database = self.sqlite_config_reader.getDatabase()
-        self.timeout = self.sqlite_config_reader.getTimeout()
-        self.detect_types = self.sqlite_config_reader.getDetectTypes()
-        self.isolation_level = self.sqlite_config_reader.getIsolationLevel()
-        self.check_same_thread = self.sqlite_config_reader.getCheckSameThread()
-        self.cached_statements = self.sqlite_config_reader.getCachedStatements()
-        self.uri = self.sqlite_config_reader.getUri()
 
-        if self.isolation_level not in VALID_ISOLATION_LEVELS:
-            raise SqliteConnectionError(
-                exception=ValueError(
-                    f"Invalid Isolation Level: {self.isolation_level}"
-                ),
-                error_code=1761423280,
+class SqliteConnector:
+    _shared_connection = None   # zentrale, geteilte Verbindung
+    _lock = threading.Lock()    # Thread-Sicherheit
+
+    def __init__(self):
+        if SqliteConnector._shared_connection is None:
+            self._init_shared_connection()
+        self.connection = SqliteConnector._shared_connection
+
+    def _init_shared_connection(self):
+        with SqliteConnector._lock:
+            if SqliteConnector._shared_connection is not None:
+                return  # wurde schon initialisiert
+
+            config = SqliteConfigReader()
+            isolation_level = config.getIsolationLevel()
+
+            if isolation_level not in VALID_ISOLATION_LEVELS:
+                raise SqliteConnectionError(
+                    exception=ValueError(f"Invalid Isolation Level: {isolation_level}"),
+                    error_code=1761423280,
+                )
+
+            SqliteConnector._shared_connection = connect(
+                database=config.getDatabase(),
+                timeout=config.getTimeout(),
+                detect_types=config.getDetectTypes(),
+                isolation_level=isolation_level,
+                check_same_thread=config.getCheckSameThread(),
+                cached_statements=config.getCachedStatements(),
+                uri=config.getUri(),
             )
+
+            print("SQLite shared connection established.")
+
+    def _ensure_connection(self):
+        if SqliteConnector._shared_connection is None:
+            print("Reconnecting to SQLite database...")
+            self._init_shared_connection()
+        self.connection = SqliteConnector._shared_connection
 
     def __enter__(self):
-        try:
-            self.connection = connect(
-                database=self.database,
-                timeout=self.timeout,
-                detect_types=self.detect_types,
-                isolation_level=self.isolation_level,
-                check_same_thread=self.check_same_thread,
-                cached_statements=self.cached_statements,
-                uri=self.uri,
-            )
-            self.connection.row_factory = Row
-            self.cursor = self.connection.cursor()
-            return self.cursor
-        except OperationalError as e:
-            raise SqliteConnectionError(
-                exception=RuntimeError(
-                    f"SQLite operational error while connecting to '{self.database}': {e}"
-                ),
-                error_code=1761423240,
-            )
-        except ProgrammingError as e:
-            raise SqliteConnectionError(
-                exception=RuntimeError(f"SQLite programming error: {e}"),
-                error_code=1761423250,
-            )
-        except DatabaseError as e:
-            raise SqliteConnectionError(
-                exception=RuntimeError(f"SQLite database error: {e}"),
-                error_code=1761423260,
-            )
-        except Exception as e:
-            raise SqliteConnectionError(
-                exception=RuntimeError(f"Unexpected SQLite connection error: {e}"),
-                error_code=1761423270,
-            )
+        self._ensure_connection()
+        self._lock.acquire()
+        self.cursor = self.connection.cursor()
+        return self.cursor
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if hasattr(self, "connection"):
-            try:
-                if exc_type is None:
+        try:
+            if exc_type is None:
+                try:
                     self.connection.commit()
-                else:
+                except Exception as e:
+                    print(f"[WARN] Commit failed: {e}")
+            else:
+                try:
                     self.connection.rollback()
-            finally:
-                self.cursor.close()
-                self.connection.close()
+                except Exception as e:
+                    print(f"[WARN] Rollback failed: {e}")
+        finally:
+            if hasattr(self, "cursor") and self.cursor:
+                try:
+                    self.cursor.close()
+                except Exception:
+                    pass
+            self._lock.release()
+
+
+    @classmethod
+    def close(cls):
+        with cls._lock:
+            if cls._shared_connection:
+                print("SQLite shared connection closed.")
+                cls._shared_connection.close()
+                cls._shared_connection = None

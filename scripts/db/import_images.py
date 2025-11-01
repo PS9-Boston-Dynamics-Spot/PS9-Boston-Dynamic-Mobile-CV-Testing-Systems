@@ -6,7 +6,6 @@ TrainPath = "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/image
 
 
 def get_images(path: str) -> list[Path]:
-    """Findet rekursiv alle Bilddateien in einem Ordner und gibt deren Pfade zurück."""
     image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
     path_obj = Path(path)
 

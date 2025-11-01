@@ -1,9 +1,9 @@
-from db.meta.connector.SqliteConnector import SqliteConnector
+from db.meta.manager.SqliteConnectionManager import SqliteConnectionManager
 
 
 class DatabaseReader:
     def __init__(self):
-        self.connector = SqliteConnector()
+        self.connector = SqliteConnectionManager.get_connector()
 
     def get_new_id_raw_images(self) -> int:
         query = "SELECT MAX(id) FROM cvision_images_raw;"

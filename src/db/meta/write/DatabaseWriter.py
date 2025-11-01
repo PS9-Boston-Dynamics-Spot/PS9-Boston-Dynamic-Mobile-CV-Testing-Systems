@@ -1,4 +1,4 @@
-from db.meta.connector.SqliteConnector import SqliteConnector
+from db.meta.manager.SqliteConnectionManager import SqliteConnectionManager
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 from sqlite3 import IntegrityError, OperationalError, DatabaseError
@@ -6,7 +6,7 @@ from sqlite3 import IntegrityError, OperationalError, DatabaseError
 
 class DatabaseWriter:
     def __init__(self):
-        self.connector = SqliteConnector()
+        self.connector = SqliteConnectionManager.get_connector()
 
     def insert_raw_image_metadata(
         self,
