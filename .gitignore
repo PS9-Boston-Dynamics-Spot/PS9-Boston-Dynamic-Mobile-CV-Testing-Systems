@@ -62,3 +62,6 @@ configs/local_*.json
 # --- OS-specific ---
 ehthumbs.db
 Icon?
+
+# --- Database stuff ---
+*.db

@@ -1,10 +1,8 @@
 import yaml
 from pathlib import Path
-from common.exceptions.ConfigErrors import (
-    ConfigNotFound,
-    ConfigParseError,
-    ConfigLoadError,
-)
+from configs.exceptions.ConfigLoadError import ConfigLoadError
+from configs.exceptions.ConfigNotFound import ConfigNotFound
+from configs.exceptions.ConfigParseError import ConfigParseError
 
 
 class ConfigLoader:
@@ -13,7 +11,9 @@ class ConfigLoader:
         path = Path(file_path)
         if not path.exists():
             raise ConfigNotFound(
-                exception=FileNotFoundError, path=file_path, error_code=1760794750
+                exception=FileNotFoundError("Config file not found"),
+                path=file_path,
+                error_code=1760794750,
             )
         try:
             with path.open("r", encoding="utf-8") as file:
