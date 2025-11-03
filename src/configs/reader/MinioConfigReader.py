@@ -17,7 +17,7 @@ class MinioConfigReader(ConfigLoader):
     def getHost(self) -> Optional[str]:
         return self._getMinio().get(MINIO_KEYS.HOST)
 
-    def getPort(self) -> Optional[str]:
+    def getPort(self) -> Optional[int]:
         return self._getMinio().get(MINIO_KEYS.PORT)
 
     def getAccessKey(self) -> Optional[str]:

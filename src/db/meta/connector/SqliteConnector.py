@@ -15,8 +15,8 @@ VALID_ISOLATION_LEVELS: set[IsolationLevel] = {
 
 
 class SqliteConnector:
-    _shared_connection = None  # zentrale, geteilte Verbindung
-    _lock = threading.Lock()  # Thread-Sicherheit
+    _shared_connection = None
+    _lock = threading.Lock()
 
     def __init__(self):
         if SqliteConnector._shared_connection is None:
@@ -26,7 +26,7 @@ class SqliteConnector:
     def _init_shared_connection(self):
         with SqliteConnector._lock:
             if SqliteConnector._shared_connection is not None:
-                return  # wurde schon initialisiert
+                return
 
             config = SqliteConfigReader()
             isolation_level = config.getIsolationLevel()
@@ -47,11 +47,8 @@ class SqliteConnector:
                 uri=config.getUri(),
             )
 
-            print("SQLite shared connection established.")
-
     def _ensure_connection(self):
         if SqliteConnector._shared_connection is None:
-            print("Reconnecting to SQLite database...")
             self._init_shared_connection()
         self.connection = SqliteConnector._shared_connection
 
@@ -85,6 +82,5 @@ class SqliteConnector:
     def close(cls):
         with cls._lock:
             if cls._shared_connection:
-                print("SQLite shared connection closed.")
                 cls._shared_connection.close()
                 cls._shared_connection = None
