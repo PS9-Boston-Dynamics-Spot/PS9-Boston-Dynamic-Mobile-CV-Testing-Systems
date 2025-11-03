@@ -6,7 +6,7 @@ services:
     volumes:
       - .:/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems:cached
       - venv-data:/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv
-      - sqlite-data:/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/db
+      - sqlite-data:/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/db_data
     working_dir: /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems
     environment:
       - PYTHONPATH=/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src

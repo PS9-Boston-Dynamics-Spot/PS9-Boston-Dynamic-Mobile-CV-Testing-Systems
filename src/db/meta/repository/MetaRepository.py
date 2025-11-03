@@ -15,7 +15,7 @@ class MetaRepository:
 
     def get_new_id_raw_images(self) -> int:
         return self.reader.get_new_id_raw_images()
-    
+
     def get_new_id_analyzed_images(self) -> int:
         return self.reader.get_new_id_analyzed_images()
 

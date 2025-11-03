@@ -13,7 +13,7 @@ if __name__ == "__main__":
     print(robot_config.getWifi())
     print(robot_config.getPassword())
 
-    path = os.path.join(os.path.dirname(__file__), "test.jpg")
+    path = os.path.join(os.path.dirname(__file__), "OPCUA.png")
     """    print(
         MediaRepository(bucket_name="ps9-analyzer-bucket").get_media(object_name="test")
     )
@@ -29,18 +29,18 @@ if __name__ == "__main__":
         analyzed_bucket = bucket_config_reader.getAnalyzedBucket()
 
         raw_image_mapper = RawImageMapper()
-    
+
         with DataAccessLayer() as dal:
-            image_name = "sensor_captasduasdasddfghasdsaaaasrzjtugghjtfhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+            image_name = "sensor_captasduasdasddfghasdsaaaasrzjtugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             dto_raw_image = raw_image_mapper.map_image(
                 image_data=image_bytes,
                 name=image_name,  # TODO: generate name automatically through uuid or hash
                 bucket=raw_bucket,
             )
-            
+
             raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
-            
+
             analyzed_image_mapper = AnalyzedImageMapper()
             dto_analyzed_image = analyzed_image_mapper.map_image(
                 image_data=image_bytes,
@@ -53,6 +53,8 @@ if __name__ == "__main__":
                 value=10.0,
                 unit="°C_2",
             )
-            result = dal.insert_analyzed_image(anaylzed_image_with_metadata=dto_analyzed_image)
+            result = dal.insert_analyzed_image(
+                anaylzed_image_with_metadata=dto_analyzed_image
+            )
             print("Inserted both images:", id)
     print("asd")

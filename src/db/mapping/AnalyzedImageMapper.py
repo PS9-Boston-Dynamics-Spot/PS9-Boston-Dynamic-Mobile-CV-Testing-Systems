@@ -44,7 +44,7 @@ class AnalyzedImageDTO:
 
         if not isinstance(self.image_data, bytes):
             raise TypeError("'image_data' must be bytes")
-        
+
         if not isinstance(self.raw_image_id, int):
             raise TypeError("'raw_image_id' must be an integer")
 

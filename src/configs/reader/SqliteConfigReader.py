@@ -9,7 +9,10 @@ class SqliteConfigReader(ConfigLoader):
         self.__config = self.load_config(ConfigEnum.SQLITE_CONFIG)
 
     def _getSqlite(self) -> Dict[str, Any]:
-        return self.__config.get(SQLITE_KEYS.SQLITE, {})
+        value = self.__config.get(SQLITE_KEYS.SQLITE)
+        if not isinstance(value, dict):
+            return {}
+        return value
 
     def getDatabase(self) -> Optional[str]:
         return self._getSqlite().get(SQLITE_KEYS.DATABASE)

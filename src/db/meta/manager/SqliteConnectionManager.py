@@ -17,4 +17,5 @@ class SqliteConnectionManager:
             cls._instance.close()
             cls._instance = None
 
+
 atexit.register(SqliteConnectionManager.close)

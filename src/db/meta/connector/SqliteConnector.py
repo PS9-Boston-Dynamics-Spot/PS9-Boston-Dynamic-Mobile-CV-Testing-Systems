@@ -1,4 +1,4 @@
-from sqlite3 import connect, OperationalError, DatabaseError, ProgrammingError, Row
+from sqlite3 import connect
 from configs.reader.SqliteConfigReader import SqliteConfigReader
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from typing import Optional, Literal
@@ -14,10 +14,9 @@ VALID_ISOLATION_LEVELS: set[IsolationLevel] = {
 }
 
 
-
 class SqliteConnector:
-    _shared_connection = None   # zentrale, geteilte Verbindung
-    _lock = threading.Lock()    # Thread-Sicherheit
+    _shared_connection = None  # zentrale, geteilte Verbindung
+    _lock = threading.Lock()  # Thread-Sicherheit
 
     def __init__(self):
         if SqliteConnector._shared_connection is None:
@@ -81,7 +80,6 @@ class SqliteConnector:
                 except Exception:
                     pass
             self._lock.release()
-
 
     @classmethod
     def close(cls):
