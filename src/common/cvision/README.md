@@ -17,6 +17,8 @@ PIP immer voher aktualisieren mit -> pip install --upgrade pip
 
 Aktuell noch in /data/images/train
 
+Bilder von Spot: /data/images/raw
+
 ## Skript 
 
 train_and_infer.py -> Erste CV Test mit FastAI

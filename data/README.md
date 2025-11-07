@@ -13,13 +13,13 @@ Dieses Verzeichnis `/data` dient als zentrale Ablage für alle Daten, die im Rah
 ├── images/ # Kamerabilder für Prüfungen
 │ ├── train/ # Trainingsdaten für CV-Modelle
 │ ├── val/ # Validierungsdaten
+| ├── raw/ # Rohdaten, unbearbeitet
 │ └── test/ # Testdaten
 │
 ├── annotations/ # Annotationsdateien zu Bildern (Labels, Bounding Boxes, Messwerte)
 │
 ├── sensor_data/ # Optional: Daten von Sensoren oder Roboterarmpositionen
 │
-├── raw/ # Rohdaten, unbearbeitet
 │
 └── processed/ # Vorverarbeitete Daten, normalisiert oder augmentiert für Modelle
 ```
