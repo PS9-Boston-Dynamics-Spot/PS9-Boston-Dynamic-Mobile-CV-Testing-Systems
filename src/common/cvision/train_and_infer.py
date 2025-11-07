@@ -8,8 +8,14 @@ Dieses Skript:
   • liest digitale Anzeigen per OCR (EasyOCR)
   • schreibt alle Ergebnisse (CSV & JSON) direkt in src/common/cvision/
 """
-
-from fastai.vision.all import *
+from fastai.vision.all import (
+    ImageDataLoaders,
+    Resize,
+    vision_learner,
+    resnet34,
+    MSELossFlat,
+    mae
+)
 import pandas as pd
 import easyocr
 from pathlib import Path
@@ -29,8 +35,9 @@ csv_path = DATA_PATH / 'labels.csv'
 if not csv_path.exists():
     raise FileNotFoundError(f"labels.csv nicht gefunden unter: {csv_path}")
 
-df = pd.read_csv(csv_path)
+df = pd.read_csv(csv_path, sep=",\s*", engine="python")
 print(f"📄 Eingelesene Datensätze: {len(df)}")
+print("Spalten:", df.columns.tolist())
 
 # === Kategorisierung ===
 df_analog = df[df['type'].str.contains('Analog', case=False, na=False)].copy()
