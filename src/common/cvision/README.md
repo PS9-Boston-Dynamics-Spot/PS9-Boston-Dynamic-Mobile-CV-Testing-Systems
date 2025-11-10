@@ -19,7 +19,17 @@ Aktuell noch in /data/images/train
 
 Bilder von Spot: /data/images/raw
 
+
 ## Skript 
 
-train_and_infer.py -> Erste CV Test mit FastAI
+VERALTET:   train_and_infer.py -> Erste CV Test mit FastAI
+            predictions.csv
+            predictions.json
+
+
+auto_label.py       -> erzeugung von Text Dateien für die Fotos
+classify_fastai.py  -> Klassifizierung Anzeige
+detect_and_crop.py  -> Schneiden der Bilder zur Klassifizierung
+labels.py           -> Erstellung raw Labels
+torch_test.py       -> Test für erfolgreiche Installation von Torch
 

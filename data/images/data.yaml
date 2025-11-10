@@ -1,0 +1,13 @@
+# dataset.yaml
+train: ../images/train
+val: ../images/val
+# es werden nur gecroppte Bilder als Trainings- und Validierungsdaten verwendet
+
+# optional, falls du auch test-Daten hast
+# test: ../images/test
+
+# Anzahl der Klassen
+nc: 3
+
+# Klassen-Namen (in Reihenfolge ihrer IDs)
+names: ['digital_display_ac', 'analog_display_pressure', 'digital_display_temperature']
