@@ -1,5 +1,5 @@
 from typing import Any
-from common.opcua.connector.OPCUAConnector import OPCUAConnector
+from db.opcua.connector.OPCUAConnector import OPCUAConnector
 
 
 class OPCUAReader:

@@ -1,5 +1,6 @@
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
+from db.opcua.repository.OPCUARepository import OPCUARepository
 
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
@@ -15,10 +16,14 @@ class DataAccessLayer:
 
     def __enter__(self):
         self.meta_repository = MetaRepository()
+        self.opcua_repository = OPCUARepository()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
+
+    def get_oven_temperature(self) -> float:
+        return self.opcua_repository.get_oven_temperature()
 
     def create_object_name(self, id: int, name: str, format: str) -> str:
         safe_name = name.replace(" ", "_").lower()
