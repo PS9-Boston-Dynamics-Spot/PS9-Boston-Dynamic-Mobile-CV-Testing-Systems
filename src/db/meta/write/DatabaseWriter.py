@@ -120,3 +120,45 @@ class DatabaseWriter:
             raise DatabaseWriterError(exception=e, error_code=1761929170)
         except Exception as e:
             raise DatabaseWriterError(exception=e, error_code=1761929180)
+
+    def insert_anomaly(
+        self,
+        analyzed_image_id: int,
+        detected_value: float,
+        comparative_value: float,
+        is_anomaly: bool,
+        node_id: str,
+    ) -> int:
+        query = """
+            INSERT INTO anomalies (
+                analyzed_image_id,
+                detected_value,
+                comparative_value,
+                is_anomaly,
+                node_id)
+            VALUES (?, ?, ?, ?, ?);
+        """
+
+        try:
+            with self.connector as cursor:
+                cursor.execute(
+                    query,
+                    (
+                        analyzed_image_id,
+                        detected_value,
+                        comparative_value,
+                        is_anomaly,
+                        node_id,
+                    ),
+                )
+                return cursor.lastrowid
+        except IntegrityError as e:
+            raise DatabaseWriterError(exception=e, error_code=1762880810)
+        except OperationalError as e:
+            raise DatabaseWriterError(exception=e, error_code=1762880820)
+        except DatabaseError as e:
+            raise DatabaseWriterError(exception=e, error_code=1762880830)
+        except SqliteConnectionError as e:
+            raise DatabaseWriterError(exception=e, error_code=1762880840)
+        except Exception as e:
+            raise DatabaseWriterError(exception=e, error_code=1762880850)

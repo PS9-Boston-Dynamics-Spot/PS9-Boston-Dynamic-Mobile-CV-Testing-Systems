@@ -8,6 +8,7 @@ from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
 
 from db.mapping.RawImageMapper import RawImageDTO
 from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.AnomalyMapper import AnomalyDTO
 
 
 class DataAccessLayer:
@@ -91,3 +92,11 @@ class DataAccessLayer:
             raise DataAccessLayerError(exception=e, error_code=1761932740)
         except Exception as e:
             raise DataAccessLayerError(exception=e, error_code=1761932750)
+
+    def insert_anomaly(self, anomaly_with_metadata: AnomalyDTO) -> None:
+        try:
+            self.meta_repository.insert_anomaly(metadata=anomaly_with_metadata)
+        except MetaRepositoryError as e:
+            raise DataAccessLayerError(exception=e, error_code=1762882020)
+        except Exception as e:
+            raise DataAccessLayerError(exception=e, error_code=1762882030)

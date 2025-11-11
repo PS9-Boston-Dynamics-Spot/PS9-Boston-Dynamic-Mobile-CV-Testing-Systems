@@ -6,6 +6,7 @@ from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 
 from db.mapping.RawImageMapper import RawImageDTO
 from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.AnomalyMapper import AnomalyDTO
 
 
 class MetaRepository:
@@ -61,3 +62,17 @@ class MetaRepository:
             raise MetaRepositoryError(exception=e, error_code=1761932480)
         except Exception as e:
             raise MetaRepositoryError(exception=e, error_code=1761932490)
+
+    def insert_anomaly(self, metadata: AnomalyDTO) -> int:
+        try:
+            return self.writer.insert_anomaly(
+                analyzed_image_id=metadata.analyzed_image_id,
+                detected_value=metadata.detected_value,
+                comparative_value=metadata.comparative_value,
+                is_anomaly=metadata.is_anomaly,
+                node_id=metadata.node_id,
+            )
+        except DatabaseWriterError as e:
+            raise MetaRepositoryError(exception=e, error_code=1762881900)
+        except Exception as e:
+            raise MetaRepositoryError(exception=e, error_code=1762881910)
