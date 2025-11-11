@@ -28,3 +28,14 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (raw_image_id) REFERENCES cvision_images_raw(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS anomalies(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    analyzed_image_id INTEGER NOT NULL,
+    detected_value REAL NOT NULL,
+    comparative_value REAL NOT NULL, -- value from opcua
+    is_anomaly BOOLEAN NOT NULL DEFAULT 0,
+    node_id TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (analyzed_image_id) REFERENCES cvision_images_analyzed(id) ON DELETE CASCADE
+);
