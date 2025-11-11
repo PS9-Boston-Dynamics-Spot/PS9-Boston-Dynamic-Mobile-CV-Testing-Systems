@@ -6,7 +6,7 @@ from configs.exceptions.ConfigParseError import ConfigParseError
 
 
 class ConfigLoader:
-    
+
     def load_config(self, file_path: str) -> dict:
         path = Path(file_path)
         if not path.exists():

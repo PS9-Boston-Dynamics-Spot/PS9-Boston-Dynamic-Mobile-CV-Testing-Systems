@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class OPCUA_NODES(str, Enum):
     NODES = "nodes"
     OVEN_NODE = "oven_node"

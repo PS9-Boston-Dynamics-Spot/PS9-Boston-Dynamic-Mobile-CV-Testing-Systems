@@ -1,5 +1,8 @@
 from typing import Any
 from db.opcua.connector.OPCUAConnector import OPCUAConnector
+from opcua import ua
+from db.opcua.exceptions.NodeNotFoundError import NodeNotFoundError
+from db.opcua.exceptions.ReaderError import ReaderError
 
 
 class OPCUAReader:
@@ -8,4 +11,9 @@ class OPCUAReader:
         self.client = self.opcua_connector.connect()
 
     def read_node(self, node_id: str) -> Any:
-        return self.client.get_node(node_id).get_value()
+        try:
+            return self.client.get_node(node_id).get_value()
+        except ua.UaStatusCodeError as e:
+            raise NodeNotFoundError(exception=e, node_id=node_id, error_code=1762858720)
+        except Exception as e:
+            raise ReaderError(exception=e, node_id=node_id, error_code=1762858730)
