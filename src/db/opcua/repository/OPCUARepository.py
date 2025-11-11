@@ -1,6 +1,7 @@
 from db.opcua.reader.OPCUAReader import OPCUAReader
 from configs.reader.OPCUANodesConfigReader import OPCUANodesConfigReader
 
+
 class OPCUARepository:
     def __init__(self):
         self.reader = OPCUAReader()

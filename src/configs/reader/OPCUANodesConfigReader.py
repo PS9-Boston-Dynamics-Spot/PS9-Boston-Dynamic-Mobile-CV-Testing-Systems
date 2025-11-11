@@ -2,6 +2,7 @@ from typing import Optional, Dict, Any
 from configs.loader.ConfigLoader import ConfigLoader
 from configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
 
+
 class OPCUANodesConfigReader(ConfigLoader):
     def __init__(self):
         super().__init__()

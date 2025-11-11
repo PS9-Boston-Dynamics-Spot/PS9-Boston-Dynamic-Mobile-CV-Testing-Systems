@@ -2,6 +2,7 @@ from typing import Optional, Dict, Any
 from configs.loader.ConfigLoader import ConfigLoader
 from configs.enum.ConfigEnum import ConfigEnum, OPCUA_KEYS
 
+
 class OPCUAConfigReader(ConfigLoader):
     def __init__(self):
         super().__init__()
@@ -15,10 +16,10 @@ class OPCUAConfigReader(ConfigLoader):
 
     def getIp(self) -> Optional[str]:
         return self._getOPCUA().get(OPCUA_KEYS.IP)
-    
+
     def getPort(self) -> Optional[int]:
         return self._getOPCUA().get(OPCUA_KEYS.PORT)
-    
+
     def getProtocol(self) -> Optional[str]:
         return self._getOPCUA().get(OPCUA_KEYS.PROTOCOL)
 
