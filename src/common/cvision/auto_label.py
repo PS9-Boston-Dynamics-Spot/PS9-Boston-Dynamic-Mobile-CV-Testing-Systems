@@ -1,3 +1,5 @@
+# Pseudo-Labeling-Skript mit YOLOv8
+
 from ultralytics import YOLO
 from PIL import Image
 from pathlib import Path

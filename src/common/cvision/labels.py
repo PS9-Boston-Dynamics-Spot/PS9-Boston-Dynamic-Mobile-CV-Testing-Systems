@@ -3,7 +3,7 @@ from PIL import Image
 from pathlib import Path
 
 # Modell laden
-model = YOLO('yolov8n.pt')  # oder dein eigenes best.pt
+model = YOLO('yolov8n.pt')  #best.pt für trainiertes Modell verwenden
 
 # Pfade
 raw_dir = Path('data/images/raw')
@@ -12,18 +12,18 @@ label_dir = Path('data/labels/train')
 
 crop_dir.mkdir(parents=True, exist_ok=True)
 label_dir.mkdir(parents=True, exist_ok=True)
-
+# Erkennung, Cropping, Resizing & Labeling
 for img_path in raw_dir.glob('*.jpg'):
     results = model(img_path)
     im = Image.open(img_path).convert("RGB")
     width, height = im.size
-
+    
     label_path = label_dir / f"{img_path.stem}.txt"
     with open(label_path, "w") as f:
         for box, cls in zip(results[0].boxes.xyxy, results[0].boxes.cls):
             x1, y1, x2, y2 = map(float, box)
 
-            # ✅ Begrenzen auf Bildgrenzen
+            # Begrenzen auf Bildgrenzen
             x1 = max(0, int(x1))
             y1 = max(0, int(y1))
             x2 = min(width, int(x2))
@@ -42,4 +42,4 @@ for img_path in raw_dir.glob('*.jpg'):
             class_id = int(cls.item())
             f.write(f"{class_id} {x_center:.6f} {y_center:.6f} {w:.6f} {h:.6f}\n")
 
-print("✅ Labels und Crops erfolgreich erstellt!")
+print("CHECK: Labels und Crops erfolgreich erstellt!")
