@@ -8,3 +8,5 @@ bosdyn-mission==5.0.1.1
 bosdyn-choreography-client==5.0.1.1
 bosdyn-orbit==5.0.1.1
 logging==0.4.9.6
+opencv-contrib-python-headless==4.12.0.88
+numpy==2.2.6
