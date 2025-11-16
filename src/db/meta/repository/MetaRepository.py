@@ -61,3 +61,6 @@ class MetaRepository:
             raise MetaRepositoryError(exception=e, error_code=1761932480)
         except Exception as e:
             raise MetaRepositoryError(exception=e, error_code=1761932490)
+
+    def get_identifier_images_metadata(self) -> list:
+        return self.reader.get_identifier_images_metadata()

@@ -1,3 +1,16 @@
+CREATE TABLE OF NOT EXISTS identifier_images(
+    id INTEGER PRIMARY KEY, -- ArUco ID
+    name TEXT NOT NULL UNIQUE,
+    format TEXT NOT NULL, -- e.g. png ,jpg
+    content_type TEXT NOT NULL, -- e.g. image/jpeg
+    bucket TEXT NOT NULL,
+    size INTEGER NOT NULL, -- bytes
+    compressed BOOLEAN NOT NULL DEFAULT 0,
+    compression_method TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
 CREATE TABLE IF NOT EXISTS cvision_images_raw (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,

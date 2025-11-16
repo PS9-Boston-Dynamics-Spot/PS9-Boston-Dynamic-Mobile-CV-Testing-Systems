@@ -1,3 +1,5 @@
+from typing import List
+
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
 
@@ -7,6 +9,7 @@ from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
 
 from db.mapping.RawImageMapper import RawImageDTO
 from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.IdentifierImageMapper import IdentifierImageMapper, IdentifierImageDTO
 
 
 class DataAccessLayer:
@@ -86,3 +89,43 @@ class DataAccessLayer:
             raise DataAccessLayerError(exception=e, error_code=1761932740)
         except Exception as e:
             raise DataAccessLayerError(exception=e, error_code=1761932750)
+
+    def get_identifer_images(self) -> List[IdentifierImageDTO]:
+
+        try:
+            identifier_dto_list = []
+            identifier_metadata_list = (
+                self.meta_repository.get_identifier_images_metadata()
+            )
+
+            for identifier_metadata in identifier_metadata_list:
+                print(identifier_metadata)
+                self.media_repository = MediaRepository(
+                    bucket_name=identifier_metadata.bucket
+                )
+
+                identifier_image = self.media_repository.get_media(
+                    object_name=identifier_metadata.name,
+                )
+
+                identifier_dto = IdentifierImageMapper.map_image(
+                    image_data=identifier_image,
+                    id=identifier_metadata.id,
+                    name=identifier_metadata.name,
+                    bucket=identifier_metadata.bucket,
+                    created_at=identifier_metadata.created_at,
+                    format=identifier_metadata.format,
+                    content_type=identifier_metadata.content_type,
+                    size=identifier_metadata.size,
+                    compressed=identifier_metadata.compressed,
+                    compression_method=identifier_metadata.compression_method,
+                )
+
+                identifier_dto_list.append(identifier_dto)
+
+            return identifier_dto_list
+
+        except MediaRepositoryError as e:
+            raise DataAccessLayerError(exception=e, error_code=1763318340)
+        except Exception as e:
+            raise DataAccessLayerError(exception=e, error_code=1763318350)
