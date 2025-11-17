@@ -1,0 +1,4 @@
+nodes:
+  oven_node: 
+    opcua_node: 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
+    aruco_id: 46

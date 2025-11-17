@@ -1,4 +1,3 @@
 buckets:
-  identifier_bucket: "ps9-identifier"
   raw_bucket: "ps9-raw"
   analyzed_bucket: "ps9-analyzed"

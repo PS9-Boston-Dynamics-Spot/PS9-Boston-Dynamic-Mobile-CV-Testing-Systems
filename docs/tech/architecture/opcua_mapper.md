@@ -22,8 +22,4 @@ flowchart TD
     E --> F[Daten abgleichen Anomalieerkennung]
 
     F --> O[Nächsten Sensor verarbeiten]
-
-
-
-
 ```

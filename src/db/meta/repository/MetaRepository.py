@@ -52,6 +52,8 @@ class MetaRepository:
                 compressed=metadata.compressed,
                 compression_method=metadata.compression_method,
                 sensor_type=metadata.sensor_type,
+                opcua_node_id=metadata.opcua_node_id,
+                aruco_id=metadata.aruco_id,
                 category=metadata.category,
                 quality=metadata.quality,
                 value=metadata.value,
@@ -61,6 +63,3 @@ class MetaRepository:
             raise MetaRepositoryError(exception=e, error_code=1761932480)
         except Exception as e:
             raise MetaRepositoryError(exception=e, error_code=1761932490)
-
-    def get_identifier_images_metadata(self) -> list:
-        return self.reader.get_identifier_images_metadata()
