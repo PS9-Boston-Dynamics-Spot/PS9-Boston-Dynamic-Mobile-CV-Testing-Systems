@@ -16,6 +16,12 @@ Dieses Verzeichnis `/data` dient als zentrale Ablage für alle Daten, die im Rah
 | ├── raw/ # Rohdaten, unbearbeitet
 │ └── test/ # Testdaten
 │
+├── labels/ # label der image für das CV Training
+│ ├── train/ # Trainingsdaten Beschreibung
+│ ├── val/ # Validierungs Beschreibung
+│ ├── val.cache
+│ └── train.cache
+│
 ├── annotations/ # Annotationsdateien zu Bildern (Labels, Bounding Boxes, Messwerte)
 │
 ├── sensor_data/ # Optional: Daten von Sensoren oder Roboterarmpositionen
