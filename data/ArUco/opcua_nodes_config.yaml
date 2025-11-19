@@ -1,0 +1,35 @@
+overall_dict: DICT_6X6_1000
+nodes:
+  node_12:
+    opcua_node: ''
+    aruco_id: 12
+  node_21:
+    opcua_node: ''
+    aruco_id: 21
+  node_22:
+    opcua_node: ''
+    aruco_id: 22
+  node_23:
+    opcua_node: ''
+    aruco_id: 23
+  node_27:
+    opcua_node: ''
+    aruco_id: 27
+  node_28:
+    opcua_node: ''
+    aruco_id: 28
+  node_37:
+    opcua_node: ''
+    aruco_id: 37
+  node_40:
+    opcua_node: ''
+    aruco_id: 40
+  node_41:
+    opcua_node: ''
+    aruco_id: 41
+  node_46:
+    opcua_node: ''
+    aruco_id: 46
+  node_47:
+    opcua_node: ''
+    aruco_id: 47

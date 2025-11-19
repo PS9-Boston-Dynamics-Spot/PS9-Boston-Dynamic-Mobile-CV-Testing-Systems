@@ -2,9 +2,12 @@ from enum import Enum
 
 
 class OPCUA_NODES(str, Enum):
+    OVERALL_DICT = "overall_dict"
+
     NODES = "nodes"
     OVEN_NODE = "oven_node"
-
+    OPCUA_NODE = "opcua_node"
+    ARUCO_ID = "aruco_id"
 
 class MINIO_BUCKETS(str, Enum):
     BUCKETS = "buckets"

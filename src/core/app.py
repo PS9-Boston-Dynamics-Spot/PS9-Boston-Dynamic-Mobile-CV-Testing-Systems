@@ -31,7 +31,7 @@ if __name__ == "__main__":
         raw_image_mapper = RawImageMapper()
 
         with DataAccessLayer() as dal:
-            image_name = "sensor_captasduasdasddfghasdsaaaasrzjtugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+            image_name = "sensor_captasduasdasddasdsaaaasrzjtjkugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             dto_raw_image = raw_image_mapper.map_image(
                 image_data=image_bytes,
@@ -48,6 +48,8 @@ if __name__ == "__main__":
                 name=image_name,  # TODO: generate name automatically through uuid or hash
                 bucket=analyzed_bucket,
                 sensor_type="test2",
+                opcua_node_id="test_node",
+                aruco_id=123,
                 category="test2",
                 quality=1.0,
                 value=10.0,
