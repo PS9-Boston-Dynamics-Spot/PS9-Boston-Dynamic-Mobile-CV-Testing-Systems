@@ -66,6 +66,8 @@ class DatabaseWriter:
         compressed: bool,
         compression_method: str,
         sensor_type: str,
+        opcua_node_id: str,
+        aruco_id: int,
         category: str,
         quality: float,
         value: float,
@@ -81,12 +83,14 @@ class DatabaseWriter:
                 size, 
                 compressed, 
                 compression_method, 
-                sensor_type, 
+                sensor_type,
+                opcua_node_id,
+                aruco_id,
                 category, 
                 quality, 
                 value, 
                 unit)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         try:
@@ -103,6 +107,8 @@ class DatabaseWriter:
                         compressed,
                         compression_method,
                         sensor_type,
+                        opcua_node_id,
+                        aruco_id,
                         category,
                         quality,
                         value,

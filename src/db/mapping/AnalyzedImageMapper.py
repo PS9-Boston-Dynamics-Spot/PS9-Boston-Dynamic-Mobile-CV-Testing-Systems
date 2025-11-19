@@ -14,12 +14,14 @@ class AnalyzedImageDTO:
     bucket: str
     size: int
     sensor_type: str
+    aruco_id: int
     category: str
     quality: float
     value: float
     unit: str
     compressed: bool = False
     compression_method: Optional[str] = None
+    opcua_node_id: Optional[str] = None
 
     def __post_init__(self):
         not_null_fields = [
@@ -31,6 +33,7 @@ class AnalyzedImageDTO:
             "size",
             "content_type",
             "sensor_type",
+            "aruco_id",
             "category",
             "quality",
             "value",
@@ -75,6 +78,12 @@ class AnalyzedImageDTO:
         if not isinstance(self.sensor_type, str):
             raise TypeError("'sensor_type' must be a string")
 
+        if (not isinstance(self.opcua_node_id, str) and self.opcua_node_id is not None):
+            raise TypeError("'opcua_node_id' must be a string")
+
+        if not isinstance(self.aruco_id, int):
+            raise TypeError("'aruco_id' must be an integer")
+
         if not isinstance(self.category, str):
             raise TypeError("'category' must be a string")
 
@@ -103,6 +112,7 @@ class AnalyzedImageMapper:
         name: str,
         bucket: str,
         sensor_type: str,
+        aruco_id: int,
         category: str,
         quality: float,
         value: float,
@@ -112,6 +122,7 @@ class AnalyzedImageMapper:
         size: Optional[int] = None,
         compressed: bool = False,
         compression_method: Optional[str] = None,
+        opcua_node_id: Optional[str] = None,
     ) -> AnalyzedImageDTO:
 
         format = format or MapperHelper.guess_file_extension(image_data)
@@ -129,6 +140,8 @@ class AnalyzedImageMapper:
             compression_method=compression_method,
             content_type=content_type,
             sensor_type=sensor_type,
+            opcua_node_id=opcua_node_id,
+            aruco_id=aruco_id,
             category=category,
             quality=quality,
             value=value,

@@ -1,0 +1,6 @@
+overall_dict: DICT_6X6_1000
+
+nodes:
+  oven_node: 
+    opcua_node: 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
+    aruco_id: 46

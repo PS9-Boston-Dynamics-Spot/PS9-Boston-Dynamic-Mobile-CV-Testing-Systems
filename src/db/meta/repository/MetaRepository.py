@@ -52,6 +52,8 @@ class MetaRepository:
                 compressed=metadata.compressed,
                 compression_method=metadata.compression_method,
                 sensor_type=metadata.sensor_type,
+                opcua_node_id=metadata.opcua_node_id,
+                aruco_id=metadata.aruco_id,
                 category=metadata.category,
                 quality=metadata.quality,
                 value=metadata.value,
