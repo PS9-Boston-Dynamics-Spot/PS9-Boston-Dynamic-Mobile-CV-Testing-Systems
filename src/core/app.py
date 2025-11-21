@@ -4,6 +4,9 @@ from db.dal.DataAccessLayer import DataAccessLayer
 from db.mapping.RawImageMapper import RawImageMapper
 from db.mapping.AnalyzedImageMapper import AnalyzedImageMapper
 from configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
+from configs.reader.OPCUANodesConfigReader import OPCUANodesConfigReader
+from db.mapping.AnomalyMapper import AnomalyMapper
+
 
 if __name__ == "__main__":
     robot_config = BostonDynamicsConfigReader()
@@ -13,7 +16,7 @@ if __name__ == "__main__":
     print(robot_config.getWifi())
     print(robot_config.getPassword())
 
-    path = os.path.join(os.path.dirname(__file__), "OPCUA.png")
+    path = os.path.join(os.path.dirname(__file__), "OPCUA.jpeg")
     """    print(
         MediaRepository(bucket_name="ps9-analyzer-bucket").get_media(object_name="test")
     )
@@ -31,7 +34,7 @@ if __name__ == "__main__":
         raw_image_mapper = RawImageMapper()
 
         with DataAccessLayer() as dal:
-            image_name = "sensor_captasduasdasddasdsaaaasrzjtjkugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+            image_name = "sensasdor_casddasdsaaaasrzjtjkugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             dto_raw_image = raw_image_mapper.map_image(
                 image_data=image_bytes,
@@ -55,8 +58,26 @@ if __name__ == "__main__":
                 value=10.0,
                 unit="°C_2",
             )
-            result = dal.insert_analyzed_image(
+            analyzed_image_id = dal.insert_analyzed_image(
                 anaylzed_image_with_metadata=dto_analyzed_image
             )
-            print("Inserted both images:", id)
-    print("asd")
+
+            # get the aruco id through image extraction
+            aruco_id = 46
+            opcua_nodes_config_reader = OPCUANodesConfigReader()
+            #opcua_node_id = opcua_nodes_config_reader.getOPCUANodebyID(aruco_id=aruco_id)
+            opcua_node_id = 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
+
+            # TODO: check if value is an anomaly
+            #value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)
+
+            anomaly_mapper = AnomalyMapper()
+            anomaly_dto = anomaly_mapper.map_anomaly(
+                analyzed_image_id=analyzed_image_id,
+                detected_value=23.0,
+                comparative_value=24.0, # e.g. 1% tolerance
+                is_anomaly=False,
+                node_id=opcua_node_id
+            )
+
+            dal.insert_anomaly(anomaly_with_metadata=anomaly_dto)

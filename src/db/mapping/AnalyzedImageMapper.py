@@ -78,7 +78,7 @@ class AnalyzedImageDTO:
         if not isinstance(self.sensor_type, str):
             raise TypeError("'sensor_type' must be a string")
 
-        if (not isinstance(self.opcua_node_id, str) and self.opcua_node_id is not None):
+        if not isinstance(self.opcua_node_id, str) and self.opcua_node_id is not None:
             raise TypeError("'opcua_node_id' must be a string")
 
         if not isinstance(self.aruco_id, int):

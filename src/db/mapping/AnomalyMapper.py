@@ -46,7 +46,7 @@ class AnomalyDTO:
 
 class AnomalyMapper:
 
-    def map_image(
+    def map_anomaly(
         self,
         analyzed_image_id: int,
         detected_value: float,

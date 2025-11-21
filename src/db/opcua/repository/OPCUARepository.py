@@ -3,13 +3,14 @@ from db.opcua.exceptions.NodeNotFoundError import NodeNotFoundError
 from db.opcua.exceptions.ReaderError import ReaderError
 from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 
+
 class OPCUARepository:
     def __init__(self):
         self.reader = OPCUAReader()
 
     def get_node_value_by_id(self, opcua_node_id: str) -> float:
         try:
-           return self.reader.read_node(node_id=opcua_node_id)
+            return self.reader.read_node(node_id=opcua_node_id)
         except NodeNotFoundError as e:
             raise OPCUARepositoryError(exception=e, error_code=1763731210)
         except ReaderError as e:

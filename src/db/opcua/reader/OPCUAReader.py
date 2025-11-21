@@ -8,7 +8,9 @@ from db.opcua.exceptions.ReaderError import ReaderError
 class OPCUAReader:
     def __init__(self):
         self.opcua_connector = OPCUAConnector()
-        self.client = self.opcua_connector.connect()
+        # TODO: comment out
+        #self.client = self.opcua_connector.connect()
+
 
     def read_node(self, node_id: str) -> Any:
         try:

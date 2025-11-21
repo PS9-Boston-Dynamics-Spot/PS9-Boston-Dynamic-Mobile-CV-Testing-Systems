@@ -9,6 +9,7 @@ class OPCUA_NODES(str, Enum):
     OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
 
+
 class MINIO_BUCKETS(str, Enum):
     BUCKETS = "buckets"
     RAW_BUCKET = "raw_bucket"

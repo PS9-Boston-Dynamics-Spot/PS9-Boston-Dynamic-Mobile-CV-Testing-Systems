@@ -13,6 +13,7 @@ from db.mapping.RawImageMapper import RawImageDTO
 from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
 from db.mapping.AnomalyMapper import AnomalyDTO
 
+
 class DataAccessLayer:
     def __init__(self):
         pass
@@ -45,8 +46,7 @@ class DataAccessLayer:
             id, name = self.meta_repository.insert_raw_image_metadata(
                 metadata=raw_image_with_metadata
             )
-            print("ID: ", id)
-            print("Name: ", name)
+
             self.media_repository.put_media(
                 object_name=object_name,
                 image_data=raw_image_with_metadata.image_data,
@@ -62,7 +62,7 @@ class DataAccessLayer:
 
     def insert_analyzed_image(
         self, anaylzed_image_with_metadata: AnalyzedImageDTO
-    ) -> None:
+    ) -> id:
         try:
             self.media_repository = MediaRepository(
                 bucket_name=anaylzed_image_with_metadata.bucket
@@ -85,6 +85,8 @@ class DataAccessLayer:
                 content_type=anaylzed_image_with_metadata.content_type,
             )
 
+            return id
+
         except MetaRepositoryError as e:
             raise DataAccessLayerError(exception=e, error_code=1761932730)
         except MediaRepositoryError as e:
@@ -102,7 +104,9 @@ class DataAccessLayer:
 
     def get_value_from_opcua_node(self, opcua_node_id: str) -> Any:
         try:
-            return self.opcua_repository.get_node_value_by_id(opcua_node_id=opcua_node_id)
+            return self.opcua_repository.get_node_value_by_id(
+                opcua_node_id=opcua_node_id
+            )
         except OPCUARepositoryError as e:
             raise DataAccessLayerError(exception=e, error_code=1762858740)
         except Exception as e:
