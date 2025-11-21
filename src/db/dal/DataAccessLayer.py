@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any
 
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
@@ -7,6 +7,7 @@ from db.opcua.repository.OPCUARepository import OPCUARepository
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
+from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 
 from db.mapping.RawImageMapper import RawImageDTO
 from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
@@ -23,9 +24,6 @@ class DataAccessLayer:
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
-
-    def get_oven_temperature(self) -> float:
-        return self.opcua_repository.get_oven_temperature()
 
     def create_object_name(self, id: int, name: str, format: str) -> str:
         safe_name = name.replace(" ", "_").lower()
@@ -101,3 +99,11 @@ class DataAccessLayer:
             raise DataAccessLayerError(exception=e, error_code=1762882020)
         except Exception as e:
             raise DataAccessLayerError(exception=e, error_code=1762882030)
+
+    def get_value_from_opcua_node(self, opcua_node_id: str) -> Any:
+        try:
+            return self.opcua_repository.get_node_value_by_id(opcua_node_id=opcua_node_id)
+        except OPCUARepositoryError as e:
+            raise DataAccessLayerError(exception=e, error_code=1762858740)
+        except Exception as e:
+            raise DataAccessLayerError(exception=e, error_code=1762858750)

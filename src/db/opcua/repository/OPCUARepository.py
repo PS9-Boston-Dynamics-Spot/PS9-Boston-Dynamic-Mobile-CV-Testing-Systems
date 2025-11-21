@@ -1,12 +1,18 @@
 from db.opcua.reader.OPCUAReader import OPCUAReader
-from configs.reader.OPCUANodesConfigReader import OPCUANodesConfigReader
-
+from db.opcua.exceptions.NodeNotFoundError import NodeNotFoundError
+from db.opcua.exceptions.ReaderError import ReaderError
+from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 
 class OPCUARepository:
     def __init__(self):
         self.reader = OPCUAReader()
-        self.config_reader = OPCUANodesConfigReader()
 
-    def get_oven_temperature(self, node_id: str) -> float:
-        node_id = self.config_reader.getOvenNode()
-        return self.reader.read_node(node_id)
+    def get_node_value_by_id(self, opcua_node_id: str) -> float:
+        try:
+           return self.reader.read_node(node_id=opcua_node_id)
+        except NodeNotFoundError as e:
+            raise OPCUARepositoryError(exception=e, error_code=1763731210)
+        except ReaderError as e:
+            raise OPCUARepositoryError(exception=e, error_code=1763731220)
+        except Exception as e:
+            OPCUARepositoryError(exception=e, error_code=1763731230)
