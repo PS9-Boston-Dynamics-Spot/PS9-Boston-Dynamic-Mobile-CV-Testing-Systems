@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, Optional
 from db.mapping.MapperHelper import MapperHelper
+from common.conventions.ImageNames import ImageNames
 
 
 @dataclass
@@ -70,8 +71,8 @@ class RawImageMapper:
     def map_image(
         self,
         image_data: bytes,
-        name: str,
         bucket: str,
+        name: Optional[str] = None,
         format: Optional[str] = None,
         content_type: Optional[str] = None,
         size: Optional[int] = None,
@@ -82,6 +83,18 @@ class RawImageMapper:
         format = format or MapperHelper.guess_file_extension(image_data)
         content_type = content_type or MapperHelper.guess_content_type(image_data)
         size = size or MapperHelper.get_bytes_length(image_data)
+
+        if not name or name.strip() == "":
+            name = ImageNames.from_dict(
+                {
+                    "size": size,
+                    "format": format,
+                    "content_type": content_type,
+                    "bucket": bucket,
+                    "compressed": compressed,
+                    "hash": MapperHelper.sha256(image_data=image_data),
+                }
+            )
 
         dto = RawImageDTO(
             image_data=image_data,

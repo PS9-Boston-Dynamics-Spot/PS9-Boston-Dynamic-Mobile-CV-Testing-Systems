@@ -17,14 +17,6 @@ if __name__ == "__main__":
     print(robot_config.getPassword())
 
     path = os.path.join(os.path.dirname(__file__), "OPCUA.jpeg")
-    """    print(
-        MediaRepository(bucket_name="ps9-analyzer-bucket").get_media(object_name="test")
-    )
-    #MediaRepository(bucket_name="asd").put_media(object_name="test", file_path=path)
-    print(MediaRepository.get_buckets())
-    print(MediaRepository(bucket_name="ps9-analyzer-bucket").get_objects())
-    print(MediaRepository.get_everything_recursive())
-    """
     with open(path, "rb") as f:
         image_bytes = f.read()
         bucket_config_reader = MinioBucketConfigReader()
@@ -34,11 +26,8 @@ if __name__ == "__main__":
         raw_image_mapper = RawImageMapper()
 
         with DataAccessLayer() as dal:
-            image_name = "sensasdor_casddasdsaaaasrzjtjkugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
-
             dto_raw_image = raw_image_mapper.map_image(
                 image_data=image_bytes,
-                name=image_name,  # TODO: generate name automatically through uuid or hash
                 bucket=raw_bucket,
             )
 
@@ -48,7 +37,6 @@ if __name__ == "__main__":
             dto_analyzed_image = analyzed_image_mapper.map_image(
                 image_data=image_bytes,
                 raw_image_id=raw_image_id,
-                name=image_name,  # TODO: generate name automatically through uuid or hash
                 bucket=analyzed_bucket,
                 sensor_type="test2",
                 opcua_node_id="test_node",
