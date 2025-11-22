@@ -65,19 +65,19 @@ if __name__ == "__main__":
             # get the aruco id through image extraction
             aruco_id = 46
             opcua_nodes_config_reader = OPCUANodesConfigReader()
-            #opcua_node_id = opcua_nodes_config_reader.getOPCUANodebyID(aruco_id=aruco_id)
+            # opcua_node_id = opcua_nodes_config_reader.getOPCUANodebyID(aruco_id=aruco_id)
             opcua_node_id = 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
 
             # TODO: check if value is an anomaly
-            #value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)
+            # value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)
 
             anomaly_mapper = AnomalyMapper()
             anomaly_dto = anomaly_mapper.map_anomaly(
                 analyzed_image_id=analyzed_image_id,
                 detected_value=23.0,
-                comparative_value=24.0, # e.g. 1% tolerance
+                comparative_value=24.0,  # e.g. 1% tolerance
                 is_anomaly=False,
-                node_id=opcua_node_id
+                node_id=opcua_node_id,
             )
 
             dal.insert_anomaly(anomaly_with_metadata=anomaly_dto)
