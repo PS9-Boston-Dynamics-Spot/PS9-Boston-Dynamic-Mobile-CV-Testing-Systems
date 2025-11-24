@@ -6,6 +6,10 @@ class MINIO_BUCKETS(str, Enum):
     RAW_BUCKET = "raw_bucket"
     ANALYZED_BUCKET = "analyzed_bucket"
 
+    def __str__(self) -> str:
+        return self.value
+
+
 
 class SQLITE_KEYS(str, Enum):
     SQLITE = "sqlite"
@@ -17,14 +21,21 @@ class SQLITE_KEYS(str, Enum):
     CACHED_STATEMENTS = "cached_statements"
     URI = "uri"
 
+    def __str__(self) -> str:
+        return self.value
+
+
 
 class MINIO_KEYS(str, Enum):
     MINIO = "minio"
     HOST = "host"
     PORT = "port"
     ACCESS_KEY = "access_key"
-    SECRET_KEY = "secret_key"  # TODO: outsource into .env
     TLS = "tls"
+
+    def __str__(self) -> str:
+        return self.value
+
 
 
 class ROBOT_KEYS(str, Enum):
@@ -32,7 +43,10 @@ class ROBOT_KEYS(str, Enum):
     IP = "ip"
     WIFI = "wifi"
     USER = "user"
-    PASSWORD = "password"  # TODO: outsource into .env
+
+    def __str__(self) -> str:
+        return self.value
+
 
 
 class ConfigEnum(str, Enum):

@@ -1,6 +1,6 @@
 import ssl
 from minio import Minio
-from configs.reader.MinioConfigReader import MinioConfigReader
+from credentials.configs.reader.MinioConfigReader import MinioConfigReader
 from minio.error import S3Error
 from db.media.exceptions.MinioConnectionError import MinioConnectionError
 from db.media.exceptions.MinioInitError import MinioInitError

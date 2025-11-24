@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from configs.reader.SqliteConfigReader import SqliteConfigReader
+from credentials.configs.reader.SqliteConfigReader import SqliteConfigReader
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from typing import Optional, Literal
 import threading

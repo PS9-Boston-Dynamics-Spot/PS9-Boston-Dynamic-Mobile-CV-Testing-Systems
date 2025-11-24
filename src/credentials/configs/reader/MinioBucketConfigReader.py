@@ -1,6 +1,6 @@
 from typing import Optional
-from configs.loader.ConfigLoader import ConfigLoader
-from configs.enum.ConfigEnum import ConfigEnum, MINIO_BUCKETS
+from credentials.configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.enum.ConfigEnum import ConfigEnum, MINIO_BUCKETS
 
 
 class MinioBucketConfigReader(ConfigLoader):
