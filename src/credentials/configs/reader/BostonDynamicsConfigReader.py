@@ -1,6 +1,6 @@
 from typing import Optional
-from configs.loader.ConfigLoader import ConfigLoader
-from configs.enum.ConfigEnum import ConfigEnum, ROBOT_KEYS
+from credentials.configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.enum.ConfigEnum import ConfigEnum, ROBOT_KEYS
 
 
 class BostonDynamicsConfigReader(ConfigLoader):
@@ -22,8 +22,3 @@ class BostonDynamicsConfigReader(ConfigLoader):
 
     def getUser(self) -> Optional[str]:
         return self._getRobot().get(ROBOT_KEYS.USER)
-
-    def getPassword(self) -> Optional[str]:
-        return self._getRobot().get(
-            ROBOT_KEYS.PASSWORD
-        )  # TODO: outsource into a .env file (e.g. .env/robot-credentials.env)
