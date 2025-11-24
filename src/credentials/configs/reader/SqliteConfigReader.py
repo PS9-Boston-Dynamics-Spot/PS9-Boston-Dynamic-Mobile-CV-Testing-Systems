@@ -1,6 +1,6 @@
-from configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.loader.ConfigLoader import ConfigLoader
 from typing import Dict, Any, Optional
-from configs.enum.ConfigEnum import ConfigEnum, SQLITE_KEYS
+from credentials.configs.enum.ConfigEnum import ConfigEnum, SQLITE_KEYS
 
 
 class SqliteConfigReader(ConfigLoader):

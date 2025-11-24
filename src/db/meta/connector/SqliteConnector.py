@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from configs.reader.SqliteConfigReader import SqliteConfigReader
+from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from typing import Optional, Literal
 import threading
@@ -15,8 +15,8 @@ VALID_ISOLATION_LEVELS: set[IsolationLevel] = {
 
 
 class SqliteConnector:
-    _shared_connection = None  # zentrale, geteilte Verbindung
-    _lock = threading.Lock()  # Thread-Sicherheit
+    _shared_connection = None
+    _lock = threading.Lock()
 
     def __init__(self):
         if SqliteConnector._shared_connection is None:
@@ -26,10 +26,11 @@ class SqliteConnector:
     def _init_shared_connection(self):
         with SqliteConnector._lock:
             if SqliteConnector._shared_connection is not None:
-                return  # wurde schon initialisiert
+                return
 
-            config = SqliteConfigReader()
-            isolation_level = config.getIsolationLevel()
+            config_manager = UnifiedCredentialsManager()
+            credentials = config_manager.getDBCredentials()
+            isolation_level = credentials["isolation_level"]
 
             if isolation_level not in VALID_ISOLATION_LEVELS:
                 raise SqliteConnectionError(
@@ -38,13 +39,13 @@ class SqliteConnector:
                 )
 
             SqliteConnector._shared_connection = connect(
-                database=config.getDatabase(),
-                timeout=config.getTimeout(),
-                detect_types=config.getDetectTypes(),
+                database=credentials["database"],
+                timeout=credentials["timeout"],
+                detect_types=credentials["detect_types"],
                 isolation_level=isolation_level,
-                check_same_thread=config.getCheckSameThread(),
-                cached_statements=config.getCachedStatements(),
-                uri=config.getUri(),
+                check_same_thread=credentials["check_same_thread"],
+                cached_statements=credentials["cached_statements"],
+                uri=credentials["uri"],
             )
 
             print("SQLite shared connection established.")
