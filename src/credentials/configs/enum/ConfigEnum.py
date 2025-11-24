@@ -1,6 +1,14 @@
 from enum import Enum
 
 
+class OPCUA_NODES(str, Enum):
+    OVERALL_DICT = "overall_dict"
+
+    NODES = "nodes"
+    OVEN_NODE = "oven_node"
+    OPCUA_NODE = "opcua_node"
+    ARUCO_ID = "aruco_id"
+
 class MINIO_BUCKETS(str, Enum):
     BUCKETS = "buckets"
     RAW_BUCKET = "raw_bucket"
@@ -56,6 +64,7 @@ class ConfigEnum(str, Enum):
     MINIO_CONFIG = CONFIG_DIR + "minio-credentials.yaml"
     SQLITE_CONFIG = CONFIG_DIR + "sqlite-credentials.yaml"
     BUCKETS_CONFIG = CONFIG_DIR + "minio-buckets.yaml"
+    OPCUA_NODES_CONFIG = CONFIG_DIR + "opcua-nodes.yaml"
 
     def __str__(self) -> str:
         return self.value

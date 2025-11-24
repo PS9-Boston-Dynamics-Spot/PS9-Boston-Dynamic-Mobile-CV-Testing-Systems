@@ -1,3 +1,5 @@
+from typing import List
+
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
 
@@ -7,7 +9,6 @@ from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
 
 from db.mapping.RawImageMapper import RawImageDTO
 from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
-
 
 class DataAccessLayer:
     def __init__(self):

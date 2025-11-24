@@ -10,6 +10,7 @@ if __name__ == "__main__":
     settings_manager = UnifiedCredentialsManager()
     robot_settings = settings_manager.getRobotCredentials()
 
+<<<<<<< HEAD
     print(robot_settings)
 # 
 #     robot_config = BostonDynamicsConfigReader()
@@ -18,6 +19,10 @@ if __name__ == "__main__":
 #     print(robot_config.getUser())
 #     print(robot_config.getWifi())
 #     print(robot_config.getPassword())
+=======
+        with DataAccessLayer() as dal:
+            image_name = "sensor_captasduasdasddasdsaaaasrzjtjkugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+>>>>>>> main
 
 #     path = os.path.join(os.path.dirname(__file__), "OPCUA.png")
 #     """    print(
@@ -36,6 +41,7 @@ if __name__ == "__main__":
 
 #         raw_image_mapper = RawImageMapper()
 
+<<<<<<< HEAD
 #         with DataAccessLayer() as dal:
 #             image_name = "sensor_captasduasdasddfghasdsaaaasrzjtugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
@@ -64,3 +70,24 @@ if __name__ == "__main__":
 #             )
 #             print("Inserted both images:", id)
 #     print("asd")
+=======
+            analyzed_image_mapper = AnalyzedImageMapper()
+            dto_analyzed_image = analyzed_image_mapper.map_image(
+                image_data=image_bytes,
+                raw_image_id=raw_image_id,
+                name=image_name,  # TODO: generate name automatically through uuid or hash
+                bucket=analyzed_bucket,
+                sensor_type="test2",
+                opcua_node_id="test_node",
+                aruco_id=123,
+                category="test2",
+                quality=1.0,
+                value=10.0,
+                unit="°C_2",
+            )
+            result = dal.insert_analyzed_image(
+                anaylzed_image_with_metadata=dto_analyzed_image
+            )
+            print("Inserted both images:", id)
+    print("asd")
+>>>>>>> main
