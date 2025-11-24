@@ -28,6 +28,8 @@ class UnifiedCredentialsManager:
         if hasattr(self, "_initialized") and self._initialized:
             return
 
+        print("test")
+
         self._initialized = True
 
         self._minio_config_reader = minio_config_reader or MinioConfigReader()

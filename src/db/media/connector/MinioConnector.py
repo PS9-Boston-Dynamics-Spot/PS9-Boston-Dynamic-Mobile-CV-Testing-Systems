@@ -1,6 +1,6 @@
 import ssl
 from minio import Minio
-from credentials.configs.reader.MinioConfigReader import MinioConfigReader
+from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 from minio.error import S3Error
 from db.media.exceptions.MinioConnectionError import MinioConnectionError
 from db.media.exceptions.MinioInitError import MinioInitError
@@ -9,12 +9,13 @@ from db.media.exceptions.MinioInitError import MinioInitError
 class MinioConnector:
 
     def __init__(self):
-        self.minio_config_reader = MinioConfigReader()
-        self.host = self.minio_config_reader.getHost()
-        self.port = self.minio_config_reader.getPort()
-        self.access_key = self.minio_config_reader.getAccessKey()
-        self.secret_key = self.minio_config_reader.getSecretKey()
-        self.tls = self.minio_config_reader.getTls()
+        self.credentials_manager = UnifiedCredentialsManager()
+        self.credentials = self.credentials_manager.getMinioCredentials()
+        self.host = self.credentials["host"]
+        self.port = self.credentials["port"]
+        self.access_key = self.credentials["access_key"]
+        self.secret_key = self.credentials["secret_key"]
+        self.tls = self.credentials["tls"]
 
         if not self.tls:
             self.tls = False
