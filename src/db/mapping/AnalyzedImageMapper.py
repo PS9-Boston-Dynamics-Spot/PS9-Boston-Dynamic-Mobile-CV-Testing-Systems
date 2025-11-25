@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict
 from typing import Any, Dict, Optional
 from db.mapping.MapperHelper import MapperHelper
 from common.conventions.ImageNames import ImageNames
-
+from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 
 @dataclass
 class AnalyzedImageDTO:
@@ -106,17 +106,17 @@ class AnalyzedImageDTO:
 
 class AnalyzedImageMapper:
 
+    @staticmethod
     def map_image(
-        self,
         image_data: bytes,
         raw_image_id: int,
-        bucket: str,
         sensor_type: str,
         aruco_id: int,
         category: str,
         quality: float,
         value: float,
         unit: str,
+        bucket: Optional[str] = None,
         name: Optional[str] = None,
         format: Optional[str] = None,
         content_type: Optional[str] = None,
@@ -129,6 +129,7 @@ class AnalyzedImageMapper:
         format = format or MapperHelper.guess_file_extension(image_data)
         content_type = content_type or MapperHelper.guess_content_type(image_data)
         size = size or MapperHelper.get_bytes_length(image_data)
+        bucket = bucket or UnifiedCredentialsManager().getMinioAnalyzedBucket()
 
         if not name or name.strip() == "":
             name = ImageNames.from_dict(

@@ -1,8 +1,8 @@
 from typing import Optional
-from configs.loader.ConfigLoader import ConfigLoader
-from configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
-from configs.exceptions.MultipleIDsError import MultipleIDsError
-from configs.exceptions.NodeDoesNotExistError import NodeDoesNotExistError
+from credentials.configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
+from credentials.configs.exceptions.MultipleIDsError import MultipleIDsError
+from credentials.configs.exceptions.NodeDoesNotExistError import NodeDoesNotExistError
 
 
 class OPCUANodesConfigReader(ConfigLoader):
@@ -20,7 +20,7 @@ class OPCUANodesConfigReader(ConfigLoader):
             return {}
         return value
 
-    def getOPCUANodebyID(self, aruco_id: int) -> Optional[str]:
+    def getOPCUANodeByID(self, aruco_id: int) -> Optional[str]:
         nodes = self._getNodes()
         result = []
 
@@ -31,7 +31,7 @@ class OPCUANodesConfigReader(ConfigLoader):
         if len(result) > 1:
             raise MultipleIDsError(error_code=1763491580, nodes=result, id=aruco_id)
 
-        if len(result) <= 1:
+        if len(result) < 1:
             raise NodeDoesNotExistError(error_code=1763729190, aruco_id=aruco_id)
 
         return result[0]

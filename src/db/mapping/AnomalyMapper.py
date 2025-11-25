@@ -46,8 +46,8 @@ class AnomalyDTO:
 
 class AnomalyMapper:
 
+    @staticmethod
     def map_anomaly(
-        self,
         analyzed_image_id: int,
         detected_value: float,
         comparative_value: float,

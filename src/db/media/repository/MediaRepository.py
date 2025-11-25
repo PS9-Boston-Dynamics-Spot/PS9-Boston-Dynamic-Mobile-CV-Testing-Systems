@@ -5,9 +5,6 @@ from db.media.exceptions.MinioWriterError import MinioWriterError
 from db.media.exceptions.BucketInitializerError import BucketInitializerError
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
 
-from db.media.read.MinioReader import MinioReader
-from db.media.exceptions.MinioReaderError import MinioReaderError
-
 
 class MediaRepository:
     def __init__(self, bucket_name: str):
@@ -37,13 +34,3 @@ class MediaRepository:
             raise MediaRepositoryError(exception=e, error_code=1761332280)
         except Exception as e:
             raise MediaRepositoryError(exception=e, error_code=1761332290)
-
-    def get_media(self, object_name: str) -> bytes:
-        try:
-            with MinioReader(self.bucket_name) as minio:
-                return minio.get_media(object_name=object_name)
-        except MinioReaderError as e:
-            # TODO: Improve error handling, e.g. try again?
-            raise MediaRepositoryError(exception=e, error_code=1763314050)
-        except Exception as e:
-            raise MediaRepositoryError(exception=e, error_code=1763314060)
