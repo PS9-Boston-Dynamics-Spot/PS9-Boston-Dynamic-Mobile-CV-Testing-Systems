@@ -25,14 +25,14 @@ if __name__ == "__main__":
 
             dto_raw_image = raw_image_mapper.map_image(
                 image_data=image_bytes,
-                size=122212123323
+                size=122212123423323
             )
             raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
 
             dto_analyzed_image = analyzed_image_mapper.map_image(
                 image_data=image_bytes,
                 raw_image_id=raw_image_id,
-                sensor_type="testasd2s",
+                sensor_type="testassdfd2s",
                 opcua_node_id="test_node",
                 aruco_id=123,
                 category="tes1tdsa2dsss",

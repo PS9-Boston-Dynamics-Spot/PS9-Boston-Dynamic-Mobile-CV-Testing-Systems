@@ -92,3 +92,6 @@ class UnifiedCredentialsManager:
     
     def getOPCUANodeByID(self, aruco_id: int) -> dict[str, Any]:
         return self._opcua_nodes_config_reader.getOPCUANodeByID(aruco_id=aruco_id)
+    
+    def getValueRange(self, aruco_id: int) -> tuple[Optional[str], Optional[str]]:
+        return self._opcua_nodes_config_reader.getValueRange(aruco_id=aruco_id)

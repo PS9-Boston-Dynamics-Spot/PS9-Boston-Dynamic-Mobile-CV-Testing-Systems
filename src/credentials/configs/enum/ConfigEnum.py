@@ -8,6 +8,8 @@ class OPCUA_NODES(str, Enum):
     OVEN_NODE = "oven_node"
     OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
+    MIN_VALUE = "min_value"
+    MAX_VALUE = "max_value"
 
 
 class MINIO_BUCKETS(str, Enum):
