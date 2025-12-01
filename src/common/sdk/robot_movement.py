@@ -1027,16 +1027,16 @@ def main():
                 time.sleep(3)
                 robot_state = rc.state_client.get_robot_state()
 
-                # Navigation zu Waypoint
-                print("Setze Location")
-                navigation._set_initial_localization_fiducial()
-                print("Gehe zu Location")
-                navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
-                navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint 17
-                # navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="])  # waypoint 2
-                navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
-                # Prüfen, ob Waypoint erreicht wurde
-                nav_state = navigation._check_success()
+                # # Navigation zu Waypoint
+                # print("Setze Location")
+                # navigation._set_initial_localization_fiducial()
+                # print("Gehe zu Location")
+                # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
+                # navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint 17
+                # # navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="])  # waypoint 2
+                # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
+                # # Prüfen, ob Waypoint erreicht wurde
+                # nav_state = navigation._check_success()
                 
                 
                 
@@ -1071,20 +1071,20 @@ def main():
 
 
 
-                
-                if reached:
-                    print("Letzter Waypoint erreicht – starte Docking…")
+                # Geht nicht 
+                # if reached:
+                #     print("Letzter Waypoint erreicht – starte Docking…")
 
-                    #  Dock-ID 
-                    DOCK_ID = 520      
+                #     #  Dock-ID 
+                #     DOCK_ID = 520      
 
-                    try:
-                        rc.dock(DOCK_ID)
-                        print("Docking erfolgreich!")
-                    except Exception as e:
-                        print(f"Docking fehlgeschlagen: {e}")
-                else:
-                    print("Waypoint NICHT erreicht – Docking wird abgebrochen.")
+                #     try:
+                #         rc.dock(DOCK_ID)
+                #         print("Docking erfolgreich!")
+                #     except Exception as e:
+                #         print(f"Docking fehlgeschlagen: {e}")
+                # else:
+                #     print("Waypoint NICHT erreicht – Docking wird abgebrochen.")
 
 
                 if 1==2:
@@ -1115,7 +1115,7 @@ def main():
                     x, y, z = 0.6, 0.0, 0.4
 
                     # Keine Drehung (Einheitsquaternion)
-                    qw, qx, qy, qz = 1.0, 0.0, 0.0, 0.0
+                    qw, qx, qy, qz = 0.0, 0.0, 0.0, 0.0
 
                     command = RobotCommandBuilder.arm_pose_command(
                         x, y, z,
@@ -1146,7 +1146,7 @@ def main():
                     image_request = build_image_request(
                         'hand_color_image',
                         quality_percent=100,  # Maximum quality
-                        image_format=image_pb2.Image.FORMAT_JPEG,
+                        image_format=image_pb2.Image.FORMAT_RAW,
                         resize_ratio=1.0  # No downsampling
                     )
 
