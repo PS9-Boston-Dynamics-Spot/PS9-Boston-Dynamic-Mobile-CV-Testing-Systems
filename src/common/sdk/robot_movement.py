@@ -1029,7 +1029,6 @@ def main():
 
                 # Navigation zu Waypoint
                 print("Setze Location")
-                #navigation._set_initial_localization_waypoint(["must-crow-7qJx3biOfsnVCoqP.NkzYg=="])
                 navigation._set_initial_localization_fiducial()
                 print("Gehe zu Location")
                 navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
@@ -1042,10 +1041,12 @@ def main():
                 
                 
                 # Wir setzen reached zum test mal auf true
+
+                #Funktioniert so nicht
                 # reached = nav_state if isinstance(nav_state, bool) else True
+                reached = False
 
-                reached = True
-
+                #Funktioniert so nicht
                 #print("Starte Navigation der Route")
                 # Definieren Sie die Route als Liste von Waypoint-Namen/IDs
                 #waypoint_route = [
@@ -1106,11 +1107,6 @@ def main():
 
                     time.sleep(3)  # Warten, damit Spot die Armbewegung abschließt
 
-                    # 2. Greifer schließen (z.B. greifen)
-                    #print("Greifer schließt...")
-                    #command = RobotCommandBuilder.claw_grasp_command()
-                    #rc.command_client.robot_command(command)
-                    #time.sleep(2)  # Warten, bis Greifer schließt
 
                     # 3. Arm bewegen (z.B. hochheben oder vorziehen)
                     print("Arm wird leicht nach vorne oben bewegt...")
@@ -1141,6 +1137,7 @@ def main():
                     # Quelle: Handkamera im Greifarm
                     HAND_CAMERA_SOURCE = 'hand_color_image'
 
+                    #Alt
                     # 1. Bild einmalig vom Roboter abrufen
                     #image_response = rc.image_client.get_image_from_sources([HAND_CAMERA_SOURCE])[0]
 
