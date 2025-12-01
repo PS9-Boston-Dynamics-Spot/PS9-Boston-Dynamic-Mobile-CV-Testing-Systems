@@ -7,7 +7,6 @@ from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsMana
 
 if __name__ == "__main__":
 
-
     settings_manager = UnifiedCredentialsManager()
     robot_settings = settings_manager.getRobotCredentials()
     print(robot_settings)
@@ -22,7 +21,6 @@ if __name__ == "__main__":
     print("score_function", score_function(12))
     print("score_function", score_function(13))
     print("score_function", score_function(14))
-    print("parameters", settings_manager.getParameters(aruco_id=46))
     print("safe_range", settings_manager.getSafeRange(aruco_id=46))
     print("uncertain_range", settings_manager.getUncertainRange(aruco_id=46))
     print("anomaly_range", settings_manager.getAnomalyRange(aruco_id=46))
@@ -40,8 +38,7 @@ if __name__ == "__main__":
             image_name = "sensor_captasduasdasddfghasdsaaaasrzjtugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             dto_raw_image = raw_image_mapper.map_image(
-                image_data=image_bytes,
-                size=122212123423323
+                image_data=image_bytes, size=122212123423323
             )
             raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
 
@@ -72,10 +69,10 @@ if __name__ == "__main__":
             #                                                                                                                       #
             # get comparative value from opcua (digital value)                                                                      #
             # value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)                                                    #
-            #                                                                                                                       #  
+            #                                                                                                                       #
             # extract value from image (analog value)                                                                               #
             # do something ...                                                                                                      #
-            #                                                                                                                       #                                     
+            #                                                                                                                       #
             # get comparative value from config file (analog value)                                                                 #
             # value = settings_manager.getAnalogComparativeValue(aruco_id=aruco_id)                                                 #
             #########################################################################################################################

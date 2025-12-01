@@ -10,7 +10,7 @@ class OPCUAConnector:
     def __init__(self):
         self.credentials_manager = UnifiedCredentialsManager()
         self.opcua_credentials = self.credentials_manager.getOPCUACredentials()
-        
+
         self.ip = self.opcua_credentials["ip"]
         self.port = self.opcua_credentials["port"]
         self.protocol = self.opcua_credentials["protocol"]

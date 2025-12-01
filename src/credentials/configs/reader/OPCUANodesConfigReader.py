@@ -21,7 +21,7 @@ class OPCUANodesConfigReader(ConfigLoader):
         if not isinstance(value, dict):
             return {}
         return value
-    
+
     def _findNodeByID(self, aruco_id: int) -> Dict[str, Dict[str, Any]]:
         nodes = self._getNodes()
 
@@ -33,16 +33,11 @@ class OPCUANodesConfigReader(ConfigLoader):
 
         if len(matched_nodes) > 1:
             raise MultipleIDsError(
-                error_code=1763491580,
-                nodes=list(matched_nodes.keys()),
-                id=aruco_id
+                error_code=1763491580, nodes=list(matched_nodes.keys()), id=aruco_id
             )
 
         if len(matched_nodes) < 1:
-            raise NodeDoesNotExistError(
-                error_code=1763729190,
-                aruco_id=aruco_id
-            )
+            raise NodeDoesNotExistError(error_code=1763729190, aruco_id=aruco_id)
 
         node_props = next(iter(matched_nodes.values()))
         return node_props
@@ -50,31 +45,51 @@ class OPCUANodesConfigReader(ConfigLoader):
     def getOPCUANodeByID(self, aruco_id: int) -> Optional[str]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node[OPCUA_NODES.OPCUA_NODE]
-    
+
     def __getScoreFunction(self, aruco_id: int) -> Optional[str]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node.get(OPCUA_NODES.SCORE_FUNCTION)
-    
-    def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
-    
-        score_function_str = self.__getScoreFunction(aruco_id=aruco_id)
-        parameters = self.getParameters(aruco_id=aruco_id)
 
-        return lambda x: eval(score_function_str, {"exp": math.exp, "pow": math.pow, **parameters, "x": x})
-    
-    def getParameters(self, aruco_id: int) -> Optional[dict]:
+    def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
+
+        score_function_str = self.__getScoreFunction(aruco_id=aruco_id)
+        parameters = self.__getParameters(aruco_id=aruco_id)
+
+        return lambda x: eval(
+            score_function_str, {"exp": math.exp, "pow": math.pow, **parameters, "x": x}
+        )
+
+    def __getParameters(self, aruco_id: int) -> Optional[dict]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
+
+        if matched_node.get(OPCUA_NODES.PARAMETERS) is None:
+            return {}
+
+        min_value = matched_node.get(OPCUA_NODES.PARAMETERS).get(OPCUA_NODES.MIN_VALUE)
+        max_value = matched_node.get(OPCUA_NODES.PARAMETERS).get(OPCUA_NODES.MAX_VALUE)
+
+        if min_value > max_value:
+            raise MinMaxValueError(
+                error_code=1764624580,
+                node=matched_node.get(OPCUA_NODES.OPCUA_NODE),
+                id=aruco_id,
+                min_value=min_value,
+                max_value=max_value,
+            )
+
         return matched_node.get(OPCUA_NODES.PARAMETERS)
 
     def _getRiskManagement(self, aruco_id: int) -> dict:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node.get(OPCUA_NODES.RISK_MANAGEMENT)
-    
+
     def getSafeRange(self, aruco_id: int) -> Optional[float]:
         return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.SAFE_RANGE)
-    
+
     def getUncertainRange(self, aruco_id: int) -> Optional[float]:
-        return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.UNCERTAIN_RANGE)
-    
+        return self._getRiskManagement(aruco_id=aruco_id).get(
+            OPCUA_NODES.UNCERTAIN_RANGE
+        )
+
     def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
         return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.ANOMALY_RANGE)

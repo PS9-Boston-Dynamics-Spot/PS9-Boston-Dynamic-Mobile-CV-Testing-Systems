@@ -4,6 +4,7 @@ from db.mapping.MapperHelper import MapperHelper
 from common.conventions.ImageNames import ImageNames
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 
+
 @dataclass
 class AnalyzedImageDTO:
 

@@ -12,7 +12,7 @@ nodes:
     score_function: !!str '1 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
     parameters:
       min_value: !!float 15.0 # Untere harte Grenze des Normalbereichs (ab hier = Score 1.0)
-      max_value: !!float 50.0 # Obere harte Grenze des Normalbereichs (bis hier = Score 1.0)
+      max_value: !!float 15.0 # Obere harte Grenze des Normalbereichs (bis hier = Score 1.0)
       min_score: !!float 0.0 # Minimaler Score, den die Funktion asymptotisch erreicht (nie unter diesen Wert)
       left_scale: !!float 7.0 # Steilheit des Abfalls unterhalb von min_value (größer = weicher Übergang)
       left_power: !!float 2.0 # Form des Abfalls links (1 = exponentiell, 2 = glockenartig, >2 = noch härter)

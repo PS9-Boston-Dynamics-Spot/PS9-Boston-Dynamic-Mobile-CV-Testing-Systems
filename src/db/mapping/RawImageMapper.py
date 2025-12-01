@@ -86,7 +86,6 @@ class RawImageMapper:
         size = size or MapperHelper.get_bytes_length(image_data)
         bucket = bucket or UnifiedCredentialsManager().getMinioRawBucket()
 
-
         if not name or name.strip() == "":
             name = ImageNames.from_dict(
                 {

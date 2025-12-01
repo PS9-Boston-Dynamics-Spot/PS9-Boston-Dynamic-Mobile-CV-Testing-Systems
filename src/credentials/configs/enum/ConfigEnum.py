@@ -5,12 +5,13 @@ class OPCUA_NODES(str, Enum):
     OVERALL_DICT = "overall_dict"
 
     NODES = "nodes"
-    OVEN_NODE = "oven_node"
     OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
-    
+
     SCORE_FUNCTION = "score_function"
     PARAMETERS = "parameters"
+    MIN_VALUE = "min_value"
+    MAX_VALUE = "max_value"
 
     RISK_MANAGEMENT = "risk_management"
     SAFE_RANGE = "safe_range"
@@ -28,7 +29,6 @@ class MINIO_BUCKETS(str, Enum):
 
     def __str__(self) -> str:
         return self.value
-
 
 
 class OPCUA_KEYS(str, Enum):
@@ -53,7 +53,6 @@ class SQLITE_KEYS(str, Enum):
         return self.value
 
 
-
 class MINIO_KEYS(str, Enum):
     MINIO = "minio"
     HOST = "host"
@@ -65,7 +64,6 @@ class MINIO_KEYS(str, Enum):
         return self.value
 
 
-
 class ROBOT_KEYS(str, Enum):
     ROBOT = "robot"
     IP = "ip"
@@ -74,7 +72,6 @@ class ROBOT_KEYS(str, Enum):
 
     def __str__(self) -> str:
         return self.value
-
 
 
 class ConfigEnum(str, Enum):

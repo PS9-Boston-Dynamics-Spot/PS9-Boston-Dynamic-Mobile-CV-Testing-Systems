@@ -3,7 +3,9 @@ from common.exceptions.BaseAppException import BaseAppException
 
 class MinMaxValueError(BaseAppException):
 
-    def __init__(self, error_code: int, node: str, id: int, min_value: float, max_value: float):
+    def __init__(
+        self, error_code: int, node: str, id: int, min_value: float, max_value: float
+    ):
         self.error_code = error_code
         self.node = node
         self.id = id
