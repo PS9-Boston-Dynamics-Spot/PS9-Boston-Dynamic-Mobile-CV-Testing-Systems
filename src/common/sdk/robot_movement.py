@@ -376,7 +376,7 @@ class RobotController:
             print('Missing dependencies. Can\'t save image.')
             return
         name = 'hello-spot-img.jpg'
-        print(len(image.shot.image.data), 'bytes received')
+        # print(len(image.shot.image.data), 'bytes received')
         if path is not None and os.path.exists(path):
             path = os.path.join(os.getcwd(), path)
             name = os.path.join(path, name)
@@ -401,7 +401,7 @@ class RobotController:
         
         # 1. Client initialisieren
         try:
-            gripper_camera_param_client = robot.ensure_client(
+            gripper_camera_param_client = self.robot.ensure_client(
                 GripperCameraParamClient.default_service_name
             )
         except Exception as e:
@@ -1181,7 +1181,7 @@ def main():
                     x, y, z = 0.6, 0.0, 0.4
 
                     # Keine Drehung (Einheitsquaternion)
-                    qw, qx, qy, qz = 0.0, 0.0, 0.0, 0.0
+                    qw, qx, qy, qz = 1.0, 0.0, 0.0, 0.0
 
                     command = RobotCommandBuilder.arm_pose_command(
                         x, y, z,
@@ -1219,11 +1219,17 @@ def main():
                         image_format=image_pb2.Image.FORMAT_JPEG,
                         resize_ratio=1.0  # No downsampling
                     )
+                    
+                    print("image_request")
 
                     # Request the image
                     image_response = rc.image_client.get_image([image_request])[0]
                     
+                    print("image_response")
+
                     rc.maybe_save_image(image_response.shot.image, path=None)
+
+                    print("maybe_save_image")
 
                     print("Bild erfolgreich gespeichert")
 
