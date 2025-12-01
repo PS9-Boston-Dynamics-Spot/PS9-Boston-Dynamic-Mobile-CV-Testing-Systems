@@ -60,7 +60,7 @@ from bosdyn.client.gripper_camera_param import GripperCameraParamClient
 from google.protobuf import wrappers_pb2
 
 import sys
-
+import datetime
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -375,8 +375,10 @@ class RobotController:
         except ImportError:
             print('Missing dependencies. Can\'t save image.')
             return
-        name = 'hello-spot-img.jpg'
-        # print(len(image.shot.image.data), 'bytes received')
+
+        # Format: YYYYMMDD_HHmmss (z.B. 20251201_172530)
+        now_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        name = 'spot-img-' + now_str + '.jpg'
         if path is not None and os.path.exists(path):
             path = os.path.join(os.getcwd(), path)
             name = os.path.join(path, name)
@@ -409,10 +411,8 @@ class RobotController:
             return False
 
         # 2. Parameter festlegen (Hardcoded für 4K und AUTO)
-        
-        # Höchste verfügbare Auflösung (4208x3120)
-        camera_mode = gripper_camera_param_pb2.GripperCameraParams.MODE_4208_3120
-        print(f"Setze Auflösung auf: 4208x3120")
+        camera_mode = gripper_camera_param_pb2.GripperCameraParams.MODE_4096_2160
+        print(f"Setze Auflösung auf: 4096x2160")
 
         # Auto-Fokus aktivieren
         auto_focus = wrappers_pb2.BoolValue(value=True)
@@ -1198,20 +1198,8 @@ def main():
                     rc.command_client.robot_command(command)
                     time.sleep(2)
 
-
-                    rc.set_high_res_auto_params()
-
-
                     # Bild aufnehmen
-                    # Ein einzelnes Bild abrufen
-                    # Quelle: Handkamera im Greifarm
-                    HAND_CAMERA_SOURCE = 'hand_color_image'
-
-                    #Alt
-                    # 1. Bild einmalig vom Roboter abrufen
-                    #image_response = rc.image_client.get_image_from_sources([HAND_CAMERA_SOURCE])[0]
-
-                    
+                    rc.set_high_res_auto_params()
 
                     image_request = build_image_request(
                         'hand_color_image',
@@ -1219,18 +1207,10 @@ def main():
                         image_format=image_pb2.Image.FORMAT_JPEG,
                         resize_ratio=1.0  # No downsampling
                     )
-                    
-                    print("image_request")
 
                     # Request the image
                     image_response = rc.image_client.get_image([image_request])[0]
-                    
-                    print("image_response")
-
                     rc.maybe_save_image(image_response.shot.image, path=None)
-
-                    print("maybe_save_image")
-
                     print("Bild erfolgreich gespeichert")
 
 
