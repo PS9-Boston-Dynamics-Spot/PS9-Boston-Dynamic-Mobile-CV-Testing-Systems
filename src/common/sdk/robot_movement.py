@@ -433,7 +433,7 @@ class GraphNavInterface(object):
     """Graph nav utility functions"""
 
 
-    def id_to_short_code(id):
+    def id_to_short_code(self, id):
         """Convert a unique id to a 2 letter short code."""
         tokens = id.split('-')
         if len(tokens) > 2:
@@ -441,8 +441,8 @@ class GraphNavInterface(object):
         return None
 
 
-    def pretty_print_waypoints(waypoint_id, waypoint_name, short_code_to_count, localization_id):
-        short_code = id_to_short_code(waypoint_id)
+    def pretty_print_waypoints(self, waypoint_id, waypoint_name, short_code_to_count, localization_id):
+        short_code = self.id_to_short_code(waypoint_id)
         if short_code is None or short_code_to_count[short_code] != 1:
             short_code = '  '  # If the short code is not valid/unique, don't show it.
 
@@ -478,14 +478,14 @@ class GraphNavInterface(object):
 
         ret = short_code
         for waypoint in graph.waypoints:
-            if short_code == id_to_short_code(waypoint.id):
+            if short_code == self.id_to_short_code(waypoint.id):
                 if ret != short_code:
                     return short_code  # Multiple waypoints with same short code.
                 ret = waypoint.id
         return ret
 
 
-    def update_waypoints_and_edges(graph, localization_id, do_print=True):
+    def update_waypoints_and_edges(self, graph, localization_id, do_print=True):
         """Update and print waypoint ids and edge ids."""
         name_to_id = dict()
         edges = dict()
@@ -504,7 +504,7 @@ class GraphNavInterface(object):
             waypoint_to_timestamp.append((waypoint.id, timestamp, waypoint.annotations.name))
 
             # Determine how many waypoints have the same short code.
-            short_code = id_to_short_code(waypoint.id)
+            short_code = self.id_to_short_code(waypoint.id)
             if short_code not in short_code_to_count:
                 short_code_to_count[short_code] = 0
             short_code_to_count[short_code] += 1
@@ -879,10 +879,25 @@ class GraphNavInterface(object):
 
         # Power off the robot if appropriate.
         if self.rc._powered_on and not self.rc._started_powered_on:
-            self.rc.toggle_power(should_power_on=False)
-
+            #self.rc.toggle_power(should_power_on=False)
+            print("Lege hin")
         # Neu hinzufügen: Rückgabewert True/False für erfolgreiche Navigation
         return self._check_success(nav_to_cmd_id)
+
+    def _match_edge(self, current_edges, waypoint1, waypoint2):
+        """Find an edge in the graph that is between two waypoint ids."""
+        # Return the correct edge id as soon as it's found.
+        for edge_to_id in current_edges:
+            for edge_from_id in current_edges[edge_to_id]:
+                if (waypoint1 == edge_to_id) and (waypoint2 == edge_from_id):
+                    # This edge matches the pair of waypoints! Add it the edge list and continue.
+                    return map_pb2.Edge.Id(from_waypoint=waypoint2, to_waypoint=waypoint1)
+                elif (waypoint2 == edge_to_id) and (waypoint1 == edge_from_id):
+                    # This edge matches the pair of waypoints! Add it the edge list and continue.
+                    return map_pb2.Edge.Id(from_waypoint=waypoint1, to_waypoint=waypoint2)
+        return None
+
+
 
     def _navigate_route(self, *args):
         """Navigate through a specific route of waypoints."""
@@ -890,14 +905,19 @@ class GraphNavInterface(object):
             # If no waypoint ids are given as input, then return without requesting navigation.
             print('No waypoints provided for navigate route.')
             return
-        waypoint_ids = args[0]
-        for i in range(len(waypoint_ids)):
-            waypoint_ids[i] = self.find_unique_waypoint_id(
-                waypoint_ids[i], self._current_graph, self._current_annotation_name_to_wp_id)
-            if not waypoint_ids[i]:
-                # Failed to find the unique waypoint id.
-                return
+        waypoint_ids = list(args[0])
 
+        resolved_waypoint_ids = []
+        for i in range(len(waypoint_ids)):
+            resolved_id = self.find_unique_waypoint_id(
+                waypoint_ids[i], self._current_graph, self._current_annotation_name_to_wp_id)
+            if not resolved_id:
+                # Failed to find the unique waypoint id.
+                print(f"Fehler: Waypoint-ID für '{waypoint_ids[i]}' konnte nicht aufgelöst werden.")
+                return False  # Navigation wird abgebrochen
+            resolved_waypoint_ids.append(resolved_id)
+            
+        waypoint_ids = resolved_waypoint_ids
         edge_ids_list = []
         all_edges_found = True
         # Attempt to find edges in the current graph that match the ordered waypoint pairs.
@@ -1012,13 +1032,42 @@ def main():
                 #navigation._set_initial_localization_waypoint(["must-crow-7qJx3biOfsnVCoqP.NkzYg=="])
                 navigation._set_initial_localization_fiducial()
                 print("Gehe zu Location")
-                navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint name
-                navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="])  # waypoint name
-
-
+                navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
+                navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint 17
+                # navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="])  # waypoint 2
+                navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
                 # Prüfen, ob Waypoint erreicht wurde
                 nav_state = navigation._check_success()
-                reached = nav_state if isinstance(nav_state, bool) else True
+                
+                
+                
+                # Wir setzen reached zum test mal auf true
+                # reached = nav_state if isinstance(nav_state, bool) else True
+
+                reached = True
+
+                #print("Starte Navigation der Route")
+                # Definieren Sie die Route als Liste von Waypoint-Namen/IDs
+                #waypoint_route = [
+                #     "fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ==",
+                #     "pulpy-oryx-t4DKvizO9AxYUnF9VdcHPA==",
+                #     "snuffed-giant-ne3n2OhXIGj.qckq4DsUTw==",
+                #     "nifty-canine-JpIqR470bflH8VGAxXVwbg==",
+                #     "pudgy-larva-V2DpDr.8zc3kp6hd6of6jg==",
+                #     "manic-poodle-g45pwx1WO21S5cdyZ4YnUQ==",
+                #     "ferned-cuscus-zhY2vevTJdyiYi6t6ki8tg==",
+                #     "tinpot-raven-ayB1AFAv+DPCU4mfiFg.cw==",
+                #     "bared-anole-D7tcRCPS16tvo8O8JgDN8w==",
+                #     "broke-cod-BzH47.UlGW9XTkSovzVgfQ==",
+                #     "six-yak-eXnqD2F5SPqQLLMgTEAGEA==",
+                #     "must-crow-7qJx3biOfsnVCoqP.NkzYg==", # Weiterer Waypoint (Edge von six-yak)
+                #     "yelled-pincer-yvVnucpX.9sRSMDZDXC3Zg==", # Weiterer Waypoint (Edge von must-crow)
+                #     "soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="
+                # ]
+                # Führen Sie die Routennavigation durch und speichern Sie das Ergebnis
+                #reached = navigation._navigate_route(waypoint_route)
+
+
 
 
                 
