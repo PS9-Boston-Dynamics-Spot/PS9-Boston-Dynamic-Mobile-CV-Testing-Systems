@@ -55,8 +55,9 @@ from bosdyn.client.docking import DockingClient
 
 from bosdyn.client.frame_helpers import VISION_FRAME_NAME, get_vision_tform_body
 
-
-
+from bosdyn.api import gripper_camera_param_pb2, header_pb2
+from bosdyn.client.gripper_camera_param import GripperCameraParamClient
+from google.protobuf import wrappers_pb2
 
 import sys
 
@@ -88,6 +89,7 @@ class RobotController:
 
         self.dock_client: DockingClient = robot.ensure_client(DockingClient.default_service_name)
 
+        self.gripper_camera_param_client: GripperCameraParamClient = robot.ensure_client(GripperCameraParamClient.default_service_name)
 
         # Power-State merken
         power_state = self.state_client.get_robot_state().power_state
@@ -363,7 +365,7 @@ class RobotController:
         cmd = RobotCommandBuilder.gripper_close_command()
         self.command_client(cmd)
 
-
+    ##Image Section
     def maybe_save_image(self, image, path):
         """Try to save image, if client has correct deps."""
         try:
@@ -389,6 +391,70 @@ class RobotController:
             
             print('Exception thrown saving image. %r', exc)
 
+    
+    def set_high_res_auto_params(self):
+        """
+        Setzt die höchste Auflösung (4208x3120) und aktiviert alle Auto-Modi 
+        (Auto-Exposure, Auto-Focus, Auto-White-Balance) für die Greiferkamera.
+        """
+        print("--- Starte Greiferkamera-Setup: 4K (4208x3120) und AUTO-Modi ---")
+        
+        # 1. Client initialisieren
+        try:
+            gripper_camera_param_client = robot.ensure_client(
+                GripperCameraParamClient.default_service_name
+            )
+        except Exception as e:
+            print(f"Fehler beim Erstellen des GripperCameraParamClient: {e}")
+            return False
+
+        # 2. Parameter festlegen (Hardcoded für 4K und AUTO)
+        
+        # Höchste verfügbare Auflösung (4208x3120)
+        camera_mode = gripper_camera_param_pb2.GripperCameraParams.MODE_4208_3120
+        print(f"Setze Auflösung auf: 4208x3120")
+
+        # Auto-Fokus aktivieren
+        auto_focus = wrappers_pb2.BoolValue(value=True)
+        print("Aktiviere Auto-Fokus")
+
+        # Auto-Exposure (Belichtung) aktivieren
+        auto_exposure = wrappers_pb2.BoolValue(value=True)
+        print("Aktiviere Auto-Belichtung")
+
+        # Auto-White-Balance (Weißabgleich) aktivieren
+        white_balance_temperature_auto = wrappers_pb2.BoolValue(value=True)
+        print("Aktiviere Auto-Weißabgleich")
+
+        # HDR-Modus auf Auto setzen (optional, kann aber helfen)
+        hdr = gripper_camera_param_pb2.HDR_AUTO
+        print("Setze HDR-Modus auf Auto")
+        
+        # 3. Das GripperCameraParams-Objekt erstellen
+        params = gripper_camera_param_pb2.GripperCameraParams(
+            camera_mode=camera_mode,
+            focus_auto=auto_focus,
+            exposure_auto=auto_exposure,
+            white_balance_temperature_auto=white_balance_temperature_auto,
+            hdr=hdr
+            # Andere nicht spezifizierte Parameter bleiben auf None und werden ignoriert
+        )
+
+        request = gripper_camera_param_pb2.GripperCameraParamRequest(params=params)
+        
+        # 4. Request senden
+        try:
+            response = gripper_camera_param_client.set_camera_params(request)
+            print('Anforderung zum Setzen der Parameter gesendet.')
+
+            if response.header.error and response.header.error.code != header_pb2.CommonError.CODE_OK:
+                print('FEHLER beim Setzen der Parameter:')
+                print(response.header.error)
+                return False
+
+        except Exception as e:
+            print(f"Kritischer Fehler bei der Kommunikation mit dem Roboter bei Gripper Cam Paramater einstellung: {e}")
+            return False
 
 
 class EstopNoGui():
@@ -1087,7 +1153,7 @@ def main():
                 #     print("Waypoint NICHT erreicht – Docking wird abgebrochen.")
 
 
-                if 1==2:
+                if 1==1:
                     print("Waypoint erreicht: Starte Arm- und Greifer-Sequenz")
 
                     # -----------------------------
@@ -1132,6 +1198,10 @@ def main():
                     rc.command_client.robot_command(command)
                     time.sleep(2)
 
+
+                    rc.set_high_res_auto_params()
+
+
                     # Bild aufnehmen
                     # Ein einzelnes Bild abrufen
                     # Quelle: Handkamera im Greifarm
@@ -1146,7 +1216,7 @@ def main():
                     image_request = build_image_request(
                         'hand_color_image',
                         quality_percent=100,  # Maximum quality
-                        image_format=image_pb2.Image.FORMAT_RAW,
+                        image_format=image_pb2.Image.FORMAT_JPEG,
                         resize_ratio=1.0  # No downsampling
                     )
 

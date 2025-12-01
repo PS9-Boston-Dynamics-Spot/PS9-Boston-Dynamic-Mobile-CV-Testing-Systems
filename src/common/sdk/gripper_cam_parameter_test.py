@@ -1,5 +1,6 @@
 import sys
 import time
+
 from google.protobuf import wrappers_pb2
 
 # Importieren Sie die notwendigen Komponenten aus dem Boston Dynamics SDK
