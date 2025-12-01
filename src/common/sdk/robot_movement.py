@@ -1177,8 +1177,8 @@ def main():
                     # 3. Arm bewegen (z.B. hochheben oder vorziehen)
                     print("Arm wird leicht nach vorne oben bewegt...")
 
-                    # Beispiel: etwas vor den Roboter (x=0.6m), mittig (y=0), leicht angehoben (z=0.4m)
-                    x, y, z = 0.6, 0.0, 0.4
+                    # Beispiel: etwas vor den Roboter (x=0.6m vor), mittig (y=0), leicht angehoben (z=0.4m)
+                    x, y, z = 0.6, -0.5, 0.8
 
                     # Keine Drehung (Einheitsquaternion)
                     qw, qx, qy, qz = 1.0, 0.0, 0.0, 0.0
@@ -1196,7 +1196,7 @@ def main():
                     print("Greifer öffnet...")
                     command = RobotCommandBuilder.claw_gripper_open_command()
                     rc.command_client.robot_command(command)
-                    time.sleep(2)
+                    time.sleep(4)
 
                     # Bild aufnehmen
                     rc.set_high_res_auto_params()
