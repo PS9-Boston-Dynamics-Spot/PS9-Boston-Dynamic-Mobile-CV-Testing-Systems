@@ -12,6 +12,22 @@ if __name__ == "__main__":
     robot_settings = settings_manager.getRobotCredentials()
     print(robot_settings)
 
+    score_function = settings_manager.getScoreFunction(aruco_id=46)
+    print("score_function", score_function(10))
+    print("score_function", score_function(15))
+    print("score_function", score_function(50))
+    print("score_function", score_function(0))
+    print("score_function", score_function(-10))
+    print("score_function", score_function(10000))
+    print("score_function", score_function(12))
+    print("score_function", score_function(13))
+    print("score_function", score_function(14))
+    print("parameters", settings_manager.getParameters(aruco_id=46))
+    print("safe_range", settings_manager.getSafeRange(aruco_id=46))
+    print("uncertain_range", settings_manager.getUncertainRange(aruco_id=46))
+    print("anomaly_range", settings_manager.getAnomalyRange(aruco_id=46))
+    exit(0)
+
     path = os.path.join(os.getcwd(), "test.jpg")
 
     with open(path, "rb") as f:

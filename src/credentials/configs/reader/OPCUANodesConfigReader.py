@@ -1,4 +1,5 @@
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Callable
+import math
 from credentials.configs.loader.ConfigLoader import ConfigLoader
 from credentials.configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
 from credentials.configs.exceptions.MultipleIDsError import MultipleIDsError
@@ -50,19 +51,30 @@ class OPCUANodesConfigReader(ConfigLoader):
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node[OPCUA_NODES.OPCUA_NODE]
     
-    def getValueRange(self, aruco_id: int) -> Tuple[Optional[float], Optional[float]]:
+    def __getScoreFunction(self, aruco_id: int) -> Optional[str]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
+        return matched_node.get(OPCUA_NODES.SCORE_FUNCTION)
+    
+    def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
+    
+        score_function_str = self.__getScoreFunction(aruco_id=aruco_id)
+        parameters = self.getParameters(aruco_id=aruco_id)
 
-        min_value = matched_node.get(OPCUA_NODES.MIN_VALUE)
-        max_value = matched_node.get(OPCUA_NODES.MAX_VALUE)
+        return lambda x: eval(score_function_str, {"exp": math.exp, "pow": math.pow, **parameters, "x": x})
+    
+    def getParameters(self, aruco_id: int) -> Optional[dict]:
+        matched_node = self._findNodeByID(aruco_id=aruco_id)
+        return matched_node.get(OPCUA_NODES.PARAMETERS)
 
-        if min_value > max_value:
-            raise MinMaxValueError(
-                error_code=1764536910,
-                node=matched_node[OPCUA_NODES.OPCUA_NODE],
-                id=aruco_id,
-                min_value=min_value,
-                max_value=max_value
-            )
-        
-        return (min_value, max_value)
+    def _getRiskManagement(self, aruco_id: int) -> dict:
+        matched_node = self._findNodeByID(aruco_id=aruco_id)
+        return matched_node.get(OPCUA_NODES.RISK_MANAGEMENT)
+    
+    def getSafeRange(self, aruco_id: int) -> Optional[float]:
+        return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.SAFE_RANGE)
+    
+    def getUncertainRange(self, aruco_id: int) -> Optional[float]:
+        return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.UNCERTAIN_RANGE)
+    
+    def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
+        return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.ANOMALY_RANGE)

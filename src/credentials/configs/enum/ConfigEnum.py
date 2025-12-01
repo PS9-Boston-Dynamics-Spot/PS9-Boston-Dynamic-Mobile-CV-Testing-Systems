@@ -8,8 +8,17 @@ class OPCUA_NODES(str, Enum):
     OVEN_NODE = "oven_node"
     OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
-    MIN_VALUE = "min_value"
-    MAX_VALUE = "max_value"
+    
+    SCORE_FUNCTION = "score_function"
+    PARAMETERS = "parameters"
+
+    RISK_MANAGEMENT = "risk_management"
+    SAFE_RANGE = "safe_range"
+    UNCERTAIN_RANGE = "uncertain_range"
+    ANOMALY_RANGE = "anomaly_range"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class MINIO_BUCKETS(str, Enum):

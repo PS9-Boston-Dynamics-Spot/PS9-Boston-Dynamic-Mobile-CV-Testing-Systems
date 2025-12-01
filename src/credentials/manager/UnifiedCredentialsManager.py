@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Callable
 
 from credentials.configs.reader.MinioConfigReader import MinioConfigReader
 from credentials.configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
@@ -92,6 +92,18 @@ class UnifiedCredentialsManager:
     
     def getOPCUANodeByID(self, aruco_id: int) -> dict[str, Any]:
         return self._opcua_nodes_config_reader.getOPCUANodeByID(aruco_id=aruco_id)
+
+    def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
+        return self._opcua_nodes_config_reader.getScoreFunction(aruco_id=aruco_id)
     
-    def getValueRange(self, aruco_id: int) -> tuple[Optional[str], Optional[str]]:
-        return self._opcua_nodes_config_reader.getValueRange(aruco_id=aruco_id)
+    def getParameters(self, aruco_id: int) -> Optional[dict]:
+        return self._opcua_nodes_config_reader.getParameters(aruco_id=aruco_id)
+    
+    def getSafeRange(self, aruco_id: int) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getSafeRange(aruco_id=aruco_id)
+    
+    def getUncertainRange(self, aruco_id: int) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getUncertainRange(aruco_id=aruco_id)
+    
+    def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getAnomalyRange(aruco_id=aruco_id)
