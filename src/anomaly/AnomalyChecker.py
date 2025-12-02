@@ -27,4 +27,4 @@ class AnomalyChecker:
         elif score >= anomaly_range and score < uncertain_range:
             return score, True
         else:
-            return score, None
+            return score, True

@@ -4,27 +4,13 @@ from db.mapping.RawImageMapper import RawImageMapper
 from db.mapping.AnalyzedImageMapper import AnalyzedImageMapper
 from db.mapping.AnomalyMapper import AnomalyMapper
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from anomaly.AnomalyChecker import AnomalyChecker
 
 if __name__ == "__main__":
 
     settings_manager = UnifiedCredentialsManager()
     robot_settings = settings_manager.getRobotCredentials()
     print(robot_settings)
-
-    score_function = settings_manager.getScoreFunction(aruco_id=46)
-    print("score_function", score_function(10))
-    print("score_function", score_function(15))
-    print("score_function", score_function(50))
-    print("score_function", score_function(0))
-    print("score_function", score_function(-10))
-    print("score_function", score_function(10000))
-    print("score_function", score_function(12))
-    print("score_function", score_function(13))
-    print("score_function", score_function(14))
-    print("safe_range", settings_manager.getSafeRange(aruco_id=46))
-    print("uncertain_range", settings_manager.getUncertainRange(aruco_id=46))
-    print("anomaly_range", settings_manager.getAnomalyRange(aruco_id=46))
-    exit(0)
 
     path = os.path.join(os.getcwd(), "test.jpg")
 
@@ -35,31 +21,33 @@ if __name__ == "__main__":
         analyzed_image_mapper = AnalyzedImageMapper()
 
         with DataAccessLayer() as dal:
-            image_name = "sensor_captasduasdasddfghasdsaaaasrzjtugghhdasdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+            image_name = "sensor_captasduaspsasvasdfsdrzjtgasdhhdaasdsdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             dto_raw_image = raw_image_mapper.map_image(
-                image_data=image_bytes, size=122212123423323
+                image_data=image_bytes, size=2221132342313223
             )
             raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
+
+            aruco_id = 46
+            detected_value = 23.0
+
+            # get the aruco id through image extraction
+            opcua_node_id = settings_manager.getOPCUANodeByID(aruco_id=aruco_id)
 
             dto_analyzed_image = analyzed_image_mapper.map_image(
                 image_data=image_bytes,
                 raw_image_id=raw_image_id,
-                sensor_type="testassdfd2s",
-                opcua_node_id="test_node",
-                aruco_id=123,
-                category="tes1tdsa2dsss",
+                sensor_type="testassdasxassddv2fd2s",
+                opcua_node_id=opcua_node_id,
+                aruco_id=aruco_id,
+                category="tes1tdsa32asdssasdsss",
                 quality=1.0,
-                value=10.0,
+                value=detected_value,
                 unit="°C_2",
             )
             analyzed_image_id = dal.insert_analyzed_image(
                 anaylzed_image_with_metadata=dto_analyzed_image
             )
-
-            # get the aruco id through image extraction
-            aruco_id = 46
-            opcua_node_id = settings_manager.getOPCUANodeByID(aruco_id=aruco_id)
 
             #########################################################################################################################
             # TODO: get the comparative value from the opcua node / config file + image extraction and check if value is an anomaly #
@@ -77,13 +65,25 @@ if __name__ == "__main__":
             # value = settings_manager.getAnalogComparativeValue(aruco_id=aruco_id)                                                 #
             #########################################################################################################################
 
+            min_value, max_value = settings_manager.getMinMaxValue(aruco_id=aruco_id)
+
+            anomaly_checker = AnomalyChecker()
+            anomaly_score, is_anomaly = anomaly_checker.is_anomaly(
+                value_to_check=detected_value,
+                aruco_id=aruco_id,
+            )
+            print(anomaly_score, is_anomaly)
+
+            parameters = settings_manager.getParametersForAnomalyMapper(aruco_id=aruco_id)
+
             anomaly_mapper = AnomalyMapper()
             anomaly_dto = anomaly_mapper.map_anomaly(
                 analyzed_image_id=analyzed_image_id,
-                detected_value=23.0,
-                comparative_value=24.0,  # e.g. 1% tolerance
-                is_anomaly=True,
+                detected_value=detected_value,
+                is_anomaly=is_anomaly,
+                anomaly_score=anomaly_score,
                 node_id=opcua_node_id,
+                **parameters,
             )
 
             dal.insert_anomaly(anomaly_with_metadata=anomaly_dto)

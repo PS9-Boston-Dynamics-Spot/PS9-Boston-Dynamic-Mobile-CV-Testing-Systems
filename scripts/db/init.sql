@@ -35,8 +35,10 @@ CREATE TABLE IF NOT EXISTS anomalies(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     analyzed_image_id INTEGER NOT NULL,
     detected_value REAL NOT NULL,
-    comparative_value TEXT, -- if analog sensor, the value is a range (e.g. +- 10% -> value: 10°C -> 9°C - 11°C) 
-    is_anomaly BOOLEAN NOT NULL DEFAULT 0,
+    is_anomaly BOOLEAN NOT NULL,
+    anomaly_score REAL NOT NULL,
+    node_id TEXT,
+    parameters TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (analyzed_image_id) REFERENCES cvision_images_analyzed(id) ON DELETE CASCADE
 );

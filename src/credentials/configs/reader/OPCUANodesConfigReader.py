@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Dict, Any, Callable, Tuple
 import math
 from credentials.configs.loader.ConfigLoader import ConfigLoader
 from credentials.configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
@@ -53,13 +53,13 @@ class OPCUANodesConfigReader(ConfigLoader):
     def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
 
         score_function_str = self.__getScoreFunction(aruco_id=aruco_id)
-        parameters = self.__getParameters(aruco_id=aruco_id)
+        parameters = self.getParameters(aruco_id=aruco_id)
 
         return lambda x: eval(
             score_function_str, {"exp": math.exp, "pow": math.pow, **parameters, "x": x}
         )
 
-    def __getParameters(self, aruco_id: int) -> Optional[dict]:
+    def getParameters(self, aruco_id: int) -> Optional[dict]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
 
         if matched_node.get(OPCUA_NODES.PARAMETERS) is None:
@@ -79,17 +79,21 @@ class OPCUANodesConfigReader(ConfigLoader):
 
         return matched_node.get(OPCUA_NODES.PARAMETERS)
 
-    def _getRiskManagement(self, aruco_id: int) -> dict:
+    def getRiskManagement(self, aruco_id: int) -> dict:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node.get(OPCUA_NODES.RISK_MANAGEMENT)
 
     def getSafeRange(self, aruco_id: int) -> Optional[float]:
-        return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.SAFE_RANGE)
+        return self.getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.SAFE_RANGE)
 
     def getUncertainRange(self, aruco_id: int) -> Optional[float]:
-        return self._getRiskManagement(aruco_id=aruco_id).get(
+        return self.getRiskManagement(aruco_id=aruco_id).get(
             OPCUA_NODES.UNCERTAIN_RANGE
         )
 
     def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
-        return self._getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.ANOMALY_RANGE)
+        return self.getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.ANOMALY_RANGE)
+    
+    def getMinMaxValue(self, aruco_id: int) -> Optional[Tuple[float, float]]:
+        matched_node = self.getParameters(aruco_id=aruco_id)
+        return (matched_node.get(OPCUA_NODES.MIN_VALUE), matched_node.get(OPCUA_NODES.MAX_VALUE))

@@ -131,18 +131,21 @@ class DatabaseWriter:
         self,
         analyzed_image_id: int,
         detected_value: float,
-        comparative_value: float,
         is_anomaly: bool,
+        anomaly_score: float,
         node_id: str,
+        parameters: str,
     ) -> int:
         query = """
             INSERT INTO anomalies (
                 analyzed_image_id,
                 detected_value,
-                comparative_value,
                 is_anomaly,
-                node_id)
-            VALUES (?, ?, ?, ?, ?);
+                anomaly_score,
+                node_id,
+                parameters
+            )
+            VALUES (?, ?, ?, ?, ?, ?);
         """
 
         try:
@@ -152,9 +155,10 @@ class DatabaseWriter:
                     (
                         analyzed_image_id,
                         detected_value,
-                        comparative_value,
                         is_anomaly,
+                        anomaly_score,
                         node_id,
+                        parameters,
                     ),
                 )
                 return cursor.lastrowid

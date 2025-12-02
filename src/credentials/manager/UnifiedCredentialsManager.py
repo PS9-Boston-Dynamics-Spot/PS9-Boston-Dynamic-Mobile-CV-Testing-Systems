@@ -1,4 +1,4 @@
-from typing import Any, Optional, Callable
+from typing import Any, Optional, Callable, Tuple
 
 from credentials.configs.reader.MinioConfigReader import MinioConfigReader
 from credentials.configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
@@ -108,3 +108,11 @@ class UnifiedCredentialsManager:
 
     def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
         return self._opcua_nodes_config_reader.getAnomalyRange(aruco_id=aruco_id)
+    
+    def getMinMaxValue(self, aruco_id: int) -> Optional[Tuple[float, float]]:
+        return self._opcua_nodes_config_reader.getMinMaxValue(aruco_id=aruco_id)
+    
+    def getParametersForAnomalyMapper(self, aruco_id: int) -> Optional[dict[str, Any]]:
+        parameters =  self._opcua_nodes_config_reader.getParameters(aruco_id=aruco_id)
+        risk_management = self._opcua_nodes_config_reader.getRiskManagement(aruco_id=aruco_id)
+        return {**parameters, **risk_management}
