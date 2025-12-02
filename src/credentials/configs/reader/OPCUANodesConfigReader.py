@@ -46,13 +46,13 @@ class OPCUANodesConfigReader(ConfigLoader):
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node[OPCUA_NODES.OPCUA_NODE]
 
-    def __getScoreFunction(self, aruco_id: int) -> Optional[str]:
+    def getScoreFunctionStr(self, aruco_id: int) -> Optional[str]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         return matched_node.get(OPCUA_NODES.SCORE_FUNCTION)
 
     def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
 
-        score_function_str = self.__getScoreFunction(aruco_id=aruco_id)
+        score_function_str = self.getScoreFunctionStr(aruco_id=aruco_id)
         parameters = self.getParameters(aruco_id=aruco_id)
 
         return lambda x: eval(

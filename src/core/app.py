@@ -21,10 +21,10 @@ if __name__ == "__main__":
         analyzed_image_mapper = AnalyzedImageMapper()
 
         with DataAccessLayer() as dal:
-            image_name = "sensor_captasduaspsasvasdfsdrzjtgasdhhdaasdsdasddsdsasadfsddasdmdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+            image_name = "sensor_captasduaspsasvasgasdhhdaasdsdassdsasadfsddamdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             dto_raw_image = raw_image_mapper.map_image(
-                image_data=image_bytes, size=2221132342313223
+                image_data=image_bytes, size=22223429223
             )
             raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
 
@@ -37,10 +37,10 @@ if __name__ == "__main__":
             dto_analyzed_image = analyzed_image_mapper.map_image(
                 image_data=image_bytes,
                 raw_image_id=raw_image_id,
-                sensor_type="testassdasxassddv2fd2s",
+                sensor_type="tesassdaassddvg2fd2s",
                 opcua_node_id=opcua_node_id,
                 aruco_id=aruco_id,
-                category="tes1tdsa32asdssasdsss",
+                category="es1tdsa32asdssasdsdfsss",
                 quality=1.0,
                 value=detected_value,
                 unit="°C_2",
@@ -81,10 +81,9 @@ if __name__ == "__main__":
             anomaly_mapper = AnomalyMapper()
             anomaly_dto = anomaly_mapper.map_anomaly(
                 analyzed_image_id=analyzed_image_id,
-                detected_value=detected_value,
                 is_anomaly=is_anomaly,
                 anomaly_score=anomaly_score,
-                node_id=opcua_node_id,
+                used_funtion=settings_manager.getScoreFunctionStr(aruco_id=aruco_id),
                 **parameters,
             )
 

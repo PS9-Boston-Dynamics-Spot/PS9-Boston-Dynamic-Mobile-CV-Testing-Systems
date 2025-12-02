@@ -61,10 +61,9 @@ class MetaRepository:
         try:
             return self.writer.insert_anomaly(
                 analyzed_image_id=metadata.analyzed_image_id,
-                detected_value=metadata.detected_value,
                 is_anomaly=metadata.is_anomaly,
                 anomaly_score=metadata.anomaly_score,
-                node_id=metadata.node_id,
+                used_funtion=metadata.used_funtion,
                 parameters=metadata.parameters,
             )
         except DatabaseWriterError as e:

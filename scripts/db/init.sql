@@ -34,10 +34,10 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
 CREATE TABLE IF NOT EXISTS anomalies(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     analyzed_image_id INTEGER NOT NULL,
-    detected_value REAL NOT NULL,
+
     is_anomaly BOOLEAN NOT NULL,
     anomaly_score REAL NOT NULL,
-    node_id TEXT,
+    used_function TEXT,
     parameters TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (analyzed_image_id) REFERENCES cvision_images_analyzed(id) ON DELETE CASCADE

@@ -97,6 +97,9 @@ class UnifiedCredentialsManager:
     def getOPCUANodeByID(self, aruco_id: int) -> dict[str, Any]:
         return self._opcua_nodes_config_reader.getOPCUANodeByID(aruco_id=aruco_id)
 
+    def getScoreFunctionStr(self, aruco_id: int) -> Optional[str]:
+        return self._opcua_nodes_config_reader.getScoreFunctionStr(aruco_id=aruco_id)
+
     def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
         return self._opcua_nodes_config_reader.getScoreFunction(aruco_id=aruco_id)
 
