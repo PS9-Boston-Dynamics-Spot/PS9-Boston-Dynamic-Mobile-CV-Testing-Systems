@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional
 
 from credentials.env.loader.EnvLoader import EnvLoader
 from credentials.env.enum.EnvEnum import EnvEnum, MINIO_KEYS
@@ -11,7 +11,3 @@ class MinioEnvReader(EnvLoader):
 
     def getMinioSecretKey(self) -> Optional[str]:
         return self.__minio_env.get(MINIO_KEYS.SECRET_KEY)
-
-
-
-

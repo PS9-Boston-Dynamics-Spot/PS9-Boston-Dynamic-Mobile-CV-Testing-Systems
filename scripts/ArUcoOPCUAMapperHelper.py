@@ -5,6 +5,7 @@ from typing import List
 import yaml
 import re
 
+
 class ArUcoOPCUAMapperHelper:
 
     def __init__(self, directory: str, dict_const=aruco.DICT_6X6_1000) -> None:
@@ -22,10 +23,7 @@ class ArUcoOPCUAMapperHelper:
 
     def get_opcua_nodes_config(self) -> str:
 
-        config = {
-            "overall_dict": self._get_dict_name(),
-            "nodes": {}
-        }
+        config = {"overall_dict": self._get_dict_name(), "nodes": {}}
 
         for file in sorted(self.directory.iterdir()):
             if file.is_file() and file.suffix.lower() in [".jpeg", ".jpg", ".png"]:
@@ -41,10 +39,7 @@ class ArUcoOPCUAMapperHelper:
                 else:
                     node_key = stem if stem else f"node_{first_id}"
 
-                config["nodes"][node_key] = {
-                    "opcua_node": "",     
-                    "aruco_id": first_id
-                }
+                config["nodes"][node_key] = {"opcua_node": "", "aruco_id": first_id}
 
         output_path = self.directory / "opcua_nodes_config.yaml"
 

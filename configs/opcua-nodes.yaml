@@ -2,5 +2,29 @@ overall_dict: DICT_6X6_1000
 
 nodes:
   oven_node: 
-    opcua_node: 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
-    aruco_id: 46
+    opcua_node: !!str 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
+    aruco_id: !!int 46
+    # Soft-Interval-Funktion
+    # Innerhalb des Intervals [min_value, max_value] ist der Score exakt 1
+    # Außerhalb fällt der Score weich/exponentiell ab – nicht hart auf 0
+    # Links (unterhalb min_value) und rechts (oberhalb max_value) können getrennt
+    # skaliert werden (left_scale/right_scale & left_power/right_power)
+    score_function: !!str '1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
+    parameters:
+      min_value: !!float 15.0 # Untere harte Grenze des Normalbereichs (ab hier = Score 1.0)
+      max_value: !!float 25.0 # Obere harte Grenze des Normalbereichs (bis hier = Score 1.0)
+      min_score: !!float 0.0 # Minimaler Score, den die Funktion asymptotisch erreicht (nie unter diesen Wert)
+      left_scale: !!float 7.0 # Steilheit des Abfalls unterhalb von min_value (größer = weicher Übergang)
+      left_power: !!float 2.0 # Form des Abfalls links (1 = exponentiell, 2 = glockenartig, >2 = noch härter)
+      right_scale: !!float 7.0 # Steilheit des Abfalls oberhalb von max_value
+      right_power: !!float 2.0 # Form des Abfalls rechts (analog zu left_power)
+    # Anomalie-Management: 
+    # Die angegeben Werte sind die Anomaliegrenzen von der score_function
+    # value == safe_range -> Ist keine Anomalie
+    # value < safe_range && value > uncertain_range -> Ist eine mögliche Anomalie
+    # value >= anomaly_range && value <= uncertain_range -> Ist Anomalie                     
+    risk_management:
+      safe_range: !!float 1.0 # Definitiv Normalbereich
+      uncertain_range: !!float 0.5 # Möglicher Anomaliebereich
+      anomaly_range: !!float 0.0 # Definitv Anomaliebereich
+ 

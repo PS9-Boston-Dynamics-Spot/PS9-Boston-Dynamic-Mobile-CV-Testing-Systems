@@ -1,7 +1,10 @@
-from typing import Optional
-from configs.loader.ConfigLoader import ConfigLoader
-from configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
-from configs.exceptions.MultipleIDsError import MultipleIDsError
+from typing import Optional, Dict, Any, Callable, Tuple
+import math
+from credentials.configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.enum.ConfigEnum import ConfigEnum, OPCUA_NODES
+from credentials.configs.exceptions.MultipleIDsError import MultipleIDsError
+from credentials.configs.exceptions.NodeDoesNotExistError import NodeDoesNotExistError
+from credentials.configs.exceptions.MinMaxValueError import MinMaxValueError
 
 
 class OPCUANodesConfigReader(ConfigLoader):
@@ -12,21 +15,88 @@ class OPCUANodesConfigReader(ConfigLoader):
     def getOverallDict(self) -> Optional[str]:
         value = self.__config.get(OPCUA_NODES.OVERALL_DICT)
         return value
-    
+
     def _getNodes(self) -> dict:
         value = self.__config.get(OPCUA_NODES.NODES)
         if not isinstance(value, dict):
             return {}
         return value
-    
-    def getOPCUANodesbyID(self, id: int) -> Optional[str]:
+
+    def _findNodeByID(self, aruco_id: int) -> Dict[str, Dict[str, Any]]:
         nodes = self._getNodes()
-        result = []
-        for key, value in nodes.items():
-            if value.get(OPCUA_NODES.ARUCO_ID) == id:
-                result.append(value.get(OPCUA_NODES.OPCUA_NODE))
 
-        if len(result) > 1:
-            raise MultipleIDsError(error_code=1763491580, nodes=result, id=id)
+        matched_nodes: Dict[str, Dict[str, Any]] = {}
 
-        return result[0] if result else None
+        for node_name, props in nodes.items():
+            if props.get(OPCUA_NODES.ARUCO_ID) == aruco_id:
+                matched_nodes[node_name] = props
+
+        if len(matched_nodes) > 1:
+            raise MultipleIDsError(
+                error_code=1763491580, nodes=list(matched_nodes.keys()), id=aruco_id
+            )
+
+        if len(matched_nodes) < 1:
+            raise NodeDoesNotExistError(error_code=1763729190, aruco_id=aruco_id)
+
+        node_props = next(iter(matched_nodes.values()))
+        return node_props
+
+    def getOPCUANodeByID(self, aruco_id: int) -> Optional[str]:
+        matched_node = self._findNodeByID(aruco_id=aruco_id)
+        return matched_node[OPCUA_NODES.OPCUA_NODE]
+
+    def __getScoreFunction(self, aruco_id: int) -> Optional[str]:
+        matched_node = self._findNodeByID(aruco_id=aruco_id)
+        return matched_node.get(OPCUA_NODES.SCORE_FUNCTION)
+
+    def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
+
+        score_function_str = self.__getScoreFunction(aruco_id=aruco_id)
+        parameters = self.getParameters(aruco_id=aruco_id)
+
+        return lambda x: eval(
+            score_function_str, {"exp": math.exp, "pow": math.pow, **parameters, "x": x}
+        )
+
+    def getParameters(self, aruco_id: int) -> Optional[dict]:
+        matched_node = self._findNodeByID(aruco_id=aruco_id)
+
+        if matched_node.get(OPCUA_NODES.PARAMETERS) is None:
+            return {}
+
+        min_value = matched_node.get(OPCUA_NODES.PARAMETERS).get(OPCUA_NODES.MIN_VALUE)
+        max_value = matched_node.get(OPCUA_NODES.PARAMETERS).get(OPCUA_NODES.MAX_VALUE)
+
+        if min_value > max_value:
+            raise MinMaxValueError(
+                error_code=1764624580,
+                node=matched_node.get(OPCUA_NODES.OPCUA_NODE),
+                id=aruco_id,
+                min_value=min_value,
+                max_value=max_value,
+            )
+
+        return matched_node.get(OPCUA_NODES.PARAMETERS)
+
+    def getRiskManagement(self, aruco_id: int) -> dict:
+        matched_node = self._findNodeByID(aruco_id=aruco_id)
+        return matched_node.get(OPCUA_NODES.RISK_MANAGEMENT)
+
+    def getSafeRange(self, aruco_id: int) -> Optional[float]:
+        return self.getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.SAFE_RANGE)
+
+    def getUncertainRange(self, aruco_id: int) -> Optional[float]:
+        return self.getRiskManagement(aruco_id=aruco_id).get(
+            OPCUA_NODES.UNCERTAIN_RANGE
+        )
+
+    def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
+        return self.getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.ANOMALY_RANGE)
+
+    def getMinMaxValue(self, aruco_id: int) -> Optional[Tuple[float, float]]:
+        matched_node = self.getParameters(aruco_id=aruco_id)
+        return (
+            matched_node.get(OPCUA_NODES.MIN_VALUE),
+            matched_node.get(OPCUA_NODES.MAX_VALUE),
+        )
