@@ -74,7 +74,9 @@ if __name__ == "__main__":
             )
             print(anomaly_score, is_anomaly)
 
-            parameters = settings_manager.getParametersForAnomalyMapper(aruco_id=aruco_id)
+            parameters = settings_manager.getParametersForAnomalyMapper(
+                aruco_id=aruco_id
+            )
 
             anomaly_mapper = AnomalyMapper()
             anomaly_dto = anomaly_mapper.map_anomaly(

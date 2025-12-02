@@ -2,6 +2,7 @@ from dataclasses import dataclass, asdict
 from typing import Any, Dict
 import json
 
+
 @dataclass
 class AnomalyDTO:
 
@@ -36,10 +37,10 @@ class AnomalyDTO:
 
         if not isinstance(self.anomaly_score, float):
             raise TypeError("'anomaly_score' must be a float")
-        
+
         if not isinstance(self.node_id, str):
             raise TypeError("'node_id' must be a string")
-        
+
         if not isinstance(self.parameters, str):
             raise TypeError("'parameters' must be a str")
 
@@ -59,7 +60,7 @@ class AnomalyMapper:
         node_id: str,
         **parameters,
     ) -> AnomalyDTO:
-        
+
         parameters_json = json.dumps(parameters)
 
         dto = AnomalyDTO(

@@ -93,7 +93,10 @@ class OPCUANodesConfigReader(ConfigLoader):
 
     def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
         return self.getRiskManagement(aruco_id=aruco_id).get(OPCUA_NODES.ANOMALY_RANGE)
-    
+
     def getMinMaxValue(self, aruco_id: int) -> Optional[Tuple[float, float]]:
         matched_node = self.getParameters(aruco_id=aruco_id)
-        return (matched_node.get(OPCUA_NODES.MIN_VALUE), matched_node.get(OPCUA_NODES.MAX_VALUE))
+        return (
+            matched_node.get(OPCUA_NODES.MIN_VALUE),
+            matched_node.get(OPCUA_NODES.MAX_VALUE),
+        )
