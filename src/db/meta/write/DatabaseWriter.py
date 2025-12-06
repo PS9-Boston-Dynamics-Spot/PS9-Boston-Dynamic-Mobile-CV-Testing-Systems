@@ -130,22 +130,20 @@ class DatabaseWriter:
     def insert_anomaly(
         self,
         analyzed_image_id: int,
-        detected_value: float,
         is_anomaly: bool,
         anomaly_score: float,
-        node_id: str,
+        used_funtion: str,
         parameters: str,
     ) -> int:
         query = """
             INSERT INTO anomalies (
                 analyzed_image_id,
-                detected_value,
                 is_anomaly,
                 anomaly_score,
-                node_id,
+                used_function,
                 parameters
             )
-            VALUES (?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?);
         """
 
         try:
@@ -154,10 +152,9 @@ class DatabaseWriter:
                     query,
                     (
                         analyzed_image_id,
-                        detected_value,
                         is_anomaly,
                         anomaly_score,
-                        node_id,
+                        used_funtion,
                         parameters,
                     ),
                 )
