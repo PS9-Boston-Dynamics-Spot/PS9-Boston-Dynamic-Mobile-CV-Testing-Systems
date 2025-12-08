@@ -9,5 +9,5 @@ model_root = project_root / 'src' / 'common' / 'cvision' / 'models'
 # Modelltraining
 model = YOLO('yolov8n.pt')
 
-model.train(data=str(data_path), epochs=10, imgsz=640)
+model.train(data=str(data_path), epochs=4, imgsz=640)
 model.save(model_root / 'yolov8n_trained')
