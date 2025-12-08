@@ -8,6 +8,7 @@ import time
 import traceback
 
 
+
 from PIL import Image
 import io
 
@@ -27,6 +28,7 @@ from bosdyn.client.math_helpers import Quat, SE3Pose
 from bosdyn.client.power import PowerClient, power_on_motors, safe_power_off_motors
 from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient
 from bosdyn.client.robot_state import RobotStateClient
+from bosdyn.client.math_helpers import Quat
 
 # Für Armsteuerung
 from bosdyn.client.manipulation_api_client import ManipulationApiClient
@@ -1094,11 +1096,18 @@ def main():
                 robot_state = rc.state_client.get_robot_state()
 
                 # # Navigation zu Waypoint
-                # print("Setze Location")
-                # navigation._set_initial_localization_fiducial()
-                # print("Gehe zu Location")
+                print("Setze Location")
+                navigation._set_initial_localization_fiducial()
+                print("Gehe zu Location")
                 # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
-                # navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint 17
+                # navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint 17  (Ecke)
+
+                # navigation._navigate_to(["nosed-hogg-k2X1XJLvCB347bqrxbhoAQ=="])  # waypoint 16 (Davor)
+                
+                navigation._navigate_to(["hadean-bear-uuJgT47H63KZUC9HbZ2HGA=="])  # default
+                
+                
+
                 # # navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="])  # waypoint 2
                 # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
                 # # Prüfen, ob Waypoint erreicht wurde
@@ -1160,10 +1169,7 @@ def main():
                     # 1. Arm ausklappen / bereit machen
                     print("Arm wird ausgeklappt...")
                     command = RobotCommandBuilder.arm_ready_command()
-                    unstow_command_id = rc.command_client.robot_command(command)
 
-                    # Wait until the stow command is successful.
-                    rc.block_until_arm_arrives(unstow_command_id, 3.0)
 
                     # Get robot pose in vision frame from robot state (we want to send commands in vision
                     # frame relative to where the robot stands now)
@@ -1171,17 +1177,46 @@ def main():
                     vision_T_body = get_vision_tform_body(robot_state.kinematic_state.transforms_snapshot)
 
 
-                    time.sleep(3)  # Warten, damit Spot die Armbewegung abschließt
+                    
 
 
                     # 3. Arm bewegen (z.B. hochheben oder vorziehen)
                     print("Arm wird leicht nach vorne oben bewegt...")
 
                     # Beispiel: etwas vor den Roboter (x=0.6m vor), mittig (y=0), leicht angehoben (z=0.4m)
-                    x, y, z = 0.6, -0.5, 0.8
-
+                    #x, y, z = 0.6, -0.5, 0.8
+                    x = 0.67708456516265869
+                    y = 0.034377455711364746
+                    z = 0.80469489097595215
                     # Keine Drehung (Einheitsquaternion)
-                    qw, qx, qy, qz = 1.0, 0.0, 0.0, 0.0
+                    # qw, qx, qy, qz = 1.0, 0.0, 0.0, 0.0
+                    
+                    # yaw_rad = math.radians(-90.0)
+                    # pitch_rad = math.radians(45.0)
+                    # roll_rad = 0.0
+
+                    # half_roll = roll_rad * 0.5
+                    # half_pitch = pitch_rad * 0.5
+                    # half_yaw = yaw_rad * 0.5
+
+                    # cr = math.cos(half_roll)
+                    # sr = math.sin(half_roll)
+                    # cp = math.cos(half_pitch)
+                    # sp = math.sin(half_pitch)
+                    # cy = math.cos(half_yaw)
+                    # sy = math.sin(half_yaw)
+
+                    # qw = cr * cp * cy + sr * sp * sy
+                    # qx = sr * cp * cy - cr * sp * sy
+                    # qy = cr * sp * cy + sr * cp * sy
+                    # qz = cr * cp * sy - sr * sp * cy
+
+
+                    qx = 0.09720776230096817
+                    qy = 0.45448499917984009
+                    qz = -0.19426915049552917
+                    qw = 0.86385965347290039
+
 
                     command = RobotCommandBuilder.arm_pose_command(
                         x, y, z,
@@ -1212,8 +1247,29 @@ def main():
                     image_response = rc.image_client.get_image([image_request])[0]
                     rc.maybe_save_image(image_response.shot.image, path=None)
                     print("Bild erfolgreich gespeichert")
+############################
+                    time.sleep(4)
+                    image_request2 = build_image_request(
+                        'hand_color_image',
+                        quality_percent=100,  # Maximum quality
+                        image_format=image_pb2.Image.FORMAT_JPEG,
+                        resize_ratio=1.0  # No downsampling
+                    )
+
+                    # Request the image
+                    image_response2 = rc.image_client.get_image([image_request2])[0]
+                    rc.maybe_save_image(image_response2.shot.image, path=None)
+                    print("Bild erfolgreich gespeichert")
+
+                    time.sleep(4)
 
 
+
+
+
+
+
+###################################
                     print("Greiferschließen...")
                     command = RobotCommandBuilder.claw_gripper_close_command()
                     rc.command_client.robot_command(command)
@@ -1227,6 +1283,8 @@ def main():
                     time.sleep(3)
                     print("Arm-Sequenz erfolgreich abgeschlossen")
                     # -----------------------------
+
+                    navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
 
                 return True
 
