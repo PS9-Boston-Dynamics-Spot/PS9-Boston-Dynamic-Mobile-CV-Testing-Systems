@@ -31,7 +31,7 @@ class OPCUANodesConfigReader(ConfigLoader):
         if len(result) > 1:
             raise MultipleIDsError(error_code=1763491580, nodes=result, id=aruco_id)
 
-        if len(result) <= 1:
+        if len(result) < 1:
             raise NodeDoesNotExistError(error_code=1763729190, aruco_id=aruco_id)
 
         return result[0]
