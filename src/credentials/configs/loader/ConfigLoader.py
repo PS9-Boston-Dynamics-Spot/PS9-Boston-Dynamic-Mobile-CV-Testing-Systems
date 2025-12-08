@@ -1,8 +1,8 @@
 import yaml
 from pathlib import Path
-from configs.exceptions.ConfigLoadError import ConfigLoadError
-from configs.exceptions.ConfigNotFound import ConfigNotFound
-from configs.exceptions.ConfigParseError import ConfigParseError
+from credentials.configs.exceptions.ConfigLoadError import ConfigLoadError
+from credentials.configs.exceptions.ConfigNotFound import ConfigNotFound
+from credentials.configs.exceptions.ConfigParseError import ConfigParseError
 
 
 class ConfigLoader:

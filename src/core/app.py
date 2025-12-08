@@ -9,72 +9,96 @@ from db.mapping.AnalyzedImageMapper import AnalyzedImageMapper
 
 from configs.mapper.ArUcoIDOPCUANodeMapper import ArUcoIDOPCUANodeMapper
 from db.mapping.AnomalyMapper import AnomalyMapper
-
+from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from anomaly.AnomalyChecker import AnomalyChecker
 
 if __name__ == "__main__":
-    robot_config = BostonDynamicsConfigReader()
-    print(robot_config._getRobot())
-    print(robot_config.getIP())
-    print(robot_config.getUser())
-    print(robot_config.getWifi())
-    print(robot_config.getPassword())
 
-    path = os.path.join(os.path.dirname(__file__), "OPCUA.png")
+    settings_manager = UnifiedCredentialsManager()
+    robot_settings = settings_manager.getRobotCredentials()
+    print(robot_settings)
+
+    path = os.path.join(os.getcwd(), "test.jpg")
+
     with open(path, "rb") as f:
         image_bytes = f.read()
-        bucket_config_reader = MinioBucketConfigReader()
-        raw_bucket = bucket_config_reader.getRawBucket()
-        analyzed_bucket = bucket_config_reader.getAnalyzedBucket()
 
         raw_image_mapper = RawImageMapper()
+        analyzed_image_mapper = AnalyzedImageMapper()
 
         with DataAccessLayer() as dal:
-            dto_raw_image = raw_image_mapper.map_image(
-                image_data=image_bytes,
-                bucket=raw_bucket,
-            )
+            image_name = "sensor_captasduaspsasvasgasdhhdaasdsdassdsasadfsddamdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
 
             aruco_node_mapper = ArUcoIDOPCUANodeMapper()
             opcua_node_id = aruco_node_mapper.get_opcua_node_by_id(aruco_id=46)
             print(dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id))
 
-            exit(0)
-
+            dto_raw_image = raw_image_mapper.map_image(
+                image_data=image_bytes, size=22223429223
+            )
             raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
 
-            analyzed_image_mapper = AnalyzedImageMapper()
+            # get the aruco id through image extraction
+            aruco_id = 46
+            detected_value = 23.0
+
+            aruco_node_mapper = ArUcoIDOPCUANodeMapper()
+            opcua_node_id = aruco_node_mapper.get_opcua_node_by_id(aruco_id=aruco_id)
+
+            opcua_node_id = settings_manager.getOPCUANodeByID(aruco_id=aruco_id)
+
             dto_analyzed_image = analyzed_image_mapper.map_image(
                 image_data=image_bytes,
                 raw_image_id=raw_image_id,
-                bucket=analyzed_bucket,
-                sensor_type="test2",
-                opcua_node_id="test_node",
-                aruco_id=123,
-                category="test2",
+                sensor_type="tesassdaassddvg2fd2s",
+                opcua_node_id=opcua_node_id,
+                aruco_id=aruco_id,
+                category="es1tdsa32asdssasdsdfsss",
                 quality=1.0,
-                value=10.0,
+                value=detected_value,
                 unit="°C_2",
             )
             analyzed_image_id = dal.insert_analyzed_image(
                 anaylzed_image_with_metadata=dto_analyzed_image
             )
 
-            # get the aruco id through image extraction
-            aruco_id = 46
+            #########################################################################################################################
+            # TODO: get the comparative value from the opcua node / config file + image extraction and check if value is an anomaly #
+            #                                                                                                                       #
+            # extratc value from image (digital value)                                                                              #
+            # do something ....                                                                                                     #
+            #                                                                                                                       #
+            # get comparative value from opcua (digital value)                                                                      #
+            # value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)                                                    #
+            #                                                                                                                       #
+            # extract value from image (analog value)                                                                               #
+            # do something ...                                                                                                      #
+            #                                                                                                                       #
+            # get comparative value from config file (analog value)                                                                 #
+            # value = settings_manager.getAnalogComparativeValue(aruco_id=aruco_id)                                                 #
+            #########################################################################################################################
 
-            aruco_node_mapper = ArUcoIDOPCUANodeMapper()
-            opcua_node_id = aruco_node_mapper.get_opcua_node_by_id(aruco_id=aruco_id)
+            min_value, max_value = settings_manager.getMinMaxValue(aruco_id=aruco_id)
 
-            # TODO: check if value is an anomaly
-            # value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)
+            anomaly_checker = AnomalyChecker()
+            anomaly_score, is_anomaly = anomaly_checker.is_anomaly(
+                value_to_check=detected_value,
+                aruco_id=aruco_id,
+            )
+            print(anomaly_score, is_anomaly)
+
+            parameters = settings_manager.getParametersForAnomalyMapper(
+                aruco_id=aruco_id
+            )
 
             anomaly_mapper = AnomalyMapper()
             anomaly_dto = anomaly_mapper.map_anomaly(
                 analyzed_image_id=analyzed_image_id,
-                detected_value=23.0,
-                comparative_value=24.0,  # e.g. 1% tolerance
-                is_anomaly=False,
-                node_id=opcua_node_id,
+                is_anomaly=is_anomaly,
+                anomaly_score=anomaly_score,
+                used_funtion=settings_manager.getScoreFunctionStr(aruco_id=aruco_id),
+                **parameters,
             )
 
             dal.insert_anomaly(anomaly_with_metadata=anomaly_dto)
+            print("Inserted both images:", id)

@@ -130,18 +130,19 @@ class DatabaseWriter:
     def insert_anomaly(
         self,
         analyzed_image_id: int,
-        detected_value: float,
-        comparative_value: float,
         is_anomaly: bool,
-        node_id: str,
+        anomaly_score: float,
+        used_funtion: str,
+        parameters: str,
     ) -> int:
         query = """
             INSERT INTO anomalies (
                 analyzed_image_id,
-                detected_value,
-                comparative_value,
                 is_anomaly,
-                node_id)
+                anomaly_score,
+                used_function,
+                parameters
+            )
             VALUES (?, ?, ?, ?, ?);
         """
 
@@ -151,10 +152,10 @@ class DatabaseWriter:
                     query,
                     (
                         analyzed_image_id,
-                        detected_value,
-                        comparative_value,
                         is_anomaly,
-                        node_id,
+                        anomaly_score,
+                        used_funtion,
+                        parameters,
                     ),
                 )
                 return cursor.lastrowid

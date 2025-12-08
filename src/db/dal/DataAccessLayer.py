@@ -26,9 +26,8 @@ class DataAccessLayer:
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
-    def create_object_name(self, id: int, name: str, format: str) -> str:
-        safe_name = name.replace(" ", "_").lower()
-        return f"{id}_{safe_name}.{format}"
+    def create_object_name(self, name: str, format: str) -> str:
+        return f"{name}.{format}"
 
     def insert_raw_image(self, raw_image_with_metadata: RawImageDTO) -> int:
         try:
@@ -36,9 +35,7 @@ class DataAccessLayer:
                 bucket_name=raw_image_with_metadata.bucket
             )
 
-            new_id = self.meta_repository.get_new_id_raw_images()
             object_name = self.create_object_name(
-                id=new_id,
                 name=raw_image_with_metadata.name,
                 format=raw_image_with_metadata.format,
             )
@@ -62,15 +59,13 @@ class DataAccessLayer:
 
     def insert_analyzed_image(
         self, anaylzed_image_with_metadata: AnalyzedImageDTO
-    ) -> id:
+    ) -> int:
         try:
             self.media_repository = MediaRepository(
                 bucket_name=anaylzed_image_with_metadata.bucket
             )
 
-            new_id = self.meta_repository.get_new_id_analyzed_images()
             object_name = self.create_object_name(
-                id=new_id,
                 name=anaylzed_image_with_metadata.name,
                 format=anaylzed_image_with_metadata.format,
             )

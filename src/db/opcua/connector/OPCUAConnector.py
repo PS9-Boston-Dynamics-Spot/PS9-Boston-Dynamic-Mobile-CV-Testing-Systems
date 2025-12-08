@@ -1,6 +1,6 @@
 from opcua import Client
 import socket
-from configs.reader.OPCUAConfigReader import OPCUAConfigReader
+from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 from db.opcua.exceptions.DNSError import DNSError
 from db.opcua.exceptions.OPCUAConnectionRefusedError import OPCUAConnectionRefusedError
 from db.opcua.exceptions.ConnectionError import ConnectionError
@@ -8,11 +8,13 @@ from db.opcua.exceptions.ConnectionError import ConnectionError
 
 class OPCUAConnector:
     def __init__(self):
-        self.opcua_config_reader = OPCUAConfigReader()
-        self.ip = self.opcua_config_reader.getIp()
-        self.port = self.opcua_config_reader.getPort()
-        self.protocol = self.opcua_config_reader.getProtocol()
-        self.timeout = self.opcua_config_reader.getTimeout()
+        self.credentials_manager = UnifiedCredentialsManager()
+        self.opcua_credentials = self.credentials_manager.getOPCUACredentials()
+
+        self.ip = self.opcua_credentials["ip"]
+        self.port = self.opcua_credentials["port"]
+        self.protocol = self.opcua_credentials["protocol"]
+        self.timeout = self.opcua_credentials["timeout"]
         self.client = None
 
         self.url = f"{self.protocol}://{self.ip}:{self.port}"

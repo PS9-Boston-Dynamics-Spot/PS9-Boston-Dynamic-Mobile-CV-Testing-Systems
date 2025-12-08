@@ -1,4 +1,3 @@
-from db.meta.read.DatabaseReader import DatabaseReader
 from db.meta.write.DatabaseWriter import DatabaseWriter
 from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 
@@ -11,14 +10,7 @@ from db.mapping.AnomalyMapper import AnomalyDTO
 
 class MetaRepository:
     def __init__(self):
-        self.reader = DatabaseReader()
         self.writer = DatabaseWriter()
-
-    def get_new_id_raw_images(self) -> int:
-        return self.reader.get_new_id_raw_images()
-
-    def get_new_id_analyzed_images(self) -> int:
-        return self.reader.get_new_id_analyzed_images()
 
     def insert_raw_image_metadata(
         self,
@@ -69,10 +61,10 @@ class MetaRepository:
         try:
             return self.writer.insert_anomaly(
                 analyzed_image_id=metadata.analyzed_image_id,
-                detected_value=metadata.detected_value,
-                comparative_value=metadata.comparative_value,
                 is_anomaly=metadata.is_anomaly,
-                node_id=metadata.node_id,
+                anomaly_score=metadata.anomaly_score,
+                used_funtion=metadata.used_funtion,
+                parameters=metadata.parameters,
             )
         except DatabaseWriterError as e:
             raise MetaRepositoryError(exception=e, error_code=1762881900)

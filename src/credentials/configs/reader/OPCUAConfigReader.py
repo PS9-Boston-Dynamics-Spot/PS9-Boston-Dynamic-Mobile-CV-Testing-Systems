@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
-from configs.loader.ConfigLoader import ConfigLoader
-from configs.enum.ConfigEnum import ConfigEnum, OPCUA_KEYS
+from credentials.configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.enum.ConfigEnum import ConfigEnum, OPCUA_KEYS
 
 
 class OPCUAConfigReader(ConfigLoader):
