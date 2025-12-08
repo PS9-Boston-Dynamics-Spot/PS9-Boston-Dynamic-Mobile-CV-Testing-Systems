@@ -14,7 +14,7 @@ CROP_FOLDER = f"{projectdir}/data/images/crop"
 WORKSPACE = "ps-9"
 WORKFLOW_ID = "find-digitaldisplayofenacs-digitaldisplaytemperatures-and-analogdisplaypressures"
 API_URL = f"https://serverless.roboflow.com/{WORKSPACE}/workflows/{WORKFLOW_ID}"
-API_KEY = "RYmNlhCjTmyi92J0pOwr"  # <-- Setze diese Umgebungsvariable! :
+API_KEY = "RYmNlhCjTmyi92J0pOwr"  # <-- Setze diese Umgebungsvariable! :ROBOFLOW_API_KEY
 
 # -----------------------------
 # Create crop folder if missing
