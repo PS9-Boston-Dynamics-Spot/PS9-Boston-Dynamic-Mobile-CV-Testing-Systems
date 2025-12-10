@@ -2,6 +2,9 @@ from roboflow import Roboflow
 from PIL import Image
 import os
 
+#veraltet
+
+
 # -------------------------
 # ROBFLOW MODEL LADEN
 # -------------------------
@@ -11,7 +14,7 @@ project = workspace.project("find-digitaldisplayofenacs-digitaldisplaytemperatur
 model = project.version(1).model
 
 raw_folder = "images/raw"
-crop_folder = "images/crops"
+crop_folder = "images/crop"
 os.makedirs(crop_folder, exist_ok=True)
 
 # -------------------------

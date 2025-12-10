@@ -2,6 +2,12 @@ from ultralytics import YOLO
 from PIL import Image
 from pathlib import Path
 
+
+#veraltet
+
+
+
+
 # Modell laden
 model = YOLO('runs/detect/train14/weights/best.pt')
 

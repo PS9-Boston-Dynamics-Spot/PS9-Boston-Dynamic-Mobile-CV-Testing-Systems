@@ -54,7 +54,6 @@ def main():
             try:
                 img = PILImage.create(p)
                 pred, pred_idx, probs = learn.predict(img)
-                # probs may be Tensor
                 probs_list = [float(x) for x in probs]
                 writer.writerow([str(p), str(pred), int(pred_idx), float(probs_list[int(pred_idx)]), probs_list])
             except Exception as e:
