@@ -9,7 +9,7 @@ model = YOLO('runs/detect/train14/weights/best.pt')
 # Ausgangsverzeichnis für Rohbilder
 raw_dir = Path('data/images/raw')
 # Zielverzeichnis für zugeschnittene und resized Bilder
-crop_dir = Path('data/images/crops')
+crop_dir = Path('data/images/crop')
 # Sicherstellen, dass das Zielverzeichnis existiert
 crop_dir.mkdir(parents=True, exist_ok=True)
 
