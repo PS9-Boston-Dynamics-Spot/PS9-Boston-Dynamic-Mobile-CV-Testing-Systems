@@ -37,8 +37,7 @@ from bosdyn.client.manipulation_api_client import ManipulationApiClient
 
 # Für Armbewegung nach oben
 from bosdyn.api.spot import robot_command_pb2
-from bosdyn.client.math_helpers import SE3Pose, Quat
-import time
+#from bosdyn.client.math_helpers import SE3Pose, Quat
 
 # Für Foto
 from bosdyn.client.image import ImageClient
@@ -63,6 +62,13 @@ from google.protobuf import wrappers_pb2
 
 import sys
 import datetime
+import math
+
+
+from bosdyn.api.basic_command_pb2 import RobotCommandFeedbackStatus
+from bosdyn.client import math_helpers
+from bosdyn.client.frame_helpers import (BODY_FRAME_NAME, ODOM_FRAME_NAME,
+                                         get_se2_a_tform_b)
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -911,6 +917,68 @@ class GraphNavInterface(object):
             # Sit the robot down + power off after the navigation command is complete.
             self.rc.toggle_power(should_power_on=False)
 
+ ###
+    
+    def auto_align_waypoint(self, waypoint_id, frame_name=ODOM_FRAME_NAME, stairs=False):
+        #Align Spot precisely with a specified waypoint pose.
+        if self._current_graph is None:
+            raise RuntimeError('Kein Graph geladen; bitte zuerst eine Karte hochladen.')
+        waypoint = next((wp for wp in self._current_graph.waypoints if wp.id == waypoint_id), None)
+        if waypoint is None:
+            raise ValueError(f"Wegpunkt '{waypoint_id}' wurde nicht gefunden.")
+
+        target_pose = math_helpers.SE2Pose.from_proto(waypoint.waypoint_tform_waypoint.local_pose)
+        transforms = self.rc.state_client.get_robot_state().kinematic_state.transforms_snapshot
+        frame_tform_body = get_se2_a_tform_b(transforms, frame_name, BODY_FRAME_NAME)
+        body_tform_goal = frame_tform_body.inverse() * target_pose
+
+        print(f"Auto-Align {waypoint_id}: dx={body_tform_goal.x:.3f} m, "
+                f"dy={body_tform_goal.y:.3f} m, dyaw={body_tform_goal.angle:.3f} rad")
+
+        return self.relative_move(
+            dx=body_tform_goal.x,
+            dy=body_tform_goal.y,
+            dyaw=body_tform_goal.angle,
+            frame_name=frame_name,
+            stairs=stairs,
+        )
+
+
+    def relative_move(self, dx, dy, dyaw, frame_name=ODOM_FRAME_NAME, stairs=False):
+        # choices=[VISION_FRAME_NAME, ODOM_FRAME_NAME]
+        transforms = self.rc.state_client.get_robot_state().kinematic_state.transforms_snapshot
+
+        # Build the transform for where we want the robot to be relative to where the body currently is.
+        body_tform_goal = math_helpers.SE2Pose(x=dx, y=dy, angle=dyaw)
+        # We do not want to command this goal in body frame because the body will move, thus shifting
+        # our goal. Instead, we transform this offset to get the goal position in the output frame
+        # (which will be either odom or vision).
+        out_tform_body = get_se2_a_tform_b(transforms, frame_name, BODY_FRAME_NAME)
+        out_tform_goal = out_tform_body * body_tform_goal
+
+        # Command the robot to go to the goal point in the specified frame. The command will stop at the
+        # new position.
+        robot_cmd = RobotCommandBuilder.synchro_se2_trajectory_point_command(
+            goal_x=out_tform_goal.x, goal_y=out_tform_goal.y, goal_heading=out_tform_goal.angle,
+            frame_name=frame_name, params=RobotCommandBuilder.mobility_params(stair_hint=stairs))
+        end_time = 10.0
+        cmd_id = self.rc.command_client.robot_command(lease=None, command=robot_cmd,
+                                                    end_time_secs=time.time() + end_time)
+        # Wait until the robot has reached the goal.
+        while True:
+            feedback = self.rc.command_client.robot_command_feedback(cmd_id)
+            mobility_feedback = feedback.feedback.synchronized_feedback.mobility_command_feedback
+            if mobility_feedback.status != RobotCommandFeedbackStatus.STATUS_PROCESSING:
+                print('Failed to reach the goal')
+                return False
+            traj_feedback = mobility_feedback.se2_trajectory_feedback
+            if (traj_feedback.status == traj_feedback.STATUS_AT_GOAL and
+                    traj_feedback.body_movement_status == traj_feedback.BODY_STATUS_SETTLED):
+                print('Arrived at the goal.')
+                return True
+            time.sleep(1)
+        return True
+
     def _navigate_to(self, *args):
         """Navigate to a specific waypoint."""
         # Take the first argument as the destination waypoint.
@@ -945,12 +1013,21 @@ class GraphNavInterface(object):
             # the robot down once it is finished.
             is_finished = self._check_success(nav_to_cmd_id)
 
-        # Power off the robot if appropriate.
-        if self.rc._powered_on and not self.rc._started_powered_on:
-            #self.rc.toggle_power(should_power_on=False)
-            print("Lege hin")
+        # # Power off the robot if appropriate.
+        # if self.rc._powered_on and not self.rc._started_powered_on:
+        #     #self.rc.toggle_power(should_power_on=False)
+        #     print("Lege hin")
         # Neu hinzufügen: Rückgabewert True/False für erfolgreiche Navigation
-        return self._check_success(nav_to_cmd_id)
+        if is_finished:
+            print("Starte Feinausrichtung…")
+            try:
+                self.auto_align_waypoint(destination_waypoint)
+                print("Feinausrichtung fertig.")
+            except Exception as e:
+                print(f"Feinausrichtung fehlgeschlagen: {e}")
+            
+        
+        return is_finished
 
     def _match_edge(self, current_edges, waypoint1, waypoint2):
         """Find an edge in the graph that is between two waypoint ids."""
