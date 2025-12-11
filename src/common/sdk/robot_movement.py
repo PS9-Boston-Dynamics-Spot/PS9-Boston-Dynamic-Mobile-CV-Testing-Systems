@@ -926,12 +926,24 @@ class GraphNavInterface(object):
         waypoint = next((wp for wp in self._current_graph.waypoints if wp.id == waypoint_id), None)
         if waypoint is None:
             raise ValueError(f"Wegpunkt '{waypoint_id}' wurde nicht gefunden.")
+            
+        print('Graph geladen & Wegpunkt gefunden')
 
-        target_pose = math_helpers.SE2Pose.from_proto(waypoint.waypoint_tform_waypoint.local_pose)
+        print(waypoint.waypoint_tform_ko)
+
+        target_pose = math_helpers.SE3Pose.get_closest_se2_transform(waypoint.waypoint_tform_ko)
+
+        #target_pose = math_helpers.SE2Pose.from_proto(waypoint.waypoint_tform_ko)
+        
+        print('target_pose erzeugt')
+        
         transforms = self.rc.state_client.get_robot_state().kinematic_state.transforms_snapshot
+        print('transforms erzeugt')
         frame_tform_body = get_se2_a_tform_b(transforms, frame_name, BODY_FRAME_NAME)
+        print('frame_tform_body erzeugt')
         body_tform_goal = frame_tform_body.inverse() * target_pose
-
+        print('body_tform_goal erzeugt')
+        
         print(f"Auto-Align {waypoint_id}: dx={body_tform_goal.x:.3f} m, "
                 f"dy={body_tform_goal.y:.3f} m, dyaw={body_tform_goal.angle:.3f} rad")
 
@@ -1018,16 +1030,16 @@ class GraphNavInterface(object):
         #     #self.rc.toggle_power(should_power_on=False)
         #     print("Lege hin")
         # Neu hinzufügen: Rückgabewert True/False für erfolgreiche Navigation
-        if is_finished:
-            print("Starte Feinausrichtung…")
-            try:
-                self.auto_align_waypoint(destination_waypoint)
-                print("Feinausrichtung fertig.")
-            except Exception as e:
-                print(f"Feinausrichtung fehlgeschlagen: {e}")
+        # if is_finished:
+        #     print("Starte Feinausrichtung…")
+        #     try:
+        #         self.auto_align_waypoint(destination_waypoint)
+        #         print("Feinausrichtung fertig.")
+        #     except Exception as e:
+        #         print(f"Feinausrichtung fehlgeschlagen: {e}")
             
         
-        return is_finished
+        #return is_finished
 
     def _match_edge(self, current_edges, waypoint1, waypoint2):
         """Find an edge in the graph that is between two waypoint ids."""
@@ -1181,7 +1193,7 @@ def main():
 
                 # navigation._navigate_to(["nosed-hogg-k2X1XJLvCB347bqrxbhoAQ=="])  # waypoint 16 (Davor)
                 
-                navigation._navigate_to(["hadean-bear-uuJgT47H63KZUC9HbZ2HGA=="])  # default
+                navigation._navigate_to(["inured-boxer-mCIfZdF867i3wEbkV+5syg=="])  # default
                 
                 
 
@@ -1262,9 +1274,9 @@ def main():
 
                     # Beispiel: etwas vor den Roboter (x=0.6m vor), mittig (y=0), leicht angehoben (z=0.4m)
                     #x, y, z = 0.6, -0.5, 0.8
-                    x = 0.67708456516265869
-                    y = 0.034377455711364746
-                    z = 0.80469489097595215
+                    x = 0.12727655470371246
+                    y = -0.20078209042549133
+                    z = 0.76679253578186035
                     # Keine Drehung (Einheitsquaternion)
                     # qw, qx, qy, qz = 1.0, 0.0, 0.0, 0.0
                     
@@ -1289,10 +1301,10 @@ def main():
                     # qz = cr * cp * sy - sr * sp * cy
 
 
-                    qx = 0.09720776230096817
-                    qy = 0.45448499917984009
-                    qz = -0.19426915049552917
-                    qw = 0.86385965347290039
+                    qx = 0.28279393911361694
+                    qy = 0.32262614369392395
+                    qz = -0.64903956651687622
+                    qw = 0.62824171781539917
 
 
                     command = RobotCommandBuilder.arm_pose_command(
@@ -1308,7 +1320,7 @@ def main():
                     print("Greifer öffnet...")
                     command = RobotCommandBuilder.claw_gripper_open_command()
                     rc.command_client.robot_command(command)
-                    time.sleep(4)
+                    time.sleep(14)
 
                     # Bild aufnehmen
                     rc.set_high_res_auto_params()
@@ -1322,6 +1334,8 @@ def main():
 
                     # Request the image
                     image_response = rc.image_client.get_image([image_request])[0]
+
+                    
                     rc.maybe_save_image(image_response.shot.image, path=None)
                     print("Bild erfolgreich gespeichert")
 ############################
@@ -1361,7 +1375,7 @@ def main():
                     print("Arm-Sequenz erfolgreich abgeschlossen")
                     # -----------------------------
 
-                    navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
+                    #navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
 
                 return True
 
