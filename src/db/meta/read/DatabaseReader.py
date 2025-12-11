@@ -5,21 +5,16 @@ class DatabaseReader:
     def __init__(self):
         self.connector = SqliteConnectionManager.get_connector()
 
-    def __get_id_from_seq(self, query: str) -> int:
-        with self.connector as cursor:
-            cursor.execute(query)
-            row = cursor.fetchone()
-
-            # row can be None, or row[0] can be None
-            if not row or row[0] is None:
-                return 0
-
-            return int(row[0])
-
     def get_new_id_raw_images(self) -> int:
         query = "select seq from sqlite_sequence where name='cvision_images_raw'"
-        return self.__get_id_from_seq(query)
+        with self.connector as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()[0]
+            return (result or 0) + 1
 
     def get_new_id_analyzed_images(self) -> int:
         query = "select seq from sqlite_sequence where name='cvision_images_analyzed'"
-        return self.__get_id_from_seq(query)
+        with self.connector as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()[0]
+            return (result or 0) + 1

@@ -2,6 +2,7 @@ from credentials.env.loader.EnvLoader import EnvLoader
 from credentials.env.enum.EnvEnum import EnvEnum, ROBOT_KEYS
 from typing import Optional
 
+
 class RobotEnvReader(EnvLoader):
     def __init__(self):
         super().__init__()

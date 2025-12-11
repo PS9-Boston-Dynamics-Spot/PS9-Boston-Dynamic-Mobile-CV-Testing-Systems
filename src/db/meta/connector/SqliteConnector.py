@@ -48,11 +48,8 @@ class SqliteConnector:
                 uri=credentials["uri"],
             )
 
-            print("SQLite shared connection established.")
-
     def _ensure_connection(self):
         if SqliteConnector._shared_connection is None:
-            print("Reconnecting to SQLite database...")
             self._init_shared_connection()
         self.connection = SqliteConnector._shared_connection
 
@@ -86,6 +83,5 @@ class SqliteConnector:
     def close(cls):
         with cls._lock:
             if cls._shared_connection:
-                print("SQLite shared connection closed.")
                 cls._shared_connection.close()
                 cls._shared_connection = None

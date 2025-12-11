@@ -1,6 +1,8 @@
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, Optional
 from db.mapping.MapperHelper import MapperHelper
+from common.conventions.ImageNames import ImageNames
+from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 
 
 @dataclass
@@ -78,7 +80,7 @@ class AnalyzedImageDTO:
         if not isinstance(self.sensor_type, str):
             raise TypeError("'sensor_type' must be a string")
 
-        if (not isinstance(self.opcua_node_id, str) and self.opcua_node_id is not None):
+        if not isinstance(self.opcua_node_id, str) and self.opcua_node_id is not None:
             raise TypeError("'opcua_node_id' must be a string")
 
         if not isinstance(self.aruco_id, int):
@@ -105,18 +107,18 @@ class AnalyzedImageDTO:
 
 class AnalyzedImageMapper:
 
+    @staticmethod
     def map_image(
-        self,
         image_data: bytes,
         raw_image_id: int,
-        name: str,
-        bucket: str,
         sensor_type: str,
         aruco_id: int,
         category: str,
         quality: float,
         value: float,
         unit: str,
+        bucket: Optional[str] = None,
+        name: Optional[str] = None,
         format: Optional[str] = None,
         content_type: Optional[str] = None,
         size: Optional[int] = None,
@@ -128,6 +130,25 @@ class AnalyzedImageMapper:
         format = format or MapperHelper.guess_file_extension(image_data)
         content_type = content_type or MapperHelper.guess_content_type(image_data)
         size = size or MapperHelper.get_bytes_length(image_data)
+        bucket = bucket or UnifiedCredentialsManager().getMinioAnalyzedBucket()
+
+        if not name or name.strip() == "":
+            name = ImageNames.from_dict(
+                {
+                    "size": size,
+                    "raw_image_id": raw_image_id,
+                    "format": format,
+                    "content_type": content_type,
+                    "bucket": bucket,
+                    "sensor_type": sensor_type,
+                    "aruco_id": aruco_id,
+                    "value": value,
+                    "unit": unit,
+                    "category": category,
+                    "compressed": compressed,
+                    "hash": MapperHelper.sha256(image_data=image_data),
+                }
+            )
 
         dto = AnalyzedImageDTO(
             image_data=image_data,
