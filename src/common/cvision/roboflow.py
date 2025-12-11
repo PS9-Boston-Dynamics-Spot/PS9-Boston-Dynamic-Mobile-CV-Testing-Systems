@@ -4,9 +4,6 @@ import base64
 import requests
 import json
 
-# -----------------------------
-# CONFIG
-# -----------------------------
 projectdir = "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems"
 RAW_FOLDER = f"{projectdir}/data/images/raw"
 CROP_FOLDER = f"{projectdir}/data/images/crop"
@@ -14,11 +11,8 @@ CROP_FOLDER = f"{projectdir}/data/images/crop"
 WORKSPACE = "ps-9"
 WORKFLOW_ID = "find-digitaldisplayofenacs-digitaldisplaytemperatures-and-analogdisplaypressures"
 API_URL = f"https://serverless.roboflow.com/{WORKSPACE}/workflows/{WORKFLOW_ID}"
-API_KEY = "RYmNlhCjTmyi92J0pOwr"  # <-- Setze diese Umgebungsvariable! :ROBOFLOW_API_KEY
+API_KEY = os.getenv("ROBOFLOW_API_KEY")
 
-# -----------------------------
-# Create crop folder if missing
-# -----------------------------
 os.makedirs(CROP_FOLDER, exist_ok=True)
 
 def run_roboflow_inference(image_path: str):
@@ -67,12 +61,12 @@ def crop_predictions(image_path: str, predictions: list):
         crop = img[y1:y2, x1:x2]
 
         if crop.size == 0:
-            print(f"⚠️ Prediction {i} ergibt kein gültiges Crop - übersprungen.")
+            print(f"Prediction {i} ergibt kein gültiges Crop - übersprungen.")
             continue
 
         crop_filename = f"{CROP_FOLDER}/{base_name}_crop_{i}.jpg"
         cv2.imwrite(crop_filename, crop)
-        print(f"📸 Crop gespeichert: {crop_filename}")
+        print(f"Crop gespeichert: {crop_filename}")
 
 
 def process_all_images():
@@ -80,12 +74,12 @@ def process_all_images():
     files = [f for f in os.listdir(RAW_FOLDER) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
 
     if not files:
-        print("❌ Keine Bilder im images/raw Ordner gefunden.")
+        print("Keine Bilder im images/raw Ordner gefunden.")
         return
 
     for filename in files:
         image_path = os.path.join(RAW_FOLDER, filename)
-        print(f"\n🔍 Verarbeite Datei: {image_path}")
+        print(f"\nVerarbeite Datei: {image_path}")
 
         # Schritt 1: Roboflow ausführen
         result = run_roboflow_inference(image_path)
@@ -93,12 +87,12 @@ def process_all_images():
         # Schritt 2: Predictions aus Result extrahieren
         predictions = result["outputs"][0]["predictions"]["predictions"]
 
-        print(f"➡️ {len(predictions)} Bildschirme erkannt.")
+        print(f"{len(predictions)} Bildschirme erkannt.")
 
         # Schritt 3: Croppen
         crop_predictions(image_path, predictions)
 
-    print("\n✅ Fertig! Crops in images/crop gespeichert.")
+    print("\nFertig! Crops in images/crop gespeichert.")
 
 
 if __name__ == "__main__":
