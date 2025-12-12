@@ -1,70 +1,30 @@
 import argparse
-import logging
-import math
+
 import os
 import sys
 import time
-import traceback
+import datetime
 
-from PIL import Image
-import io
+from google.protobuf import wrappers_pb2
 
-import google.protobuf.timestamp_pb2
-import grpc
-
-import bosdyn.client.channel
 import bosdyn.client.util
-from bosdyn.api import geometry_pb2, power_pb2, robot_state_pb2, arm_command_pb2, image_pb2
-from bosdyn.api.gps import gps_pb2
+from bosdyn.api import robot_state_pb2, image_pb2, gripper_camera_param_pb2, header_pb2
 from bosdyn.api.graph_nav import graph_nav_pb2, map_pb2, nav_pb2
 from bosdyn.client.exceptions import ResponseError
 from bosdyn.client.frame_helpers import get_odom_tform_body
 from bosdyn.client.graph_nav import GraphNavClient
 from bosdyn.client.lease import LeaseClient, LeaseKeepAlive, ResourceAlreadyClaimedError
-from bosdyn.client.math_helpers import Quat, SE3Pose
 from bosdyn.client.power import PowerClient, power_on_motors, safe_power_off_motors
 from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient, blocking_stand
 from bosdyn.client.robot_state import RobotStateClient
-from bosdyn.client.math_helpers import Quat
-
-# Für Armsteuerung
-from bosdyn.client.manipulation_api_client import ManipulationApiClient
 
 
-
-# Für Armbewegung nach oben
-from bosdyn.api.spot import robot_command_pb2
-
-# Für Foto
-from bosdyn.client.image import ImageClient
-from bosdyn.client.image import build_image_request
-
+from bosdyn.client.image import ImageClient, build_image_request
 from bosdyn.client.estop import EstopClient, EstopEndpoint, EstopKeepAlive
-
-from bosdyn.api import basic_command_pb2
-
-from bosdyn.client.robot_command import CommandFailedErrorWithFeedback
-from bosdyn.client.exceptions import TimedOutError
-from bosdyn.client.robot_command import CommandTimedOutError
-
 from bosdyn.client.docking import DockingClient
-
-
-from bosdyn.client.frame_helpers import VISION_FRAME_NAME, get_vision_tform_body
-
-from bosdyn.api import gripper_camera_param_pb2, header_pb2
 from bosdyn.client.gripper_camera_param import GripperCameraParamClient
-from google.protobuf import wrappers_pb2
-
-import sys
-import datetime
-import math
 
 
-from bosdyn.api.basic_command_pb2 import RobotCommandFeedbackStatus
-from bosdyn.client import math_helpers
-from bosdyn.client.frame_helpers import (BODY_FRAME_NAME, ODOM_FRAME_NAME,
-                                         get_se2_a_tform_b)
 
 from dotenv import load_dotenv
 load_dotenv()
