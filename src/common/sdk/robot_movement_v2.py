@@ -23,7 +23,7 @@ from bosdyn.client.graph_nav import GraphNavClient
 from bosdyn.client.lease import LeaseClient, LeaseKeepAlive, ResourceAlreadyClaimedError
 from bosdyn.client.math_helpers import Quat, SE3Pose
 from bosdyn.client.power import PowerClient, power_on_motors, safe_power_off_motors
-from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient
+from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient, blocking_stand
 from bosdyn.client.robot_state import RobotStateClient
 from bosdyn.client.math_helpers import Quat
 
@@ -34,7 +34,6 @@ from bosdyn.client.manipulation_api_client import ManipulationApiClient
 
 # Für Armbewegung nach oben
 from bosdyn.api.spot import robot_command_pb2
-#from bosdyn.client.math_helpers import SE3Pose, Quat
 
 # Für Foto
 from bosdyn.client.image import ImageClient
@@ -101,7 +100,7 @@ class RobotController:
         self._started_powered_on = (power_state.motor_power_state == power_state.STATE_ON)
         self._powered_on = self._started_powered_on
 
-            
+    #Not working        
     def dock(self, dock_id: int, timeout_sec: int = 60):
 
         """Führt einen vollständigen Docking-Vorgang an der angegebenen Dock-ID aus."""
@@ -110,7 +109,7 @@ class RobotController:
 
         # 1. Sicherstellen, dass Spot steht
         print("[Dock] Stelle sicher, dass der Roboter steht...")
-        self.blocking_stand()
+        blocking_stand(self.command_client)
 
         # 2. Dock-Befehl senden
         print("[Dock] Sende Dock-Command...")
@@ -155,85 +154,6 @@ class RobotController:
         power_state = self.state_client.get_robot_state().power_state
         self._powered_on = (power_state.motor_power_state == power_state.STATE_ON)
         return self._powered_on
-    
-    def blocking_command(self, command, check_status_fn, end_time_secs=None, timeout_sec=10,
-                     update_frequency=1.0):
-
-
-        def raise_not_processing(command_id, feedback_status, response):
-            raise CommandFailedErrorWithFeedback(
-                'Command (ID {}) no longer processing ({})'.format(
-                    command_id,
-                    basic_command_pb2.RobotCommandFeedbackStatus.Status.Name(feedback_status)),
-                response)
-
-        start_time = time.time()
-        end_time = start_time + timeout_sec
-        update_time = 1.0 / update_frequency
-
-        command_id = self.command_client.robot_command(command, timeout=timeout_sec,
-                                                end_time_secs=end_time_secs)
-
-        now = time.time()
-        while now < end_time:
-            time_until_timeout = end_time - now
-            rpc_timeout = max(time_until_timeout, 1)
-            start_call_time = time.time()
-            try:
-                response = self.command_client.robot_command_feedback(command_id, timeout=rpc_timeout)
-            except TimedOutError:
-                # Excuse the TimedOutError and let the while check bail us out if we're out of time.
-                pass
-            else:
-                # Check the high level robot command status'
-                if response.feedback.HasField("full_body_feedback"):
-                    full_body_status = response.feedback.full_body_feedback.status
-                    if full_body_status != basic_command_pb2.RobotCommandFeedbackStatus.STATUS_PROCESSING:
-                        raise_not_processing(command_id, full_body_status, response)
-                elif response.feedback.HasField("synchronized_feedback"):
-                    synchro_fb = response.feedback.synchronized_feedback
-                    # Mobility Feedback
-                    if synchro_fb.HasField("mobility_command_feedback"):
-                        mob_status = synchro_fb.mobility_command_feedback.status
-                        if mob_status != basic_command_pb2.RobotCommandFeedbackStatus.STATUS_PROCESSING:
-                            raise_not_processing(command_id, mob_status, response)
-                    # Arm Feedback
-                    if synchro_fb.HasField("arm_command_feedback"):
-                        arm_status = synchro_fb.arm_command_feedback.status
-                        if arm_status != basic_command_pb2.RobotCommandFeedbackStatus.STATUS_PROCESSING:
-                            raise_not_processing(command_id, arm_status, response)
-                    # Gripper Feedback
-                    if synchro_fb.HasField("gripper_command_feedback"):
-                        gripper_status = synchro_fb.gripper_command_feedback.status
-                        if gripper_status != basic_command_pb2.RobotCommandFeedbackStatus.STATUS_PROCESSING:
-                            raise_not_processing(command_id, gripper_status, response)
-                else:
-                    raise CommandFailedErrorWithFeedback(
-                        'Command (ID {}) has neither full body nor synchronized feedback'.format(
-                            command_id), response)
-
-                # Check low level command specific status'
-                if check_status_fn(response):
-                    return
-
-            delta_t = time.time() - start_call_time
-            time.sleep(max(min(delta_t, update_time), 0.0))
-            now = time.time()
-
-        raise CommandTimedOutError(
-            "Took longer than {:.1f} seconds to execute the command.".format(now - start_time))
-
-
-    def blocking_stand(self, timeout_sec=10, update_frequency=1.0, params=None):
-
-        def check_stand_status(response):
-            status = response.feedback.synchronized_feedback.mobility_command_feedback.stand_feedback.status
-            return status == basic_command_pb2.StandCommand.Feedback.STATUS_IS_STANDING
-
-        stand_command = RobotCommandBuilder.synchro_stand_command(params=params)
-        self.blocking_command(stand_command, check_stand_status, timeout_sec=timeout_sec,
-                        update_frequency=update_frequency)
-
 
     def maybe_save_image(self, image, path):
         """Try to save image, if client has correct deps."""
@@ -328,7 +248,6 @@ class RobotController:
             print(f"Kritischer Fehler bei der Kommunikation mit dem Roboter bei Gripper Cam Paramater einstellung: {e}")
             return False
 
-
 class EstopNoGui():
     """Provides a software estop without a GUI.
 
@@ -365,26 +284,14 @@ class EstopNoGui():
         self.estop_keep_alive.settle_then_cut()
 
 class GraphNavInterface(object):
-    
+    #-GNU
     def id_to_short_code(self, id):
         """Convert a unique id to a 2 letter short code."""
         tokens = id.split('-')
         if len(tokens) > 2:
             return f'{tokens[0][0]}{tokens[1][0]}'
         return None
-
-
-    def pretty_print_waypoints(self, waypoint_id, waypoint_name, short_code_to_count, localization_id):
-        short_code = self.id_to_short_code(waypoint_id)
-        if short_code is None or short_code_to_count[short_code] != 1:
-            short_code = '  '  # If the short code is not valid/unique, don't show it.
-
-        waypoint_symbol = '->' if localization_id == waypoint_id else '  '
-        print(
-            f'{waypoint_symbol} Waypoint name: {waypoint_name} id: {waypoint_id} short code: {short_code}'
-        )
-
-
+    #-GNU
     def find_unique_waypoint_id(self, short_code, graph, name_to_id):
         """Convert either a 2 letter short code or an annotation name into the associated unique id."""
         if graph is None:
@@ -416,67 +323,6 @@ class GraphNavInterface(object):
                     return short_code  # Multiple waypoints with same short code.
                 ret = waypoint.id
         return ret
-
-
-    def update_waypoints_and_edges(self, graph, localization_id, do_print=True):
-        """Update and print waypoint ids and edge ids."""
-        name_to_id = dict()
-        edges = dict()
-
-        short_code_to_count = {}
-        waypoint_to_timestamp = []
-        for waypoint in graph.waypoints:
-            # Determine the timestamp that this waypoint was created at.
-            timestamp = -1.0
-            try:
-                timestamp = waypoint.annotations.creation_time.seconds + waypoint.annotations.creation_time.nanos / 1e9
-            except:
-                # Must be operating on an older graph nav map, since the creation_time is not
-                # available within the waypoint annotations message.
-                pass
-            waypoint_to_timestamp.append((waypoint.id, timestamp, waypoint.annotations.name))
-
-            # Determine how many waypoints have the same short code.
-            short_code = self.id_to_short_code(waypoint.id)
-            if short_code not in short_code_to_count:
-                short_code_to_count[short_code] = 0
-            short_code_to_count[short_code] += 1
-
-            # Add the annotation name/id into the current dictionary.
-            waypoint_name = waypoint.annotations.name
-            if waypoint_name:
-                if waypoint_name in name_to_id:
-                    # Waypoint name is used for multiple different waypoints, so set the waypoint id
-                    # in this dictionary to None to avoid confusion between two different waypoints.
-                    name_to_id[waypoint_name] = None
-                else:
-                    # First time we have seen this waypoint annotation name. Add it into the dictionary
-                    # with the respective waypoint unique id.
-                    name_to_id[waypoint_name] = waypoint.id
-
-        # Sort the set of waypoints by their creation timestamp. If the creation timestamp is unavailable,
-        # fallback to sorting by annotation name.
-        waypoint_to_timestamp = sorted(waypoint_to_timestamp, key=lambda x: (x[1], x[2]))
-
-        # Print out the waypoints name, id, and short code in an ordered sorted by the timestamp from
-        # when the waypoint was created.
-        if do_print:
-            print(f'{len(graph.waypoints):d} waypoints:')
-            for waypoint in waypoint_to_timestamp:
-                self.pretty_print_waypoints(waypoint[0], waypoint[2], short_code_to_count, localization_id)
-
-        for edge in graph.edges:
-            if edge.id.to_waypoint in edges:
-                if edge.id.from_waypoint not in edges[edge.id.to_waypoint]:
-                    edges[edge.id.to_waypoint].append(edge.id.from_waypoint)
-            else:
-                edges[edge.id.to_waypoint] = [edge.id.from_waypoint]
-            if do_print:
-                print(f'(Edge) from waypoint {edge.id.from_waypoint} to waypoint {edge.id.to_waypoint} '
-                    f'(cost {edge.annotations.cost.value})')
-
-        return name_to_id, edges
-
 
     def __init__(self, robot_controller: RobotController, upload_path):
         self.use_gps=False
@@ -523,12 +369,10 @@ class GraphNavInterface(object):
         self.rc.graph_nav_client.set_localization(initial_guess_localization=localization,
                                                 ko_tform_body=current_odom_tform_body)
 
-
     def _clear_graph_and_cache(self, *args):
         """Clear the state of the map on the robot, removing all waypoints and edges. Also clears the disk cache."""
         return self.rc.graph_nav_client.clear_graph_and_cache()
-
-
+    #
     def _upload_graph_and_snapshots(self, *args):
         """Upload the graph and snapshots to the robot."""
         print('Loading the graph from disk into local storage...')
@@ -581,8 +425,7 @@ class GraphNavInterface(object):
             print(
                 'Upload complete! The robot is currently not localized to the map; please localize'
                 ' the robot using commands (2) or (3) before attempting a navigation command.')
-
-
+    #
     def _navigate_to(self, *args):
         """Navigate to a specific waypoint."""
         # Take the first argument as the destination waypoint.
@@ -620,19 +463,10 @@ class GraphNavInterface(object):
         # # Power off the robot if appropriate.
         # if self.rc._powered_on and not self.rc._started_powered_on:
         #     #self.rc.toggle_power(should_power_on=False)
-        #     print("Lege hin")
-        # Neu hinzufügen: Rückgabewert True/False für erfolgreiche Navigation
-        # if is_finished:
-        #     print("Starte Feinausrichtung…")
-        #     try:
-        #         self.auto_align_waypoint(destination_waypoint)
-        #         print("Feinausrichtung fertig.")
-        #     except Exception as e:
-        #         print(f"Feinausrichtung fehlgeschlagen: {e}")
-            
+        #     print("Lege hin") 
         
-        #return is_finished
-
+        return is_finished
+    #-
     def _match_edge(self, current_edges, waypoint1, waypoint2):
         """Find an edge in the graph that is between two waypoint ids."""
         # Return the correct edge id as soon as it's found.
@@ -645,7 +479,7 @@ class GraphNavInterface(object):
                     # This edge matches the pair of waypoints! Add it the edge list and continue.
                     return map_pb2.Edge.Id(from_waypoint=waypoint1, to_waypoint=waypoint2)
         return None
-
+    #-
     def _navigate_route(self, *args):
         """Navigate through a specific route of waypoints."""
         if len(args) < 1 or len(args[0]) < 1:
@@ -705,7 +539,7 @@ class GraphNavInterface(object):
             if self.rc._powered_on and not self.rc._started_powered_on:
                 # Sit the robot down + power off after the navigation command is complete.
                 self.rc.toggle_power(should_power_on=False)
-
+    #
     def _check_success(self, command_id=-1):
         """Use a navigation command id to get feedback from the robot and sit when command succeeds."""
         if command_id == -1:
@@ -730,32 +564,16 @@ class GraphNavInterface(object):
 
 
 def main():
-    """Run the command-line interface with GraphNav navigation and arm/gripper control."""
 
     parser = argparse.ArgumentParser(
-        description="Spot navigiert automatisch mit GraphNav und E-Stop GUI"
+        description="Spot Navigation Script with Arm and Camera Functionality"
     )
     parser.add_argument('-u', '--upload-filepath',
                         help='Full filepath to graph and snapshots to be uploaded.', required=True)
     bosdyn.client.util.add_base_arguments(parser)
     options = parser.parse_args()
 
-    # --- START DER NEUEN LOGIK FÜR DEN BILD-SPEICHERPFAD ---
-    # 1. Absoluten Pfad des Skript-Ordners bestimmen
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "spot_bilder")
-    
-    print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
-    
-    # 3. Sicherstellen, dass der Ordner existiert
-    if not os.path.exists(OUTPUT_DIR):
-        try:
-            os.makedirs(OUTPUT_DIR)
-            print(f"Zielordner '{OUTPUT_DIR}' erstellt.")
-        except Exception as e:
-            print(f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}")
-            OUTPUT_DIR = None # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
+
 
     # Setup and authenticate the robot.
     sdk = bosdyn.client.create_standard_sdk('SeminarClient')
@@ -783,7 +601,7 @@ def main():
                 
 
                 print("Commanding robot to stand...")
-                rc.blocking_stand()
+                blocking_stand(rc.command_client)
                 print("Robot standing.")
                 time.sleep(3)
                 robot_state = rc.state_client.get_robot_state()
@@ -792,29 +610,11 @@ def main():
                 print("Setze Location")
                 navigation._set_initial_localization_fiducial()
                 print("Gehe zu Location")
-                # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
-                # navigation._navigate_to(["fringy-hyla-nlBmspSxRbmgsIwQXeE.iQ=="])  # waypoint 17  (Ecke)
 
-                # navigation._navigate_to(["nosed-hogg-k2X1XJLvCB347bqrxbhoAQ=="])  # waypoint 16 (Davor)
                 
-                navigation._navigate_to(["inured-boxer-mCIfZdF867i3wEbkV+5syg=="])  # default
+                is_finished = navigation._navigate_to(["inured-boxer-mCIfZdF867i3wEbkV+5syg=="])  # default
                 
-                
-
-                # # navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="])  # waypoint 2
-                # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
-                # # Prüfen, ob Waypoint erreicht wurde
-                # nav_state = navigation._check_success()
-                
-                
-                
-                # Wir setzen reached zum test mal auf true
-
-                # reached = nav_state if isinstance(nav_state, bool) else True
-                reached = False
-
-
-                if 1==1:
+                if is_finished:
                     print("Waypoint erreicht: Starte Arm- und Greifer-Sequenz")
 
                     # 1. Arm ausklappen / bereit machen
@@ -825,7 +625,6 @@ def main():
                     # Get robot pose in vision frame from robot state (we want to send commands in vision
                     # frame relative to where the robot stands now)
                     robot_state = rc.state_client.get_robot_state()
-                    vision_T_body = get_vision_tform_body(robot_state.kinematic_state.transforms_snapshot)
 
                     # 3. Arm bewegen (z.B. hochheben oder vorziehen)
                     print("Arm wird leicht nach vorne oben bewegt...")
@@ -855,35 +654,33 @@ def main():
                     time.sleep(14)
 
                     # Bild aufnehmen
+                    
+                    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) # 1. Absoluten Pfad des Skript-Ordners bestimmen
+                    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "spot_bilder") # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
+                    
+                    print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
+                    try:
+                        os.makedirs(OUTPUT_DIR, exist_ok=True)
+                    except Exception as e:
+                            print(f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}")
+                            OUTPUT_DIR = None # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
+
                     rc.set_high_res_auto_params()
+                    for i in range(2):
+                        image_request = build_image_request(
+                            'hand_color_image',
+                            quality_percent=100,  # Maximum quality
+                            image_format=image_pb2.Image.FORMAT_JPEG,
+                            resize_ratio=1.0  # No downsampling
+                        )
 
-                    image_request = build_image_request(
-                        'hand_color_image',
-                        quality_percent=100,  # Maximum quality
-                        image_format=image_pb2.Image.FORMAT_JPEG,
-                        resize_ratio=1.0  # No downsampling
-                    )
+                        # Request the image
+                        image_response = rc.image_client.get_image([image_request])[0]
 
-                    # Request the image
-                    image_response = rc.image_client.get_image([image_request])[0]
+                        rc.maybe_save_image(image_response.shot.image, path=OUTPUT_DIR)
+                        print("Bild erfolgreich gespeichert")
+                        time.sleep(6)
 
-                    rc.maybe_save_image(image_response.shot.image, path=OUTPUT_DIR)
-                    print("Bild erfolgreich gespeichert")
-
-                    # 2. Bild aufnehmen
-                    time.sleep(6) 
-                    image_request2 = build_image_request(
-                        'hand_color_image',
-                        quality_percent=100,  # Maximum quality
-                        image_format=image_pb2.Image.FORMAT_JPEG,
-                        resize_ratio=1.0  # No downsampling
-                    )
-
-                    # Request the image
-                    image_response2 = rc.image_client.get_image([image_request2])[0]
-                    # *** GEÄNDERT: Übergabe des expliziten Speicherpfades ***
-                    rc.maybe_save_image(image_response2.shot.image, path=OUTPUT_DIR)
-                    print("Bild erfolgreich gespeichert")
 
                     time.sleep(4)
 
@@ -902,7 +699,7 @@ def main():
                     print("Arm-Sequenz erfolgreich abgeschlossen")
                     # -----------------------------
 
-                    # navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3
+                #navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3 wieder zurück irgendwo hin
 
                 return True
 
