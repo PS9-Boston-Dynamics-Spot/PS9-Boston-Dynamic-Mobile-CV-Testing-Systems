@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, Tuple
+from common.typing.Typing import Optional, Tuple
 from db.mapping.RawImageMapper import RawImageMapper
 from db.mapping.AnalyzedImageMapper import AnalyzedImageMapper
 from db.mapping.AnomalyMapper import AnomalyMapper

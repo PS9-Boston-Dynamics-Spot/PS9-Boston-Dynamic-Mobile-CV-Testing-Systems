@@ -1,4 +1,4 @@
-from typing import Any
+from common.typing.Typing import Any
 
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository

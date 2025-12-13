@@ -1,4 +1,4 @@
-from typing import Any
+from common.typing.Typing import Any
 from db.opcua.connector.OPCUAConnector import OPCUAConnector
 from opcua import ua
 from db.opcua.exceptions.NodeNotFoundError import NodeNotFoundError

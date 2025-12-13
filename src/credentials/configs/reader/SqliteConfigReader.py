@@ -1,5 +1,5 @@
 from credentials.configs.loader.ConfigLoader import ConfigLoader
-from typing import Dict, Any, Optional
+from common.typing.Typing import Dict, Any, Optional
 from credentials.configs.enum.ConfigEnum import ConfigEnum, SQLITE_KEYS
 
 

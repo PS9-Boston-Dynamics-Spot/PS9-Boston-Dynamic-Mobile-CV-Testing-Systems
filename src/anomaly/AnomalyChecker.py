@@ -1,5 +1,5 @@
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
-from typing import Tuple, Optional
+from common.typing.Typing import Tuple, Optional
 
 
 class AnomalyChecker:
