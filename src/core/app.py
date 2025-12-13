@@ -1,29 +1,3 @@
-<<<<<<< HEAD
-from common.utils.BostonDynamicLoader import BostonDynamicsConfigLoader
-from minio import Minio
-
-if __name__ == "__main__":
-    robot_config = BostonDynamicsConfigLoader()
-    print(robot_config._get_robot())
-    print(robot_config.getIP())
-    print(robot_config.getUser())
-    print(robot_config.getWifi())
-    print(robot_config.getPassword())
-
-
-
-    client = Minio(
-        "minio:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False
-    )
-
-    # Liste Buckets
-    buckets = client.list_buckets()
-    for b in buckets:
-        print(b.name)
-=======
 import os
 
 from configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
@@ -37,6 +11,8 @@ from configs.mapper.ArUcoIDOPCUANodeMapper import ArUcoIDOPCUANodeMapper
 from db.mapping.AnomalyMapper import AnomalyMapper
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 from anomaly.AnomalyChecker import AnomalyChecker
+#raw Daten Croppen und speichern in Bytestream + crop folder
+from common.cvision.roboflow import run_roboflow_inference, crop_predictions
 
 if __name__ == "__main__":
 
@@ -66,26 +42,47 @@ if __name__ == "__main__":
 
             # get the aruco id through image extraction
             aruco_id = 46
-            detected_value = 23.0
-
+            
             aruco_node_mapper = ArUcoIDOPCUANodeMapper()
             opcua_node_id = aruco_node_mapper.get_opcua_node_by_id(aruco_id=aruco_id)
 
             opcua_node_id = settings_manager.getOPCUANodeByID(aruco_id=aruco_id)
 
-            dto_analyzed_image = analyzed_image_mapper.map_image(
-                image_data=image_bytes,
-                raw_image_id=raw_image_id,
-                sensor_type="tesassdaassddvg2fd2s",
-                opcua_node_id=opcua_node_id,
-                aruco_id=aruco_id,
-                category="es1tdsa32asdssasdsdfsss",
-                quality=1.0,
-                value=detected_value,
-                unit="°C_2",
-            )
+            #analyzed image mit metadata in db speichern
+
+            result = run_roboflow_inference(path)
+
+            predictions = result["outputs"][0]["predictions"]["predictions"][:2]
+            print(f"Roboflow returned {len(predictions)} predictions.")
+
+            # Crops erzeugen (JPG speichern + Bytes erzeugen)
+            cropped_images = crop_predictions(path, predictions)
+            print(f"{len(cropped_images)} Cropped images created.")
+
+            # Erfassung der Daten aus dem Crop wird noch implementiert
+            detected_value = 23.0
+            unit = "°C"
+            category = "temperature"
+
+
+            # JEDEN CROP in cvision_images_analyzed speichern
+            
+            for crop in cropped_images:
+
+                dto_analyzed_image = analyzed_image_mapper.map_image(
+                    image_data=crop["bytes"],        # BYTES → DB
+                    raw_image_id=raw_image_id,       # Verbindung zum Raw-Bild
+                    sensor_type=crop["sensor_type"],         # aus Roboflow
+                    opcua_node_id=opcua_node_id,
+                    aruco_id=aruco_id,
+                    category=category,
+                    quality=1.0,
+                    value=detected_value,
+                    unit=unit
+                )
+
             analyzed_image_id = dal.insert_analyzed_image(
-                anaylzed_image_with_metadata=dto_analyzed_image
+                analyzed_image_with_metadata=dto_analyzed_image
             )
 
             #########################################################################################################################
@@ -128,4 +125,3 @@ if __name__ == "__main__":
 
             dal.insert_anomaly(anomaly_with_metadata=anomaly_dto)
             print("Inserted both images:", id)
->>>>>>> origin/main
