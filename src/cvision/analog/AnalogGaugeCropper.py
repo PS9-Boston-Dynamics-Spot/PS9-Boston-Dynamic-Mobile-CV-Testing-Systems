@@ -16,7 +16,9 @@ class AnalogGaugeCropper:
         self,
         resolution=(1000, 1000),
         pad_color=(0, 0, 0),
-        model: str = os.path.join(os.getcwd(), "src/cvision/analog/models/analog_gauge_detection_model.pt"),
+        model: str = os.path.join(
+            os.getcwd(), "src/cvision/analog/models/analog_gauge_detection_model.pt"
+        ),
     ):
         self.resolution = resolution
         self.pad_color = list(pad_color)

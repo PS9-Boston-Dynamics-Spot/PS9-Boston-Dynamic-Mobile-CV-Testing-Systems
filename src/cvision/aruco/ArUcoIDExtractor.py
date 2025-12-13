@@ -1,6 +1,5 @@
 import cv2
 import cv2.aruco as aruco
-from typing import List
 import numpy as np
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 
@@ -27,7 +26,7 @@ class ArUcoIDExtraktor:
 
         if ids is None:
             return None
-        
+
         ids = ids.flatten().tolist()
 
         return ids[0]

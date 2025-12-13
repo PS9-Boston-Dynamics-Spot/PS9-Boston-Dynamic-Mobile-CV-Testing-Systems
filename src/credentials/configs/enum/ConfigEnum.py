@@ -4,16 +4,14 @@ from enum import Enum
 class SENSOR_KEYS(str, Enum):
     OVERALL_DICT = "overall_dict"
 
-    ANALOG_GAUGE = "analog_gauge"
-    MIN_ANGLE = "min_angle"
-    MAX_ANGLE = "max_angle"
-    ANALOG_GAUGE_MIN_VALUE = "min_value"
-    ANALOG_GAUGE_MAX_VALUE = "max_value"
-    UNIT = "unit"
-
     NODES = "nodes"
     OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
+
+    # Analog Gauge
+    MIN_ANGLE = "min_angle"
+    MAX_ANGLE = "max_angle"
+    UNIT = "unit"
 
     SCORE_FUNCTION = "score_function"
     PARAMETERS = "parameters"

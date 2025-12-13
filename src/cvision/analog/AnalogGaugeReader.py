@@ -16,12 +16,13 @@ class AnalogGaugeReader:
     def __enter__(
         self,
     ):
-        # TODO: read from config
-        self.min_angle = self.credentials_manager.getAnalogGaugeMinAngle()
-        self.max_angle = self.credentials_manager.getAnalogGaugeMaxAngle()
-        self.min_value = self.credentials_manager.getAnalogGaugeMinValue()
-        self.max_value = self.credentials_manager.getAnalogGaugeMaxValue()
-        self.units = self.credentials_manager.getAnalogGaugeUnit()
+        self.min_angle, self.max_angle = self.credentials_manager.getMinMaxAngle(
+            allow_missing=True
+        )
+        self.min_value, self.max_value = self.credentials_manager.getMinMaxValue(
+            allow_missing=True
+        )
+        self.units = self.credentials_manager.getUnit(allow_missing=True)
         self.__images_log: bytes = []
         return self
 
@@ -210,7 +211,8 @@ class AnalogGaugeReader:
             return 0
 
         best_line = max(
-            final_lines, key=lambda l: self.__dist_2_pts(l[0], l[1], l[2], l[3])
+            final_lines,
+            key=lambda line: self.__dist_2_pts(line[0], line[1], line[2], line[3]),
         )
 
         if self.__dist_2_pts(x, y, best_line[0], best_line[1]) > self.__dist_2_pts(
@@ -240,21 +242,3 @@ class AnalogGaugeReader:
         ) * new_range + float(self.min_value)
         print(f"Debug: gauge_value = {new_value:.2f}")
         return float(new_value)
-
-
-def main():
-    with open("./gauge-51.jpg", "rb") as f:
-        img = f.read()
-
-    with AnalogGaugeReader(img=img) as analog_gauge_reader:
-        x, y, r = analog_gauge_reader.calibrate_gauge()
-        value = analog_gauge_reader.get_current_value(x, y, r)
-
-        for idx, img_bytes in enumerate(analog_gauge_reader.get_images_log()):
-            img_array = np.frombuffer(img_bytes, dtype=np.uint8)
-            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-            cv2.imwrite(f"./{idx}.png", img)
-
-
-if __name__ == "__main__":
-    main()

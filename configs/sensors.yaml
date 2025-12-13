@@ -1,13 +1,26 @@
 overall_dict: !!str "DICT_6X6_1000"
 
-analog_gauge:
-  min_angle: !!float 43.87
-  max_angle: !!float 310.0
-  min_value: !!float 0.0
-  max_value: !!float 10.0
-  unit: !!str 'bar'
-
 nodes:
+  analog_gauge:
+    min_angle: !!float 43.87
+    max_angle: !!float 310.0
+    unit: !!str 'bar'
+    
+    score_function: !!str '1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
+    parameters:
+      min_value: !!float 0.0
+      max_value: !!float 6.0
+      min_score: !!float 0.0
+      left_scale: !!float 7.0
+      left_power: !!float 2.0
+      right_scale: !!float 7.0
+      right_power: !!float 2.0
+                    
+    risk_management:
+      safe_range: !!float 1.0
+      uncertain_range: !!float 0.5
+      anomaly_range: !!float 0.0
+      
   oven_node: 
     opcua_node: !!str 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
     aruco_id: !!int 46

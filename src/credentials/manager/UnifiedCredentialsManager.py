@@ -34,8 +34,6 @@ class UnifiedCredentialsManager:
         if hasattr(self, "_initialized") and self._initialized:
             return
 
-        print("test")
-
         self._initialized = True
 
         self._minio_config_reader = minio_config_reader or MinioConfigReader()
@@ -94,45 +92,72 @@ class UnifiedCredentialsManager:
     def getArUcoOverallDict(self) -> dict:
         return self._opcua_nodes_config_reader.getOverallDict()
 
-    def getAnalogGaugeMinValue(self) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getAnalogGaugeMinValue()
-
-    def getAnalogGaugeMaxValue(self) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getAnalogGaugeMaxValue()
-
-    def getAnalogGaugeMinAngle(self) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getAnalogGaugeMinAngle()
-
-    def getAnalogGaugeMaxAngle(self) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getAnalogGaugeMaxAngle()
-
-    def getAnalogGaugeUnit(self) -> Optional[str]:
-        return self._opcua_nodes_config_reader.getAnalogGaugeUnit()
-
-    def getOPCUANodeByID(self, aruco_id: int) -> Optional[str]:
+    def getOPCUANodeByID(self, aruco_id: Optional[int] = None) -> Optional[str]:
         return self._opcua_nodes_config_reader.getOPCUANodeByID(aruco_id=aruco_id)
 
-    def getScoreFunctionStr(self, aruco_id: int) -> Optional[str]:
-        return self._opcua_nodes_config_reader.getScoreFunctionStr(aruco_id=aruco_id)
+    def getScoreFunctionStr(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[str]:
+        return self._opcua_nodes_config_reader.getScoreFunctionStr(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
 
-    def getScoreFunction(self, aruco_id: int) -> Optional[Callable[[float], float]]:
-        return self._opcua_nodes_config_reader.getScoreFunction(aruco_id=aruco_id)
+    def getScoreFunction(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[Callable[[float], float]]:
+        return self._opcua_nodes_config_reader.getScoreFunction(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
 
-    def getSafeRange(self, aruco_id: int) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getSafeRange(aruco_id=aruco_id)
+    def getSafeRange(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getSafeRange(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
 
-    def getUncertainRange(self, aruco_id: int) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getUncertainRange(aruco_id=aruco_id)
+    def getUncertainRange(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getUncertainRange(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
 
-    def getAnomalyRange(self, aruco_id: int) -> Optional[float]:
-        return self._opcua_nodes_config_reader.getAnomalyRange(aruco_id=aruco_id)
+    def getAnomalyRange(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getAnomalyRange(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
 
-    def getMinMaxValue(self, aruco_id: int) -> Optional[Tuple[float, float]]:
-        return self._opcua_nodes_config_reader.getMinMaxValue(aruco_id=aruco_id)
+    def getMinMaxValue(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[Tuple[float, float]]:
+        return self._opcua_nodes_config_reader.getMinMaxValue(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
 
-    def getParametersForAnomalyMapper(self, aruco_id: int) -> Optional[dict[str, Any]]:
-        parameters = self._opcua_nodes_config_reader.getParameters(aruco_id=aruco_id)
+    def getParametersForAnomalyMapper(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[dict[str, Any]]:
+        parameters = self._opcua_nodes_config_reader.getParameters(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
         risk_management = self._opcua_nodes_config_reader.getRiskManagement(
-            aruco_id=aruco_id
+            aruco_id=aruco_id, allow_missing=allow_missing
         )
         return {**parameters, **risk_management}
+
+    def getMinMaxAngle(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[Tuple[float, float]]:
+        return self._opcua_nodes_config_reader.getMinMaxAngle(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
+
+    def getUnit(
+        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+    ) -> Optional[str]:
+        return self._opcua_nodes_config_reader.getUnit(
+            aruco_id=aruco_id, allow_missing=allow_missing
+        )
