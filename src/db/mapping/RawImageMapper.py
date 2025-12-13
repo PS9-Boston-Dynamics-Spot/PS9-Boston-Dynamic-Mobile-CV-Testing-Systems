@@ -87,16 +87,7 @@ class RawImageMapper:
         bucket = bucket or UnifiedCredentialsManager().getMinioRawBucket()
 
         if not name or name.strip() == "":
-            name = ImageNames.from_dict(
-                {
-                    "size": size,
-                    "format": format,
-                    "content_type": content_type,
-                    "bucket": bucket,
-                    "compressed": compressed,
-                    "hash": MapperHelper.sha256(image_data=image_data),
-                }
-            )
+            name = ImageNames.random()
 
         dto = RawImageDTO(
             image_data=image_data,

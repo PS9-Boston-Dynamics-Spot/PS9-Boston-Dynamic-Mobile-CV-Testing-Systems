@@ -133,22 +133,7 @@ class AnalyzedImageMapper:
         bucket = bucket or UnifiedCredentialsManager().getMinioAnalyzedBucket()
 
         if not name or name.strip() == "":
-            name = ImageNames.from_dict(
-                {
-                    "size": size,
-                    "raw_image_id": raw_image_id,
-                    "format": format,
-                    "content_type": content_type,
-                    "bucket": bucket,
-                    "sensor_type": sensor_type,
-                    "aruco_id": aruco_id,
-                    "value": value,
-                    "unit": unit,
-                    "category": category,
-                    "compressed": compressed,
-                    "hash": MapperHelper.sha256(image_data=image_data),
-                }
-            )
+            name = ImageNames.random()
 
         dto = AnalyzedImageDTO(
             image_data=image_data,

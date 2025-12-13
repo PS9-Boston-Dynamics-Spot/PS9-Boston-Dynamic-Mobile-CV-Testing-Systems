@@ -7,7 +7,7 @@ from credentials.configs.reader.BostonDynamicsConfigReader import (
     BostonDynamicsConfigReader,
 )
 from credentials.configs.reader.OPCUAConfigReader import OPCUAConfigReader
-from credentials.configs.reader.OPCUANodesConfigReader import OPCUANodesConfigReader
+from credentials.configs.reader.SensorConfigReader import SensorConfigReader
 from credentials.env.reader.MinioEnvReader import MinioEnvReader
 from credentials.env.reader.RobotEnvReader import RobotEnvReader
 
@@ -26,8 +26,8 @@ class UnifiedCredentialsManager:
         minio_bucket_reader: Optional[MinioBucketConfigReader] = None,
         sqlite_config_reader: Optional[SqliteConfigReader] = None,
         robot_config_reader: Optional[BostonDynamicsConfigReader] = None,
-        opcua_config_reader: Optional[OPCUAConfigReader] = None,
-        opcua_nodes_config_reader: Optional[OPCUANodesConfigReader] = None,
+        sensor_config_reader: Optional[OPCUAConfigReader] = None,
+        opcua_nodes_config_reader: Optional[SensorConfigReader] = None,
         minio_env_reader: Optional[MinioEnvReader] = None,
         robot_env_reader: Optional[RobotEnvReader] = None,
     ):
@@ -42,9 +42,9 @@ class UnifiedCredentialsManager:
         self._minio_bucket_reader = minio_bucket_reader or MinioBucketConfigReader()
         self._sqlite_config_reader = sqlite_config_reader or SqliteConfigReader()
         self._robot_config_reader = robot_config_reader or BostonDynamicsConfigReader()
-        self._opcua_config_reader = opcua_config_reader or OPCUAConfigReader()
+        self._sensor_config_reader = sensor_config_reader or OPCUAConfigReader()
         self._opcua_nodes_config_reader = (
-            opcua_nodes_config_reader or OPCUANodesConfigReader()
+            opcua_nodes_config_reader or SensorConfigReader()
         )
         self._minio_env_reader = minio_env_reader or MinioEnvReader()
         self._robot_env_reader = robot_env_reader or RobotEnvReader()
@@ -85,16 +85,31 @@ class UnifiedCredentialsManager:
 
     def getOPCUACredentials(self) -> dict[str, Any]:
         return {
-            "ip": self._opcua_config_reader.getIp(),
-            "port": self._opcua_config_reader.getPort(),
-            "protocol": self._opcua_config_reader.getProtocol(),
-            "timeout": self._opcua_config_reader.getTimeout(),
+            "ip": self._sensor_config_reader.getIp(),
+            "port": self._sensor_config_reader.getPort(),
+            "protocol": self._sensor_config_reader.getProtocol(),
+            "timeout": self._sensor_config_reader.getTimeout(),
         }
 
     def getArUcoOverallDict(self) -> dict:
         return self._opcua_nodes_config_reader.getOverallDict()
 
-    def getOPCUANodeByID(self, aruco_id: int) -> dict[str, Any]:
+    def getAnalogGaugeMinValue(self) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getAnalogGaugeMinValue()
+
+    def getAnalogGaugeMaxValue(self) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getAnalogGaugeMaxValue()
+
+    def getAnalogGaugeMinAngle(self) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getAnalogGaugeMinAngle()
+
+    def getAnalogGaugeMaxAngle(self) -> Optional[float]:
+        return self._opcua_nodes_config_reader.getAnalogGaugeMaxAngle()
+
+    def getAnalogGaugeUnit(self) -> Optional[str]:
+        return self._opcua_nodes_config_reader.getAnalogGaugeUnit()
+
+    def getOPCUANodeByID(self, aruco_id: int) -> Optional[str]:
         return self._opcua_nodes_config_reader.getOPCUANodeByID(aruco_id=aruco_id)
 
     def getScoreFunctionStr(self, aruco_id: int) -> Optional[str]:
