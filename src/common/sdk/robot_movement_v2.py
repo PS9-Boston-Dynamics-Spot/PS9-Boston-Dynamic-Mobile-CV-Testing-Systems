@@ -127,7 +127,7 @@ class RobotController:
 
         # Format: YYYYMMDD_HHmmss (z.B. 20251201_172530)
         now_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        name = 'spot-img-' + now_str + '.jpg'
+        name = 'spot-img-' + now_str + '.png'
         
         # Bestimme den vollständigen Pfad
         if path is not None and os.path.isdir(path):
@@ -630,7 +630,7 @@ def main():
                         image_request = build_image_request(
                             'hand_color_image',
                             quality_percent=100,  # Maximum quality
-                            image_format=image_pb2.Image.FORMAT_JPEG,
+                            image_format=image_pb2.Image.FORMAT_PNG,
                             resize_ratio=1.0  # No downsampling
                         )
 
