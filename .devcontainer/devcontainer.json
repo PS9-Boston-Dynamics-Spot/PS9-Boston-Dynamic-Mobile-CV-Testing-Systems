@@ -1,17 +1,5 @@
 {
     "name": "Python Boston Dynamics Environment",
-<<<<<<< HEAD
-    "build": {
-        "dockerfile": "Dockerfile",
-        "context": ".."
-    },
-    "runArgs": ["--shm-size=2gb"],
-    "features": {
-        "ghcr.io/devcontainers/features/python:1": {
-            "version": "3.11"
-        }
-    },
-=======
     "dockerComposeFile": "../docker-compose.yml",
     "service": "ps9-boston-dynamic-mobile-cv-testing-systems",
     "workspaceFolder": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems",
@@ -25,25 +13,13 @@
         "bierner.markdown-mermaid",
         "cweijan.vscode-database-client2"
     ],
->>>>>>> origin/main
     "remoteUser": "root",
     "postCreateCommand": "python -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt",
     "customizations": {
         "vscode": {
-            "extensions": [
-                "ms-python.python",
-                "ms-python.vscode-pylance",
-                "yzhang.markdown-all-in-one",
-                "bierner.markdown-mermaid"
-            ],
             "settings": {
                 "python.defaultInterpreterPath": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python",
-                "python.pythonPath": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python",
-                "python.analysis.diagnosticSeverityOverrides": {
-                    "reportUndefinedVariable": "none",
-                    "reportMissingImports": "none",
-                    "reportWildcardImportFromLibrary": "none"
-                }
+                "python.pythonPath": "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python"
             }
         }
     },
@@ -58,4 +34,4 @@
             "onAutoForward": "openBrowser"
         }
     }
-}    
+}
