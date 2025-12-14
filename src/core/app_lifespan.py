@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from common.typing.Typing import Optional, Tuple
-from db.mapping.RawImageMapper import RawImageMapper
-from db.mapping.AnalyzedImageMapper import AnalyzedImageMapper
-from db.mapping.AnomalyMapper import AnomalyMapper
+from common.imports.Typing import Optional, Tuple
+from db.mapping.input.RawImageMapper import RawImageMapper
+from db.mapping.input.AnalyzedImageMapper import AnalyzedImageMapper
+from db.mapping.input.AnomalyMapper import AnomalyMapper
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 from anomaly.AnomalyChecker import AnomalyChecker
 from cvision.analog.AnalogGaugeReader import AnalogGaugeReader

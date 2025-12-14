@@ -1,4 +1,4 @@
-from common.typing.Typing import Any, Optional, Callable, Tuple
+from common.imports.Typing import Any, Optional, Callable, Tuple
 
 from credentials.configs.reader.MinioConfigReader import MinioConfigReader
 from credentials.configs.reader.MinioBucketConfigReader import MinioBucketConfigReader

@@ -3,9 +3,9 @@ from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 
-from db.mapping.RawImageMapper import RawImageDTO
-from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
-from db.mapping.AnomalyMapper import AnomalyDTO
+from db.mapping.input.RawImageMapper import RawImageDTO
+from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.input.AnomalyMapper import AnomalyDTO
 
 
 class MetaRepository:

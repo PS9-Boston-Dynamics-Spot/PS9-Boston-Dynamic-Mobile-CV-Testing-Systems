@@ -1,4 +1,4 @@
-from common.typing.Typing import Optional, Dict, Any
+from common.imports.Typing import Optional, Dict, Any
 from credentials.configs.loader.ConfigLoader import ConfigLoader
 from credentials.configs.enum.ConfigEnum import ConfigEnum, OPCUA_KEYS
 

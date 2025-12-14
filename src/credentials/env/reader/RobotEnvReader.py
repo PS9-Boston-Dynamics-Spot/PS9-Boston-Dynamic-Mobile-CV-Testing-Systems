@@ -1,6 +1,6 @@
 from credentials.env.loader.EnvLoader import EnvLoader
 from credentials.env.enum.EnvEnum import EnvEnum, ROBOT_KEYS
-from common.typing.Typing import Optional
+from common.imports.Typing import Optional
 
 
 class RobotEnvReader(EnvLoader):

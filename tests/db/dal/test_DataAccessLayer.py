@@ -5,8 +5,8 @@ from db.dal.DataAccessLayer import DataAccessLayer
 from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
 from db.media.exceptions.MediaRepositoryError import MediaRepositoryError
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
-from db.mapping.RawImageMapper import RawImageDTO
-from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.input.RawImageMapper import RawImageDTO
+from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
 
 
 class TestDataAccessLayer(unittest.TestCase):

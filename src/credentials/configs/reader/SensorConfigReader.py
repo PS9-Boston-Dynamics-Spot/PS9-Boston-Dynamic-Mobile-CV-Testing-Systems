@@ -1,4 +1,4 @@
-from common.typing.Typing import Optional, Dict, Any, Callable, Tuple
+from common.imports.Typing import Optional, Dict, Any, Callable, Tuple
 import math
 from credentials.configs.loader.ConfigLoader import ConfigLoader
 from credentials.configs.enum.ConfigEnum import ConfigEnum, SENSOR_KEYS

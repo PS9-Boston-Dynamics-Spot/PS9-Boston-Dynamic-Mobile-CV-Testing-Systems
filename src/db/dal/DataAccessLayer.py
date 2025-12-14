@@ -1,4 +1,4 @@
-from common.typing.Typing import Any
+from common.imports.Typing import Any
 
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
@@ -9,9 +9,9 @@ from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
 from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 
-from db.mapping.RawImageMapper import RawImageDTO
-from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
-from db.mapping.AnomalyMapper import AnomalyDTO
+from db.mapping.input.RawImageMapper import RawImageDTO
+from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.input.AnomalyMapper import AnomalyDTO
 
 
 class DataAccessLayer:
