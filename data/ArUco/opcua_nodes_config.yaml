@@ -1,35 +1,207 @@
 overall_dict: DICT_6X6_1000
 nodes:
+  analog_gauge:
+    min_angle: 43.87
+    max_angle: 310.0
+    unit: bar
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 6.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_12:
     opcua_node: ''
     aruco_id: 12
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_21:
     opcua_node: ''
     aruco_id: 21
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_22:
     opcua_node: ''
     aruco_id: 22
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_23:
     opcua_node: ''
     aruco_id: 23
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_27:
     opcua_node: ''
     aruco_id: 27
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_28:
     opcua_node: ''
     aruco_id: 28
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_37:
     opcua_node: ''
     aruco_id: 37
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_40:
     opcua_node: ''
     aruco_id: 40
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_41:
     opcua_node: ''
     aruco_id: 41
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_46:
     opcua_node: ''
     aruco_id: 46
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0
   node_47:
     opcua_node: ''
     aruco_id: 47
+    score_function: 1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power))
+      if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))
+    parameters:
+      min_value: 0.0
+      max_value: 1.0
+      min_score: 0.0
+      left_scale: 7.0
+      left_power: 2.0
+      right_scale: 7.0
+      right_power: 2.0
+    risk_management:
+      safe_range: 1.0
+      uncertain_range: 0.5
+      anomaly_range: 0.0

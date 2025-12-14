@@ -22,31 +22,97 @@ class ArUcoOPCUAMapperHelper:
         return str(self.dict)
 
     def get_opcua_nodes_config(self) -> str:
+        """
+        Creates a YAML config with:
+        - exactly one 'analog_gauge' node
+        - multiple OPCUA nodes mapped from ArUco markers
+        """
 
-        config = {"overall_dict": self._get_dict_name(), "nodes": {}}
+        config = {
+            "overall_dict": self._get_dict_name(),
+            "nodes": {
+                "analog_gauge": self._default_analog_gauge_config()
+            }
+        }
 
         for file in sorted(self.directory.iterdir()):
-            if file.is_file() and file.suffix.lower() in [".jpeg", ".jpg", ".png"]:
-                ids = self._get_ids(str(file))
-                if not ids:
-                    continue
+            if not file.is_file() or file.suffix.lower() not in [".jpeg", ".jpg", ".png"]:
+                continue
 
-                first_id = int(ids[0])
+            ids = self._get_ids(str(file))
+            if not ids:
+                continue
 
-                stem = file.stem
-                if re.fullmatch(r"\d+", stem):
-                    node_key = f"node_{first_id}"
-                else:
-                    node_key = stem if stem else f"node_{first_id}"
+            aruco_id = int(ids[0])
 
-                config["nodes"][node_key] = {"opcua_node": "", "aruco_id": first_id}
+            stem = file.stem
+            if re.fullmatch(r"\d+", stem):
+                node_key = f"node_{aruco_id}"
+            else:
+                node_key = stem
+
+            # Skip accidental overwrite of analog_gauge
+            if node_key == "analog_gauge":
+                node_key = f"node_{aruco_id}"
+
+            config["nodes"][node_key] = {
+                "opcua_node": "",
+                "aruco_id": aruco_id,
+                "score_function": (
+                    "1.0 if min_value <= x <= max_value else "
+                    "min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) "
+                    "if x < min_value else "
+                    "min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))"
+                ),
+                "parameters": {
+                    "min_value": 0.0,
+                    "max_value": 1.0,
+                    "min_score": 0.0,
+                    "left_scale": 7.0,
+                    "left_power": 2.0,
+                    "right_scale": 7.0,
+                    "right_power": 2.0,
+                },
+                "risk_management": {
+                    "safe_range": 1.0,
+                    "uncertain_range": 0.5,
+                    "anomaly_range": 0.0,
+                },
+            }
 
         output_path = self.directory / "opcua_nodes_config.yaml"
-
         with open(output_path, "w") as f:
-            yaml.safe_dump(config, f, default_flow_style=False, sort_keys=False)
+            yaml.safe_dump(config, f, sort_keys=False)
 
         return str(output_path)
+
+    def _default_analog_gauge_config(self) -> dict:
+        """Exactly one analog gauge configuration."""
+        return {
+            "min_angle": 43.87,
+            "max_angle": 310.0,
+            "unit": "bar",
+            "score_function": (
+                "1.0 if min_value <= x <= max_value else "
+                "min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) "
+                "if x < min_value else "
+                "min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))"
+            ),
+            "parameters": {
+                "min_value": 0.0,
+                "max_value": 6.0,
+                "min_score": 0.0,
+                "left_scale": 7.0,
+                "left_power": 2.0,
+                "right_scale": 7.0,
+                "right_power": 2.0,
+            },
+            "risk_management": {
+                "safe_range": 1.0,
+                "uncertain_range": 0.5,
+                "anomaly_range": 0.0,
+            },
+        }
 
     def _get_ids(self, file_path: str) -> List[int]:
         if not Path(file_path).exists():
@@ -57,7 +123,6 @@ class ArUcoOPCUAMapperHelper:
             return []
 
         _, ids, _ = self.detector.detectMarkers(image)
-
         if ids is None:
             return []
 
@@ -65,6 +130,5 @@ class ArUcoOPCUAMapperHelper:
 
 
 if __name__ == "__main__":
-    # Example call with the directory where the markers are located and the marker dictionary configuration
     extractor = ArUcoOPCUAMapperHelper("../data/ArUco/", dict_const=aruco.DICT_6X6_1000)
     print(extractor.get_opcua_nodes_config())
