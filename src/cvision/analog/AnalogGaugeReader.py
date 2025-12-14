@@ -44,70 +44,60 @@ class AnalogGaugeReader:
     def __dist_2_pts(self, x1: int, y1: int, x2: np.int32, y2: np.int32) -> np.float64:
         return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-    def find_gauge_center_combined(self, img: MatLike) -> tuple[int, int, int]:
-
+    def __get_contours(self, img: MatLike, use_morph: bool = False) -> list[MatLike]:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_blur = cv2.medianBlur(gray, 5)
         self.__log_image(gray_blur)
 
-        circles = cv2.HoughCircles(
-            gray_blur,
-            cv2.HOUGH_GRADIENT,
-            dp=1,
-            minDist=10,
-            param1=100,
-            param2=40,
-            minRadius=0,
-            maxRadius=50,
-        )
-
-        if circles is not None:
-            circles = np.uint16(np.around(circles[0]))
-            selected_circle = min(circles, key=lambda c: c[2])
-            cx, cy, _ = selected_circle
-            print(f"Hough-Circle Center gefunden: ({cx}, {cy})")
-        else:
-            cx, cy = None, None
-            print("Hough-Circle: Kein Center gefunden!")
-
         edges = self.__get_edges(img)
+
+        if use_morph:
+            kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7,7))
+            edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel_close) 
+
         self.__log_image(edges)
 
-        contours, _ = cv2.findContours(
-            edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
-
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not contours:
-            print("Fallback: Keine Konturen gefunden!")
-            return None, None, None
+            print("Keine Konturen gefunden")
+            return []
 
-        cnt = max(contours, key=cv2.contourArea)
+        out_img = img.copy()
+        cv2.drawContours(out_img, contours, -1, (0, 255, 0), 2)
+        self.__log_image(out_img)
+
+        return contours
+
+
+    def find_gauge_center_combined(self, img: np.ndarray) -> tuple[int, int, int]:
+        large_contours_normal = self.__get_contours(img=img, use_morph=False)
+        large_contours_morph = self.__get_contours(img=img, use_morph=True)
+
+        all_large_contours = large_contours_normal + large_contours_morph
+        if not all_large_contours:
+            print("Keine großen Konturen gefunden")
+            return 0, 0, 0
+
+        # Größte Kontur auswählen
+        cnt = max(all_large_contours, key=cv2.contourArea)
         if len(cnt) < 5:
-            print("Fallback: Kontur zu klein!")
-            return None, None, None
+            print("Kontur zu klein für Ellipsen-Fit")
+            return 0,0,0
 
-        (MA, ma) = cv2.fitEllipse(cnt)[1]
-        (_, _), radius_circle = cv2.minEnclosingCircle(cnt)
-        radius = (
-            int((MA + ma) / 4 + radius_circle) // 2
-        )  # Average of major and minor axis
-        print(f"Fallback Radius: {radius}")
-
-        if cx is None or cy is None:
-            M = cv2.moments(cnt)
-            if M["m00"] != 0:
-                cx = int(M["m10"] / M["m00"])
-                cy = int(M["m01"] / M["m00"])
-            else:
-                cx, cy = 0, 0  # fallback
-            print(f"Fallback Center verwendet: ({cx}, {cy})")
+        # Ellipse fitten
+        ellipse = cv2.fitEllipse(cnt)
+        (cx, cy), (MA, ma), angle = ellipse
+        cx, cy = int(cx), int(cy)
+        radius = int((MA + ma) / 4)
 
         out = img.copy()
-        cv2.circle(out, (cx, cy), radius, (0, 255, 0), 2)
+        cv2.ellipse(out, ellipse, (0, 255, 0), 2)
         cv2.circle(out, (cx, cy), 3, (0, 0, 255), -1)
         self.__log_image(out)
 
+        print(f"Ellipse-Center: ({cx}, {cy}), Radius approx.: {radius}")
         return cx, cy, radius
+
 
     def __write_angles(self, img: MatLike, x: int, y: int, r: int) -> MatLike:
 
@@ -164,7 +154,7 @@ class AnalogGaugeReader:
 
     def __get_edges(self, img: MatLike) -> MatLike:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        gray = cv2.GaussianBlur(gray, (9, 9), 0)
         edges = cv2.Canny(gray, 50, 150)
 
         return edges
@@ -192,13 +182,16 @@ class AnalogGaugeReader:
             maxLineGap=10,
         )
 
+        out_img = self.__img.copy()
+
         if lines is None:
             print("No lines detected")
-            return 0
+            return -1.0
 
         final_lines = []
         for line in lines:
             x1, y1, x2, y2 = line[0]
+            cv2.line(out_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
             d1 = self.__dist_2_pts(x, y, x1, y1)
             d2 = self.__dist_2_pts(x, y, x2, y2)
             if d1 > d2:
@@ -206,9 +199,11 @@ class AnalogGaugeReader:
             if 0.05 * r < d1 < 0.3 * r and 0.5 * r < d2 < 1.05 * r:
                 final_lines.append([x1, y1, x2, y2])
 
+        self.__log_image(out_img)
+
         if len(final_lines) == 0:
             print("Keine Linien im Radiusbereich gefunden")
-            return 0
+            return -1.0
 
         best_line = max(
             final_lines,

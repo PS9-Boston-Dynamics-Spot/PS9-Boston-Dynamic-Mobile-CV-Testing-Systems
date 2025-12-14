@@ -1,37 +1,35 @@
 from dataclasses import dataclass, asdict
 from common.imports.Typing import Any, Dict
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 
 
 @dataclass
 class OPCUADTO:
 
-    image_data: bytes
+    value: float
 
     def __post_init__(self):
 
         not_null_fields = [
-            "image_data",
+            "value",
         ]
 
-        self.format = self.format.lower()
+        if not isinstance(self.value, float):
+            raise TypeError("'value' must be a float")
 
     def to_dict(self) -> Dict[str, Any]:
         d = asdict(self)
         return d
 
 
-class RawImageMapper:
+class OPCUANodeMapper:
 
     @staticmethod
     def map_image(
-
+        value: float
     ) -> OPCUADTO:
 
-        
-
         dto = OPCUADTO(
-
+            value=value
         )
 
         return dto

@@ -12,7 +12,7 @@ from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 from db.mapping.input.RawImageMapper import RawImageDTO
 from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
 from db.mapping.input.AnomalyMapper import AnomalyDTO
-
+from db.mapping.output.OPCUANodeMapper import OPCUADTO
 
 class DataAccessLayer:
     def __init__(self):
@@ -97,7 +97,7 @@ class DataAccessLayer:
         except Exception as e:
             raise DataAccessLayerError(exception=e, error_code=1762882030)
 
-    def get_value_from_opcua_node(self, opcua_node_id: str) -> Any:
+    def get_value_from_opcua_node(self, opcua_node_id: str) -> OPCUADTO:
         try:
             return self.opcua_repository.get_node_value_by_id(
                 opcua_node_id=opcua_node_id

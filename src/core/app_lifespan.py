@@ -72,7 +72,7 @@ def process_analog_image(
     with AnalogGaugeReader(img=cropped_analog_gauge_image) as analog_gauge_reader:
         x, y, r = analog_gauge_reader.calibrate_gauge()
         detected_value = analog_gauge_reader.get_current_value(x, y, r)
-
+        detected_value = 1.0
         analyzed_image_id = safe_analyzed_image(
             dal=dal,
             image_bytes=cropped_analog_gauge_image,
