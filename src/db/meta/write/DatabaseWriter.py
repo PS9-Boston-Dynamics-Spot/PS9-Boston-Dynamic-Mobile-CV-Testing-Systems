@@ -68,8 +68,6 @@ class DatabaseWriter:
         sensor_type: str,
         opcua_node_id: str,
         aruco_id: int,
-        category: str,
-        quality: float,
         value: float,
         unit: str,
     ) -> tuple[int, str]:
@@ -86,11 +84,9 @@ class DatabaseWriter:
                 sensor_type,
                 opcua_node_id,
                 aruco_id,
-                category, 
-                quality, 
                 value, 
                 unit)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         try:
@@ -109,8 +105,6 @@ class DatabaseWriter:
                         sensor_type,
                         opcua_node_id,
                         aruco_id,
-                        category,
-                        quality,
                         value,
                         unit,
                     ),

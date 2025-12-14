@@ -16,14 +16,12 @@ class AnalyzedImageDTO:
     bucket: str
     size: int
     sensor_type: str
-    aruco_id: int
-    category: str
-    quality: float
     value: float
     unit: str
     compressed: bool = False
     compression_method: Optional[str] = None
     opcua_node_id: Optional[str] = None
+    aruco_id: Optional[int] = None
 
     def __post_init__(self):
         not_null_fields = [
@@ -35,9 +33,6 @@ class AnalyzedImageDTO:
             "size",
             "content_type",
             "sensor_type",
-            "aruco_id",
-            "category",
-            "quality",
             "value",
             "unit",
         ]
@@ -83,14 +78,8 @@ class AnalyzedImageDTO:
         if not isinstance(self.opcua_node_id, str) and self.opcua_node_id is not None:
             raise TypeError("'opcua_node_id' must be a string")
 
-        if not isinstance(self.aruco_id, int):
+        if not isinstance(self.aruco_id, int) and self.aruco_id is not None:
             raise TypeError("'aruco_id' must be an integer")
-
-        if not isinstance(self.category, str):
-            raise TypeError("'category' must be a string")
-
-        if not isinstance(self.quality, float):
-            raise TypeError("'quality' must be a float")
 
         if not isinstance(self.value, float):
             raise TypeError("'value' must be a float")
@@ -112,11 +101,9 @@ class AnalyzedImageMapper:
         image_data: bytes,
         raw_image_id: int,
         sensor_type: str,
-        aruco_id: int,
-        category: str,
-        quality: float,
         value: float,
         unit: str,
+        aruco_id: Optional[int] = None,
         bucket: Optional[str] = None,
         name: Optional[str] = None,
         format: Optional[str] = None,
@@ -148,8 +135,6 @@ class AnalyzedImageMapper:
             sensor_type=sensor_type,
             opcua_node_id=opcua_node_id,
             aruco_id=aruco_id,
-            category=category,
-            quality=quality,
             value=value,
             unit=unit,
         )

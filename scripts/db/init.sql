@@ -22,9 +22,7 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
     compression_method TEXT,
     sensor_type TEXT NOT NULL, -- e.g. digital / analog / both (NOT NULL)
     opcua_node_id TEXT, -- if analog sensor, node_id is empty
-    aruco_id INTEGER NOT NULL, 
-    category TEXT NOT NULL, -- category: e.g. temperature, pressure (NOT NULL)
-    quality REAL, -- means the image quality, any value between 0 and 1, --> 1 is the best
+    aruco_id INTEGER, -- if analog sensor, aruco_id is empty 
     value REAL NOT NULL, -- e.g. 20.0 °C (NOT NULL)
     unit TEXT NOT NULL, -- e.g. °C (NOT NULL)
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

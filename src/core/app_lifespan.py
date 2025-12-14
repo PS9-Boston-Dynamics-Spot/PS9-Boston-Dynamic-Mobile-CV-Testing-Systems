@@ -48,8 +48,6 @@ def safe_analyzed_image(
         sensor_type=sensor_type,
         opcua_node_id=opcua_node_id,
         aruco_id=aruco_id,
-        category="testsdfsdfdfss",
-        quality=1.0,
         value=detected_value,
         unit=unit,
     )

@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     sqlite3 \
+    libgl1 \
+    libglib2.0-0 \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
