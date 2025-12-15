@@ -52,12 +52,14 @@ class AnalogGaugeReader:
         edges = self.__get_edges(img)
 
         if use_morph:
-            kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7,7))
-            edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel_close) 
+            kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+            edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel_close)
 
         self.__log_image(edges)
 
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(
+            edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
         if not contours:
             print("Keine Konturen gefunden")
             return []
@@ -67,7 +69,6 @@ class AnalogGaugeReader:
         self.__log_image(out_img)
 
         return contours
-
 
     def find_gauge_center_combined(self, img: np.ndarray) -> tuple[int, int, int]:
         large_contours_normal = self.__get_contours(img=img, use_morph=False)
@@ -82,7 +83,7 @@ class AnalogGaugeReader:
         cnt = max(all_large_contours, key=cv2.contourArea)
         if len(cnt) < 5:
             print("Kontur zu klein für Ellipsen-Fit")
-            return 0,0,0
+            return 0, 0, 0
 
         # Ellipse fitten
         ellipse = cv2.fitEllipse(cnt)
@@ -97,7 +98,6 @@ class AnalogGaugeReader:
 
         print(f"Ellipse-Center: ({cx}, {cy}), Radius approx.: {radius}")
         return cx, cy, radius
-
 
     def __write_angles(self, img: MatLike, x: int, y: int, r: int) -> MatLike:
 

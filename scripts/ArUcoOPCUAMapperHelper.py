@@ -30,13 +30,15 @@ class ArUcoOPCUAMapperHelper:
 
         config = {
             "overall_dict": self._get_dict_name(),
-            "nodes": {
-                "analog_gauge": self._default_analog_gauge_config()
-            }
+            "nodes": {"analog_gauge": self._default_analog_gauge_config()},
         }
 
         for file in sorted(self.directory.iterdir()):
-            if not file.is_file() or file.suffix.lower() not in [".jpeg", ".jpg", ".png"]:
+            if not file.is_file() or file.suffix.lower() not in [
+                ".jpeg",
+                ".jpg",
+                ".png",
+            ]:
                 continue
 
             ids = self._get_ids(str(file))

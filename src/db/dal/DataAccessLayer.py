@@ -1,5 +1,3 @@
-from common.imports.Typing import Any
-
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
 from db.opcua.repository.OPCUARepository import OPCUARepository
@@ -13,6 +11,7 @@ from db.mapping.input.RawImageMapper import RawImageDTO
 from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
 from db.mapping.input.AnomalyMapper import AnomalyDTO
 from db.mapping.output.OPCUANodeMapper import OPCUADTO
+
 
 class DataAccessLayer:
     def __init__(self):

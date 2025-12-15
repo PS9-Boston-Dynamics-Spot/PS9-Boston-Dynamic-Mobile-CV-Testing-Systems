@@ -4,6 +4,7 @@ from db.opcua.exceptions.ReaderError import ReaderError
 from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 from db.mapping.output.OPCUANodeMapper import OPCUANodeMapper, OPCUADTO
 
+
 class OPCUARepository:
     def __init__(self):
         self.reader = OPCUAReader()
