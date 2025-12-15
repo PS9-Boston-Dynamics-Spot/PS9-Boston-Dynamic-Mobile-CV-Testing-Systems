@@ -7,7 +7,7 @@ val: ../val
 # test: ../test
 
 # Anzahl der Klassen
-nc: 4
+nc: 3
 
 # Klassen-Namen (in Reihenfolge ihrer IDs)
-names: ['digital_display_ac', 'analog_display_pressure', 'digital_display_temperature', 'not_categorised']
+names: ['digital_display_ofen', 'analog_display_pressure', 'digital_display_temperature']
