@@ -1,8 +1,5 @@
 import os
 
-from configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
-from configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
-
 from db.dal.DataAccessLayer import DataAccessLayer
 from app_lifespan import (
     services,
@@ -13,7 +10,7 @@ from app_lifespan import (
 
 if __name__ == "__main__":
 
-    path = os.path.join(os.getcwd(), "gauge-31.jpg")
+    path = os.path.join(os.getcwd(), "spot2.jpg")
 
     with open(path, "rb") as f:
         image_bytes = f.read()
