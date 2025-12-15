@@ -3,9 +3,9 @@ from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 
-from db.mapping.RawImageMapper import RawImageDTO
-from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
-from db.mapping.AnomalyMapper import AnomalyDTO
+from db.mapping.input.RawImageMapper import RawImageDTO
+from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.input.AnomalyMapper import AnomalyDTO
 
 
 class MetaRepository:
@@ -47,8 +47,6 @@ class MetaRepository:
                 sensor_type=metadata.sensor_type,
                 opcua_node_id=metadata.opcua_node_id,
                 aruco_id=metadata.aruco_id,
-                category=metadata.category,
-                quality=metadata.quality,
                 value=metadata.value,
                 unit=metadata.unit,
             )

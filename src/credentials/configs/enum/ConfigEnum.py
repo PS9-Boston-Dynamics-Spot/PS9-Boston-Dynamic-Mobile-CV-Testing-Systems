@@ -1,17 +1,22 @@
 from enum import Enum
 
 
-class OPCUA_NODES(str, Enum):
+class SENSOR_KEYS(str, Enum):
     OVERALL_DICT = "overall_dict"
 
     NODES = "nodes"
     OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
 
+    # Analog Gauge
+    MIN_ANGLE = "min_angle"
+    MAX_ANGLE = "max_angle"
+    UNIT = "unit"
+
     SCORE_FUNCTION = "score_function"
     PARAMETERS = "parameters"
-    MIN_VALUE = "min_value"
-    MAX_VALUE = "max_value"
+    PARAMETERS_MIN_VALUE = "min_value"
+    PARAMETERS_MAX_VALUE = "max_value"
 
     RISK_MANAGEMENT = "risk_management"
     SAFE_RANGE = "safe_range"
@@ -82,7 +87,7 @@ class ConfigEnum(str, Enum):
     SQLITE_CONFIG = CONFIG_DIR + "sqlite-credentials.yaml"
     BUCKETS_CONFIG = CONFIG_DIR + "minio-buckets.yaml"
     OPCUA_CONFIG = CONFIG_DIR + "opcua-credentials.yaml"
-    OPCUA_NODES_CONFIG = CONFIG_DIR + "opcua-nodes.yaml"
+    SENSOR_KEYS_CONFIG = CONFIG_DIR + "sensors.yaml"
 
     def __str__(self) -> str:
         return self.value

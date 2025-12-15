@@ -1,7 +1,7 @@
 from sqlite3 import connect
 from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
-from typing import Optional, Literal
+from common.imports.Typing import Optional, Literal
 import threading
 
 IsolationLevel = Optional[Literal["DEFERRED", "IMMEDIATE", "EXCLUSIVE"]]

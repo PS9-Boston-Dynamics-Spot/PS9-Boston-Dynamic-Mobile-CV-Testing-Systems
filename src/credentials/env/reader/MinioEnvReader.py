@@ -1,4 +1,4 @@
-from typing import Optional
+from common.imports.Typing import Optional
 
 from credentials.env.loader.EnvLoader import EnvLoader
 from credentials.env.enum.EnvEnum import EnvEnum, MINIO_KEYS
