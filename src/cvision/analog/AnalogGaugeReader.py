@@ -17,12 +17,12 @@ class AnalogGaugeReader:
         self,
     ):
         self.min_angle, self.max_angle = self._settings_manager.getMinMaxAngle(
-            allow_missing=True
+            category_name="pressure"
         )
         self.min_value, self.max_value = self._settings_manager.getMinMaxValue(
-            allow_missing=True
+            category_name="pressure"
         )
-        self.units = self._settings_manager.getUnit(allow_missing=True)
+        self.units = self._settings_manager.getUnit(category_name="pressure")
         self.__images_log: bytes = []
         return self
 

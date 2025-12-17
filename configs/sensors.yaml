@@ -2,6 +2,7 @@ overall_dict: !!str "DICT_6X6_1000"
 
 nodes:
   analog_gauge:
+    aruco_id: null
     categories:
       - name: !!str 'pressure' 
         min_angle: !!float 42.50
@@ -9,6 +10,7 @@ nodes:
 
         opcua_node: !!str ''
         unit: !!str 'bar'
+        value_tolerance: !!float 0.1
 
         score_function: !!str '1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
         parameters:
@@ -31,6 +33,7 @@ nodes:
       - name: !!str 'temperature'
         opcua_node: !!str 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
         unit: !!str '°C'
+        value_tolerance: !!float 0.1 # deviation of measured values, before opcua fallabck is used
 
         # Soft-Interval-Funktion
         # Innerhalb des Intervals [min_value, max_value] ist der Score exakt 1
@@ -59,6 +62,7 @@ nodes:
       - name: !!str 'humidity'
         opcua_node: !!str ''
         unit: !!str '%'
+        value_tolerance: !!float 0.1
 
         score_function: !!str '1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
         parameters:
@@ -77,6 +81,7 @@ nodes:
       - name: !!str 'alternating current'
         opcua_node: !!str ''
         unit: !!str 'A'
+        value_tolerance: !!float 0.1
 
         score_function: !!str '1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
         parameters:

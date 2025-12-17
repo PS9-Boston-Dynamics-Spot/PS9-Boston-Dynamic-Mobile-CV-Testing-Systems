@@ -24,18 +24,15 @@ class SensorConfigReader(ConfigLoader):
         return value
 
     def _findNodeByID(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, aruco_id: Optional[int] = None
     ) -> Dict[str, Dict[str, Any]]:
         nodes = self._getNodes()
         matched_nodes: Dict[str, Dict[str, Any]] = {}
 
         for node_name, props in nodes.items():
-            if aruco_id is None:
-                if allow_missing and SENSOR_KEYS.ARUCO_ID not in props:
-                    matched_nodes[node_name] = props
-            else:
-                if props.get(SENSOR_KEYS.ARUCO_ID) == aruco_id:
-                    matched_nodes[node_name] = props
+            node_aruco_id = props[SENSOR_KEYS.ARUCO_ID]            
+            if node_aruco_id == aruco_id:
+                matched_nodes[node_name] = props
 
         if len(matched_nodes) > 1:
             raise MultipleIDsError(
@@ -44,6 +41,7 @@ class SensorConfigReader(ConfigLoader):
 
         if not matched_nodes:
             raise NodeDoesNotExistError(error_code=1763729190, aruco_id=aruco_id)
+        
         values = next(iter(matched_nodes.values()))
         return values
     
@@ -52,7 +50,7 @@ class SensorConfigReader(ConfigLoader):
         categories = matched_node.get(SENSOR_KEYS.CATEGORIES, [])
         return [category[SENSOR_KEYS.NAME] for category in categories]
     
-    def getCategoryByCategoryNameAndArucoID(self, category_name: str, aruco_id: int) -> Dict[Any]:
+    def getCategoryByCategoryNameAndArucoID(self, category_name: str, aruco_id: int) -> Dict[str, Any]:
         matched_node = self._findNodeByID(aruco_id=aruco_id)
         categories = matched_node.get(SENSOR_KEYS.CATEGORIES, [])
         
@@ -64,36 +62,40 @@ class SensorConfigReader(ConfigLoader):
 
 
 
-    def getOPCUANodeByID(self, aruco_id: Optional[int] = None) -> Optional[str]:
-        matched_node = self.getCategoryByCategoryNameAndArucoID(aruco_id=aruco_id)
+    def getOPCUANodeByID(self, category_name: str, aruco_id: Optional[int] = None, ) -> Optional[str]:
+        matched_node = self.getCategoryByCategoryNameAndArucoID(aruco_id=aruco_id, category_name=category_name)
         return matched_node[SENSOR_KEYS.OPCUA_NODE]
+    
+    def getValueTolerance(self, category_name: str, aruco_id: Optional[int] = None) -> Optional[float]:
+        matched_node = self.getCategoryByCategoryNameAndArucoID(aruco_id=aruco_id, category_name=category_name)
+        return matched_node.get(SENSOR_KEYS.VALUE_TOLERANCE)
 
     def getScoreFunctionStr(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[str]:
         matched_node = self.getCategoryByCategoryNameAndArucoID(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
         return matched_node.get(SENSOR_KEYS.SCORE_FUNCTION)
 
     def getScoreFunction(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[Callable[[float], float]]:
 
         score_function_str = self.getScoreFunctionStr(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
-        parameters = self.getParameters(aruco_id=aruco_id, allow_missing=allow_missing)
+        parameters = self.getParameters(aruco_id=aruco_id, category_name=category_name)
 
         return lambda x: eval(
             score_function_str, {"exp": math.exp, "pow": math.pow, **parameters, "x": x}
         )
 
     def getParameters(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[dict]:
         matched_node = self.getCategoryByCategoryNameAndArucoID(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
         if matched_node.get(SENSOR_KEYS.PARAMETERS) is None:
@@ -102,38 +104,38 @@ class SensorConfigReader(ConfigLoader):
         return matched_node.get(SENSOR_KEYS.PARAMETERS)
 
     def getRiskManagement(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> dict:
         matched_node = self.getCategoryByCategoryNameAndArucoID(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
         return matched_node.get(SENSOR_KEYS.RISK_MANAGEMENT)
 
     def getSafeRange(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[float]:
         return self.getRiskManagement(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         ).get(SENSOR_KEYS.SAFE_RANGE)
 
     def getUncertainRange(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[float]:
         return self.getRiskManagement(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         ).get(SENSOR_KEYS.UNCERTAIN_RANGE)
 
     def getAnomalyRange(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[float]:
         return self.getRiskManagement(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         ).get(SENSOR_KEYS.ANOMALY_RANGE)
 
     def getMinMaxValue(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[Tuple[float, float]]:
-        parameters = self.getParameters(aruco_id=aruco_id, allow_missing=allow_missing)
+        parameters = self.getParameters(aruco_id=aruco_id, category_name=category_name)
 
         min_value = parameters.get(SENSOR_KEYS.PARAMETERS_MIN_VALUE)
         max_value = parameters.get(SENSOR_KEYS.PARAMETERS_MAX_VALUE)
@@ -152,10 +154,10 @@ class SensorConfigReader(ConfigLoader):
         )
 
     def getMinMaxAngle(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[Tuple[float, float]]:
         matched_node = self.getCategoryByCategoryNameAndArucoID(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
         return (
             matched_node.get(SENSOR_KEYS.MIN_ANGLE),
@@ -163,9 +165,9 @@ class SensorConfigReader(ConfigLoader):
         )
 
     def getUnit(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[str]:
         matched_node = self.getCategoryByCategoryNameAndArucoID(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
         return matched_node.get(SENSOR_KEYS.UNIT)

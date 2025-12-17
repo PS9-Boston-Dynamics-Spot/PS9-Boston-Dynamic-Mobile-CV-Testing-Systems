@@ -1,4 +1,4 @@
-from common.imports.Typing import Any, Optional, Callable, Tuple, List
+from common.imports.Typing import Any, Optional, Callable, Tuple, List, Dict
 
 from credentials.configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
 from credentials.configs.reader.SensorConfigReader import SensorConfigReader
@@ -39,75 +39,83 @@ class SettingsManager:
     def getArUcoOverallDict(self) -> dict:
         return self._sensor_config_reader.getOverallDict()
 
-    def getOPCUANodeByID(self, aruco_id: Optional[int] = None) -> Optional[str]:
-        return self._sensor_config_reader.getOPCUANodeByID(aruco_id=aruco_id)
+    def getOPCUANodeByID(self, category_name: str, aruco_id: Optional[int] = None) -> Optional[str]:
+        return self._sensor_config_reader.getOPCUANodeByID(aruco_id=aruco_id, category_name=category_name)
     
     def getCategoriesNameByNodeID(self, aruco_id: int) -> List[str]:
         return self._sensor_config_reader.getCategoriesNameByNodeID(aruco_id=aruco_id)
 
+    def getCategoryByCategoryNameAndArucoID(self, category_name: str, aruco_id: int) -> Dict[str, Any]:
+        return self._sensor_config_reader.getCategoryByCategoryNameAndArucoID(category_name=category_name, aruco_id=aruco_id)
+
+
+
     def getScoreFunctionStr(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[str]:
         return self._sensor_config_reader.getScoreFunctionStr(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getScoreFunction(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[Callable[[float], float]]:
         return self._sensor_config_reader.getScoreFunction(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getSafeRange(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[float]:
         return self._sensor_config_reader.getSafeRange(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getUncertainRange(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[float]:
         return self._sensor_config_reader.getUncertainRange(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getAnomalyRange(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[float]:
         return self._sensor_config_reader.getAnomalyRange(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getMinMaxValue(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[Tuple[float, float]]:
         return self._sensor_config_reader.getMinMaxValue(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getParametersForAnomalyMapper(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[dict[str, Any]]:
         parameters = self._sensor_config_reader.getParameters(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
         risk_management = self._sensor_config_reader.getRiskManagement(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
         return {**parameters, **risk_management}
 
     def getMinMaxAngle(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[Tuple[float, float]]:
         return self._sensor_config_reader.getMinMaxAngle(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
 
     def getUnit(
-        self, aruco_id: Optional[int] = None, allow_missing: bool = False
+        self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[str]:
         return self._sensor_config_reader.getUnit(
-            aruco_id=aruco_id, allow_missing=allow_missing
+            aruco_id=aruco_id, category_name=category_name
         )
+    
+    def getValueTolerance(self, category_name: str, aruco_id: Optional[int] = None) -> Optional[float]:
+        return self._sensor_config_reader.getValueTolerance(aruco_id=aruco_id, category_name=category_name)

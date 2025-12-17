@@ -18,6 +18,7 @@ class AnalyzedImageDTO:
     sensor_type: str
     value: float
     unit: str
+    category: str
     compressed: bool = False
     compression_method: Optional[str] = None
     opcua_node_id: Optional[str] = None
@@ -35,6 +36,7 @@ class AnalyzedImageDTO:
             "sensor_type",
             "value",
             "unit",
+            "category",
         ]
 
         for field_name in not_null_fields:
@@ -86,6 +88,11 @@ class AnalyzedImageDTO:
 
         if not isinstance(self.unit, str):
             raise TypeError("'unit' must be a string")
+        
+        if not isinstance(self.category, str):
+            print("category: ", self.category)
+            print(type(self.category))
+            raise TypeError("'category' must be a string")
 
         self.format = self.format.lower()
 
@@ -103,6 +110,7 @@ class AnalyzedImageMapper:
         sensor_type: str,
         value: float,
         unit: str,
+        category: str,
         aruco_id: Optional[int] = None,
         bucket: Optional[str] = None,
         name: Optional[str] = None,
@@ -137,6 +145,7 @@ class AnalyzedImageMapper:
             aruco_id=aruco_id,
             value=value,
             unit=unit,
+            category=category
         )
 
         return dto

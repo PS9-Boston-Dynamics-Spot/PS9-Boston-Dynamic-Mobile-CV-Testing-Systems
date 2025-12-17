@@ -70,6 +70,7 @@ class DatabaseWriter:
         aruco_id: int,
         value: float,
         unit: str,
+        category: str,
     ) -> tuple[int, str]:
         query = """
             INSERT INTO cvision_images_analyzed (
@@ -85,8 +86,10 @@ class DatabaseWriter:
                 opcua_node_id,
                 aruco_id,
                 value, 
-                unit)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                unit,
+                category
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         try:
@@ -107,6 +110,7 @@ class DatabaseWriter:
                         aruco_id,
                         value,
                         unit,
+                        category,
                     ),
                 )
                 return cursor.lastrowid, name

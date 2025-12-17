@@ -49,6 +49,7 @@ class MetaRepository:
                 aruco_id=metadata.aruco_id,
                 value=metadata.value,
                 unit=metadata.unit,
+                category=metadata.category,
             )
         except DatabaseWriterError as e:
             raise MetaRepositoryError(exception=e, error_code=1761932480)

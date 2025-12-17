@@ -16,6 +16,7 @@ class SENSOR_KEYS(str, Enum):
 
     OPCUA_NODE = "opcua_node"
     UNIT = "unit"
+    VALUE_TOLERANCE = "value_tolerance"
 
     SCORE_FUNCTION = "score_function"
     PARAMETERS = "parameters"
