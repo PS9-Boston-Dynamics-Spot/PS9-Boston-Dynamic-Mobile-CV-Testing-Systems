@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
     aruco_id INTEGER, -- if analog sensor, aruco_id is empty 
     value REAL NOT NULL, -- e.g. 20.0 °C (NOT NULL)
     unit TEXT NOT NULL, -- e.g. °C (NOT NULL)
+    category TEXT NOT NULL, -- e.g. temperature, pressure, humidity ... (NOT NULL)
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (raw_image_id) REFERENCES cvision_images_raw(id) ON DELETE CASCADE
 );

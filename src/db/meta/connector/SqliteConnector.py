@@ -1,5 +1,5 @@
 from sqlite3 import connect
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.CredentialsManager import CredentialsManager
 from db.meta.exceptions.SqliteConnectionError import SqliteConnectionError
 from common.imports.Typing import Optional, Literal
 import threading
@@ -28,8 +28,8 @@ class SqliteConnector:
             if SqliteConnector._shared_connection is not None:
                 return
 
-            config_manager = UnifiedCredentialsManager()
-            credentials = config_manager.getDBCredentials()
+            credentials_manager = CredentialsManager()
+            credentials = credentials_manager.getDBCredentials()
             isolation_level = credentials["isolation_level"]
 
             if isolation_level not in VALID_ISOLATION_LEVELS:

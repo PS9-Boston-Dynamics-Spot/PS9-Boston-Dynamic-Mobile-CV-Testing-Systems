@@ -12,41 +12,43 @@ if __name__ == "__main__":
 
     path = os.path.join(os.getcwd(), "spot2.jpg")
 
+    # TODO: move spot to machine and capture picture + for loop
     with open(path, "rb") as f:
         image_bytes = f.read()
 
-    # TODO: move spot to machine and capture picture
+    aruco_id = services.aruco_extractor.get_id(image_bytes=image_bytes)
 
+    aruco_id_analog = None
+    category_name_analog = "pressure"
+    opcua_node_id = services.settings_manager.getOPCUANodeByID(aruco_id=aruco_id_analog, category_name=category_name_analog)
+    
     with DataAccessLayer() as dal:
         dto_raw_image = services.raw_image_mapper.map_image(image_data=image_bytes)
         raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
 
-        aruco_id = services.aruco_extractor.get_id(image_bytes=image_bytes)
+        # at first, process analog gauge
         print("Aruco IDs: ", aruco_id)
 
         if aruco_id is None:
             raise Exception("No aruco id found in image")
-
-        opcua_node_id = services.settings_manager.getOPCUANodeByID(aruco_id=aruco_id)
 
         analyzed_image_id, detected_value = process_analog_image(
             dal=dal,
             image_bytes=image_bytes,
             raw_image_id=raw_image_id,
             opcua_node_id=opcua_node_id,
-            aruco_id=aruco_id,
+            aruco_id=aruco_id_analog,
+            category_name=category_name_analog
         )
 
         is_anomaly = check_anomaly_analog_gauge(
             dal=dal,
             analyzed_image_id=analyzed_image_id,
             detected_value=detected_value,
-            aruco_id=None,
-            allow_missing=True,
+            aruco_id=aruco_id_analog,
+            category_name=category_name_analog
         )
 
         handle_anomaly(is_anomaly=is_anomaly)
 
         # TODO: same for digital sensors
-
-        print("Inserted both images:", id)

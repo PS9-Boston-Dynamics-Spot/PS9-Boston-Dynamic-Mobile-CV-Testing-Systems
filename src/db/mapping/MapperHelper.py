@@ -41,7 +41,3 @@ class MapperHelper:
                 return "bin"
 
         return "bin"
-
-    @staticmethod
-    def sha256(image_data: bytes) -> str:
-        return hashlib.sha256(image_data).hexdigest()

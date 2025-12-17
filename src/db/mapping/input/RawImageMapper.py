@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict
 from common.imports.Typing import Any, Dict, Optional
 from db.mapping.MapperHelper import MapperHelper
 from common.conventions.ImageNames import ImageNames
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.SettingsManager import SettingsManager
 
 
 @dataclass
@@ -84,7 +84,7 @@ class RawImageMapper:
         format = format or MapperHelper.guess_file_extension(image_data)
         content_type = content_type or MapperHelper.guess_content_type(image_data)
         size = size or MapperHelper.get_bytes_length(image_data)
-        bucket = bucket or UnifiedCredentialsManager().getMinioRawBucket()
+        bucket = bucket or SettingsManager().getMinioRawBucket()
 
         if not name or name.strip() == "":
             name = ImageNames.random()

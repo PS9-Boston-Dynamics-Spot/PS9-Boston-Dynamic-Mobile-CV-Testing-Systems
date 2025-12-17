@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict
 from common.imports.Typing import Any, Dict, Optional
 from db.mapping.MapperHelper import MapperHelper
 from common.conventions.ImageNames import ImageNames
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.SettingsManager import SettingsManager
 
 
 @dataclass
@@ -18,6 +18,7 @@ class AnalyzedImageDTO:
     sensor_type: str
     value: float
     unit: str
+    category: str
     compressed: bool = False
     compression_method: Optional[str] = None
     opcua_node_id: Optional[str] = None
@@ -35,6 +36,7 @@ class AnalyzedImageDTO:
             "sensor_type",
             "value",
             "unit",
+            "category",
         ]
 
         for field_name in not_null_fields:
@@ -86,6 +88,11 @@ class AnalyzedImageDTO:
 
         if not isinstance(self.unit, str):
             raise TypeError("'unit' must be a string")
+        
+        if not isinstance(self.category, str):
+            print("category: ", self.category)
+            print(type(self.category))
+            raise TypeError("'category' must be a string")
 
         self.format = self.format.lower()
 
@@ -103,6 +110,7 @@ class AnalyzedImageMapper:
         sensor_type: str,
         value: float,
         unit: str,
+        category: str,
         aruco_id: Optional[int] = None,
         bucket: Optional[str] = None,
         name: Optional[str] = None,
@@ -117,7 +125,7 @@ class AnalyzedImageMapper:
         format = format or MapperHelper.guess_file_extension(image_data)
         content_type = content_type or MapperHelper.guess_content_type(image_data)
         size = size or MapperHelper.get_bytes_length(image_data)
-        bucket = bucket or UnifiedCredentialsManager().getMinioAnalyzedBucket()
+        bucket = bucket or SettingsManager().getMinioAnalyzedBucket()
 
         if not name or name.strip() == "":
             name = ImageNames.random()
@@ -137,6 +145,7 @@ class AnalyzedImageMapper:
             aruco_id=aruco_id,
             value=value,
             unit=unit,
+            category=category
         )
 
         return dto
