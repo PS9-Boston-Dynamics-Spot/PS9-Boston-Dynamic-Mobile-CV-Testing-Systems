@@ -10,19 +10,9 @@ from app_lifespan import (
 
 if __name__ == "__main__":
 
-    categories = services.settings_manager.getCategoriesNameByNodeID(aruco_id=46)
-    print("categories: ", categories)
-
-    category = services.settings_manager.getCategoryByCategoryNameAndArucoID(
-        category_name=categories[0], aruco_id=46
-    )
-    print("category: ", category)
-
-    #exit(0)
-
     path = os.path.join(os.getcwd(), "spot2.jpg")
 
-    # TODO: move spot to machine and capture picture
+    # TODO: move spot to machine and capture picture + for loop
     with open(path, "rb") as f:
         image_bytes = f.read()
 
@@ -62,5 +52,3 @@ if __name__ == "__main__":
         handle_anomaly(is_anomaly=is_anomaly)
 
         # TODO: same for digital sensors
-
-        print("Inserted both images:", id)
