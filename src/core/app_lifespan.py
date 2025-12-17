@@ -3,7 +3,7 @@ from common.imports.Typing import Optional, Tuple
 from db.mapping.input.RawImageMapper import RawImageMapper
 from db.mapping.input.AnalyzedImageMapper import AnalyzedImageMapper
 from db.mapping.input.AnomalyMapper import AnomalyMapper
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.SettingsManager import SettingsManager
 from anomaly.AnomalyChecker import AnomalyChecker
 from cvision.analog.AnalogGaugeReader import AnalogGaugeReader
 from cvision.analog.AnalogGaugeCropper import AnalogGaugeCropper
@@ -19,8 +19,8 @@ class Initializer:
         default_factory=AnalyzedImageMapper
     )
     anomaly_mapper: AnomalyMapper = field(default_factory=AnomalyMapper)
-    settings_manager: UnifiedCredentialsManager = field(
-        default_factory=UnifiedCredentialsManager
+    settings_manager: SettingsManager = field(
+        default_factory=SettingsManager
     )
     aruco_extractor: ArUcoIDExtraktor = field(default_factory=ArUcoIDExtraktor)
     anomaly_checker: AnomalyChecker = field(default_factory=AnomalyChecker)

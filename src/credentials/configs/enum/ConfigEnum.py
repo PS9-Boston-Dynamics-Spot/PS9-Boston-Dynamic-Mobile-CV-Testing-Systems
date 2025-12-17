@@ -5,12 +5,16 @@ class SENSOR_KEYS(str, Enum):
     OVERALL_DICT = "overall_dict"
 
     NODES = "nodes"
-    OPCUA_NODE = "opcua_node"
     ARUCO_ID = "aruco_id"
+    CATEGORIES = "categories"
+    NAME = "name"
 
-    # Analog Gauge
+    # --- Analog Gauge ---
     MIN_ANGLE = "min_angle"
     MAX_ANGLE = "max_angle"
+    # --------------------
+
+    OPCUA_NODE = "opcua_node"
     UNIT = "unit"
 
     SCORE_FUNCTION = "score_function"

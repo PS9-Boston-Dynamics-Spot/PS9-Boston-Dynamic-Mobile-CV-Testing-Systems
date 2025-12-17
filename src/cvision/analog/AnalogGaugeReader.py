@@ -3,26 +3,26 @@ from cv2.typing import MatLike
 import numpy as np
 from cvision.analog.exceptions.ImageEncodingFailed import ImageEncodingFailed
 from cvision.analog.exceptions.CenterNotFound import CenterNotFound
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.SettingsManager import SettingsManager
 
 
 class AnalogGaugeReader:
 
     def __init__(self, img: bytes) -> None:
-        self.credentials_manager = UnifiedCredentialsManager()
+        self._settings_manager = SettingsManager()
         img_array = np.frombuffer(img, dtype=np.uint8)
         self.__img: MatLike = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
     def __enter__(
         self,
     ):
-        self.min_angle, self.max_angle = self.credentials_manager.getMinMaxAngle(
+        self.min_angle, self.max_angle = self._settings_manager.getMinMaxAngle(
             allow_missing=True
         )
-        self.min_value, self.max_value = self.credentials_manager.getMinMaxValue(
+        self.min_value, self.max_value = self._settings_manager.getMinMaxValue(
             allow_missing=True
         )
-        self.units = self.credentials_manager.getUnit(allow_missing=True)
+        self.units = self._settings_manager.getUnit(allow_missing=True)
         self.__images_log: bytes = []
         return self
 

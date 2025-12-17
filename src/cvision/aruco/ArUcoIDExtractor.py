@@ -1,14 +1,14 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.SettingsManager import SettingsManager
 
 
 class ArUcoIDExtraktor:
 
     def __init__(self):
-        self.credentials_manager = UnifiedCredentialsManager()
-        self.dict_name = self.credentials_manager.getArUcoOverallDict()
+        self._settings_manager = SettingsManager()
+        self.dict_name = self._settings_manager.getArUcoOverallDict()
         self.aruco_dict_id = getattr(aruco, self.dict_name)
         self.aruco_dict = aruco.getPredefinedDictionary(self.aruco_dict_id)
         self.parameters = aruco.DetectorParameters()

@@ -10,6 +10,10 @@ from app_lifespan import (
 
 if __name__ == "__main__":
 
+    categories = services.settings_manager.getCategoriesNameByNodeID(aruco_id=46)
+    print("categories: ", categories)
+    exit(0)
+
     path = os.path.join(os.getcwd(), "spot2.jpg")
 
     with open(path, "rb") as f:

@@ -1,6 +1,6 @@
 from opcua import Client
 import socket
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.CredentialsManager import CredentialsManager
 from db.opcua.exceptions.DNSError import DNSError
 from db.opcua.exceptions.OPCUAConnectionRefusedError import OPCUAConnectionRefusedError
 from db.opcua.exceptions.ConnectionError import ConnectionError
@@ -8,8 +8,8 @@ from db.opcua.exceptions.ConnectionError import ConnectionError
 
 class OPCUAConnector:
     def __init__(self):
-        self.credentials_manager = UnifiedCredentialsManager()
-        self.opcua_credentials = self.credentials_manager.getOPCUACredentials()
+        self._credentials_manager = CredentialsManager()
+        self.opcua_credentials = self._credentials_manager.getOPCUACredentials()
 
         self.ip = self.opcua_credentials["ip"]
         self.port = self.opcua_credentials["port"]
