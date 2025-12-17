@@ -101,6 +101,40 @@ class RobotController:
         print("[Dock] Docking-Vorgang lief in ein Timeout.")
         return False
 
+    def undock(self, timeout_sec: int = 60):
+        """Löst den Undocking-Prozess aus und wartet auf Rückmeldung."""
+
+        print("[Dock] Starte Undocking-Vorgang...")
+
+        try:
+            command_id = self.dock_client.undock_robot_command(
+                clock_identifier=self.robot.time_sync.clock_identifier,
+            )
+        except Exception as exc:
+            print(f"[Dock] Fehler beim Senden des Undock-Kommandos: {exc}")
+            return False
+
+        start_time = time.time()
+        while time.time() - start_time < timeout_sec:
+            feedback = self.dock_client.undock_command_feedback(command_id)
+            status = feedback.status
+
+            if status == docking_pb2.UndockCommandFeedbackResponse.STATUS_UNDOCKED:
+                print("[Dock] Undocking erfolgreich abgeschlossen.")
+                return True
+
+            if status in (
+                docking_pb2.UndockCommandFeedbackResponse.STATUS_ERROR,
+                docking_pb2.UndockCommandFeedbackResponse.STATUS_ABORTED,
+            ):
+                print(f"[Dock] Undocking fehlgeschlagen mit Status {status}.")
+                return False
+
+            time.sleep(0.5)
+
+        print("[Dock] Undocking-Vorgang lief in ein Timeout.")
+        return False
+
     def toggle_power(self, should_power_on):
         """Power the robot on/off dependent on the current power state."""
         is_powered_on = self.check_is_powered_on()
@@ -673,12 +707,20 @@ def main():
                 time.sleep(3)
                 robot_state = rc.state_client.get_robot_state()
 
-                # # Navigation zu Waypoint
+
+                #Location setzen jetz nach undock -> Prüfen wie genau lokalisierung, was besser ist
+                print("Starte Undocking...")
+
+                if not rc.undock():
+                    print("Undocking fehlgeschlagen – Programm wird beendet.")
+                    return False
+
+                                # # Navigation zu Waypoint
                 print("Setze Location")
                 navigation._set_initial_localization_fiducial()
-                print("Gehe zu Location")
-
                 
+                
+                print("Gehe zu Location")
                 is_finished = navigation._navigate_to(["inured-boxer-mCIfZdF867i3wEbkV+5syg=="])  # default
                 
                 if is_finished:
