@@ -9,7 +9,7 @@ import math
 from google.protobuf import wrappers_pb2
 
 import bosdyn.client.util
-from bosdyn.api import robot_state_pb2, image_pb2, gripper_camera_param_pb2, header_pb2
+from bosdyn.api import robot_state_pb2, image_pb2, gripper_camera_param_pb2, header_pb2, docking_pb2
 from bosdyn.api.graph_nav import graph_nav_pb2, map_pb2, nav_pb2
 from bosdyn.client.exceptions import ResponseError
 from bosdyn.client.frame_helpers import get_odom_tform_body
@@ -63,27 +63,43 @@ class RobotController:
         self._started_powered_on = (power_state.motor_power_state == power_state.STATE_ON)
         self._powered_on = self._started_powered_on
 
-    #Not working        
     def dock(self, dock_id: int, timeout_sec: int = 60):
-
-        """Führt einen vollständigen Docking-Vorgang an der angegebenen Dock-ID aus."""
+        """Führt einen Docking-Vorgang inklusive Feedback-Loop aus."""
 
         print(f"[Dock] Starte Docking-Vorgang zu Dock-ID {dock_id}...")
 
-        # 1. Sicherstellen, dass Spot steht
         print("[Dock] Stelle sicher, dass der Roboter steht...")
         blocking_stand(self.command_client)
 
-        # 2. Dock-Befehl senden
-        print("[Dock] Sende Dock-Command...")
-        self.dock_client.dock(dock_id)
+        try:
+            command_id = self.dock_client.dock_robot_command(
+                dock_id,
+                clock_identifier=self.robot.time_sync.clock_identifier,
+            )
+        except Exception as exc:
+            print(f"[Dock] Fehler beim Senden des Dock-Kommandos: {exc}")
+            return False
 
-        # 3. Auf Abschluss warten
-        print("[Dock] Warte auf Docking-Abschluss...")
-        result = self.dock_client.block_until_complete(timeout_sec=timeout_sec)
+        start_time = time.time()
+        while time.time() - start_time < timeout_sec:
+            feedback = self.dock_client.dock_command_feedback(command_id)
+            status = feedback.status
 
-        print(f"[Dock] Docking abgeschlossen: {result}")
-        return result
+            if status == docking_pb2.DockCommandFeedbackResponse.STATUS_DOCKED:
+                print("[Dock] Docking erfolgreich abgeschlossen.")
+                return True
+
+            if status in (
+                docking_pb2.DockCommandFeedbackResponse.STATUS_ERROR,
+                docking_pb2.DockCommandFeedbackResponse.STATUS_ABORTED,
+            ):
+                print(f"[Dock] Docking fehlgeschlagen mit Status {status}.")
+                return False
+
+            time.sleep(0.5)
+
+        print("[Dock] Docking-Vorgang lief in ein Timeout.")
+        return False
 
     def toggle_power(self, should_power_on):
         """Power the robot on/off dependent on the current power state."""
@@ -619,6 +635,8 @@ def main():
     )
     parser.add_argument('-u', '--upload-filepath',
                         help='Full filepath to graph and snapshots to be uploaded.', required=True)
+    parser.add_argument('--dock-id', type=int, default=520,
+                        help='Dock-ID für das automatische Andocken (Standard: 520).')
     bosdyn.client.util.add_base_arguments(parser)
     options = parser.parse_args()
 
@@ -747,8 +765,18 @@ def main():
                     time.sleep(3)
                     print("Arm-Sequenz erfolgreich abgeschlossen")
                     # -----------------------------
+                
+                is_finished = False
+                #is_finished = navigation._navigate_to(["fated-filly-uqC9PODnwI=="]) # waypoint 3 wieder zurück irgendwo hin
+                if is_finished:
+                    dock_id = options.dock_id or 520
+                    print(f"Starte Docking an Dock-ID {dock_id}...")
+                    dock_success = rc.dock(dock_id)
+                    if dock_success:
+                        print("Docking erfolgreich abgeschlossen.")
+                    else:
+                        print("Docking fehlgeschlagen – manuelles Eingreifen erforderlich.")
 
-                #navigation._navigate_to(["fated-filly-uqC9P0DnwIVkUcjNIqMXHg=="]) # waypoint 3 wieder zurück irgendwo hin
 
                 return True
 
