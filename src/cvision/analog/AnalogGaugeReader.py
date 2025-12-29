@@ -19,8 +19,7 @@ class AnalogGaugeReader:
         self,
     ):
         self.start_point, self.end_point, self.kp_resolution = self.kp_detector.detect_key_points(image_bytes)
-
-        self.min_value, self.max_value = self._settings_manager.getMinMaxValue()
+        self.min_value, self.max_value = self._settings_manager.getMinMaxValue(category_name="pressure")
 
         self.units = self._settings_manager.getUnit(category_name="pressure")
         self.__images_log: bytes = []
@@ -129,12 +128,53 @@ class AnalogGaugeReader:
 
         return min_angle, max_angle
 
+    def __write_angles(self, img: MatLike, x: int, y: int, r: int) -> MatLike:
+
+        separation = 3.0
+        angles = np.arange(0, 360, separation)
+        rad = np.deg2rad(angles)
+
+        p1 = np.column_stack((x + 0.9 * r * np.cos(rad), y + 0.9 * r * np.sin(rad)))
+
+        p2 = np.column_stack((x + 1.0 * r * np.cos(rad), y + 1.0 * r * np.sin(rad)))
+
+        label_rad = np.deg2rad(angles + 90)
+        p_text = np.column_stack(
+            (x + 1.2 * r * np.cos(label_rad), y + 1.2 * r * np.sin(label_rad))
+        )
+
+        for i, angle in enumerate(angles):
+            cv2.line(
+                img,
+                (int(p1[i, 0]), int(p1[i, 1])),
+                (int(p2[i, 0]), int(p2[i, 1])),
+                (0, 255, 0),
+                2,
+            )
+            cv2.putText(
+                img,
+                str(int(angle)),
+                (int(p_text[i, 0]), int(p_text[i, 1])),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.35,
+                (0, 0, 0),
+                1,
+                cv2.LINE_AA,
+            )
+
+        return img
+
+
     def calibrate(self) -> Tuple[int, int, int]:
         center_x, center_y, radius = self.find_gauge_center_combined(self.__img)
         if radius == 0:
             raise CenterNotFound(error_code=1765392500)
 
         self.min_angle, self.max_angle = self.__calculate_angle(center_x=center_x, center_y=center_y)
+
+        img = self.__write_angles(img=self.__img, x=center_x, y=center_y, r=radius)
+
+        self.__log_image(img)
 
         print(f"[CALIB] min={self.min_angle:.2f}°, max={self.max_angle:.2f}°")
 
