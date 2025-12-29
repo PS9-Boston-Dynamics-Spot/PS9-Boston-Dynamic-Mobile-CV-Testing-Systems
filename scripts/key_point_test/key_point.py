@@ -3,23 +3,43 @@ import numpy as np
 from PIL import Image, ImageDraw
 import io
 
-# =====================
-# Config
-# =====================
 RESOLUTION = (448, 448)
 
+class KeyPointDetector:
 
-# =====================
-# Image utils
-# =====================
+    def __init__(self, key_point_model_path: str = "./models/key_point_model.pt") -> None:
+        self.key_point_model_path = key_point_model_path
+        self.key_point_inferencer = KeyPointInference(key_point_model_path)
+
+    def detect_key_points(self, image_bytes: bytes) -> tuple[float, float]:
+
+        heatmaps = self.key_point_inferencer.predict_heatmaps(image_bytes)
+
+        for i, hm in enumerate(heatmaps):
+            hm_norm = hm - hm.min()
+            if hm_norm.max() > 0:
+                hm_norm /= hm_norm.max()
+
+            hm_img = Image.fromarray((hm_norm * 255).astype(np.uint8))
+            hm_img = hm_img.resize(RESOLUTION, Image.BICUBIC)
+
+            hm_img.save(f"./heatmap_{i:02d}.png")
+
+        key_point_list = detect_key_points(heatmaps)
+
+        start_point = key_point_list[0]
+        end_point = key_point_list[2]
+
+        return (start_point, end_point)
+
+
 def resize_image_bytes(image_bytes, resolution):
-    """
-    Bytes -> resized PIL Image
-    """
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    img_resized = img.resize(resolution, Image.BICUBIC)
-    return img_resized
-
+        """
+        Bytes -> resized PIL Image
+        """
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        img_resized = img.resize(resolution, Image.BICUBIC)
+        return img_resized
 
 def save_image_with_keypoints(img_pil, key_point_list, out_path):
     """
@@ -41,36 +61,6 @@ def save_image_with_keypoints(img_pil, key_point_list, out_path):
     img_pil.save(out_path)
 
 
-# =====================
-# Inference
-# =====================
-def main(key_point_model_path, resized_img_pil):
-    key_point_inferencer = KeyPointInference(key_point_model_path)
-
-    buf = io.BytesIO()
-    resized_img.save(buf, format="JPEG")
-    image_bytes = buf.getvalue()
-
-    heatmaps = key_point_inferencer.predict_heatmaps(image_bytes)
-
-    for i, hm in enumerate(heatmaps):
-        hm_norm = hm - hm.min()
-        if hm_norm.max() > 0:
-            hm_norm /= hm_norm.max()
-
-        hm_img = Image.fromarray((hm_norm * 255).astype(np.uint8))
-        hm_img = hm_img.resize(RESOLUTION, Image.BICUBIC)
-
-        hm_img.save(f"./heatmap_{i:02d}.png")
-
-    key_point_list = detect_key_points(heatmaps)
-
-    start_point = key_point_list[0]
-    key_points = key_point_list[1]
-    end_point = key_point_list[2]
-
-    return start_point, key_points, end_point
-
 
 # =====================
 # Entry point
@@ -85,10 +75,11 @@ if __name__ == "__main__":
     resized_img = resize_image_bytes(image_bytes, RESOLUTION)
 
     # Run inference
-    start_point, key_points, end_point = main(
-        key_point_model_path="./models/key_point_model.pt",
-        resized_img_pil=resized_img
-    )
+    key_point_detector = KeyPointDetector()
+    start_point, end_point = key_point_detector.detect_key_points(image_bytes=image_bytes)
+
+    print("start_point", start_point)
+    print("end_point", end_point)
 
     # Save debug image with keypoints
     save_image_with_keypoints(

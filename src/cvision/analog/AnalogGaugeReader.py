@@ -19,6 +19,8 @@ class AnalogGaugeReader:
         self.min_angle, self.max_angle = self._settings_manager.getMinMaxAngle(
             category_name="pressure"
         )
+        print("min_angle", self.min_angle)
+        print("max_angle", self.max_angle)
         self.min_value, self.max_value = self._settings_manager.getMinMaxValue(
             category_name="pressure"
         )
@@ -135,22 +137,55 @@ class AnalogGaugeReader:
 
         return img
 
-    def calibrate_gauge(self) -> tuple[int, int, int]:
-        result = self.find_gauge_center_combined(img=self.__img)
-
-        if result is None:
+    def calibrate_with_keypoints(
+        self,
+        start_point: np.ndarray,
+        end_point: np.ndarray,
+        resized_resolution: tuple[int, int],
+    ):
+        # 1) Gauge Center
+        cx, cy, r = self.find_gauge_center_combined(self.__img)
+        if r == 0:
             raise CenterNotFound(error_code=1765392500)
 
-        x, y, r = result
+        # 2) Skalierung
+        h, w = self.__img.shape[:2]
+        rx, ry = resized_resolution
 
-        cv2.circle(self.__img, (x, y), r, (0, 0, 255), 3, cv2.LINE_AA)
-        cv2.circle(self.__img, (x, y), 3, (0, 255, 0), -1, cv2.LINE_AA)
+        sx = start_point[0][0] * (w / rx)
+        sy = start_point[0][1] * (h / ry)
 
-        img = self.__write_angles(img=self.__img, x=x, y=y, r=r)
+        ex = end_point[0][0] * (w / rx)
+        ey = end_point[0][1] * (h / ry)
 
-        self.__log_image(img)
+        # 3) Winkel berechnen
+        min_angle = self.__point_to_gauge_angle(cx, cy, sx, sy)
+        max_angle = self.__point_to_gauge_angle(cx, cy, ex, ey)
 
-        return x, y, r
+        if max_angle < min_angle:
+            max_angle += 360
+
+        self.min_angle = min_angle - 2
+        self.max_angle = max_angle - 2
+
+        print("[CALIB] min_angle", min_angle)
+        print("[CALIB] max_angle", max_angle)
+
+        # 4) Debug
+        dbg = self.__img.copy()
+        cv2.circle(dbg, (int(sx), int(sy)), 6, (0, 255, 0), -1)
+        cv2.circle(dbg, (int(ex), int(ey)), 6, (255, 0, 0), -1)
+        cv2.circle(dbg, (cx, cy), 4, (0, 0, 255), -1)
+
+        cv2.line(dbg, (cx, cy), (int(sx), int(sy)), (0, 255, 0), 2)
+        cv2.line(dbg, (cx, cy), (int(ex), int(ey)), (255, 0, 0), 2)
+
+        self.__log_image(dbg)
+
+        print(f"[CALIB] min={min_angle:.2f}°, max={max_angle:.2f}°")
+
+        return cx, cy, r
+
 
     def __get_edges(self, img: MatLike) -> MatLike:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -237,3 +272,101 @@ class AnalogGaugeReader:
         ) * new_range + float(self.min_value)
         print(f"Debug: gauge_value = {new_value:.2f}")
         return float(new_value)
+
+    def __point_to_gauge_angle(
+        self,
+        cx: int,
+        cy: int,
+        px: float,
+        py: float,
+    ) -> float:
+        dx = px - cx
+        dy = py - cy
+        angle_rad = np.arctan2(dy, dx)
+        return (np.rad2deg(angle_rad) - 90) % 360
+
+
+from key_point_detection.key_point_inference import KeyPointInference, detect_key_points
+import numpy as np
+from PIL import Image, ImageDraw
+import io
+
+RESOLUTION = (448, 448)
+
+class KeyPointDetector:
+
+    def __init__(self, key_point_model_path: str = "./models/key_point_model.pt") -> None:
+        self.key_point_model_path = key_point_model_path
+        self.key_point_inferencer = KeyPointInference(key_point_model_path)
+
+    def detect_key_points(self, image_bytes: bytes) -> tuple[np.ndarray, np.ndarray, tuple[int, int]]:
+
+        img_resized = resize_image_bytes(image_bytes, RESOLUTION)
+
+        buf = io.BytesIO()
+        img_resized.save(buf, format="JPEG")
+        resized_bytes = buf.getvalue()
+
+        heatmaps = self.key_point_inferencer.predict_heatmaps(resized_bytes)
+        key_point_list = detect_key_points(heatmaps)
+
+        start_point = key_point_list[0]
+        end_point = key_point_list[2]
+
+        return start_point, end_point, RESOLUTION
+
+
+
+def resize_image_bytes(image_bytes, resolution):
+        """
+        Bytes -> resized PIL Image
+        """
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        img_resized = img.resize(resolution, Image.BICUBIC)
+        return img_resized
+
+def save_image_with_keypoints(img_pil, key_point_list, out_path):
+    """
+    Draw keypoints ON THE RESIZED IMAGE
+    """
+    draw = ImageDraw.Draw(img_pil)
+
+    start_point, end_point = key_point_list
+
+    def draw_point(x, y, r=4, color="red"):
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+
+    if start_point.shape == (1, 2):
+        draw_point(start_point[0][0], start_point[0][1], color="green")
+
+    if end_point.shape == (1, 2):
+        draw_point(end_point[0][0], end_point[0][1], color="blue")
+
+    img_pil.save(out_path)
+
+
+
+if __name__ == "__main__":
+    with open("gauge-4-test.jpg", "rb") as f:
+        image_bytes = f.read()
+
+    print(image_bytes)
+
+    # Keypoints
+    kp_detector = KeyPointDetector()
+    start_point, end_point, kp_resolution = kp_detector.detect_key_points(image_bytes)
+
+    # Gauge
+    with AnalogGaugeReader(image_bytes) as gauge:
+        cx, cy, r = gauge.calibrate_with_keypoints(
+            start_point=start_point,
+            end_point=end_point,
+            resized_resolution=kp_resolution,
+        )
+
+        value = gauge.get_current_value(cx, cy, r)
+        print("Gauge Value:", value)
+
+        for idx, img_bytes in enumerate(gauge.get_images_log()):
+            with open(f"test-{idx}.jpg", "wb") as f:
+                f.write(img_bytes)
