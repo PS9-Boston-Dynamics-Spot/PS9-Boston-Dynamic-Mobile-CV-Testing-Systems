@@ -2,9 +2,9 @@ path: ./dataset # Pfad zum Dataset-Hauptordner
 train: images/train # Relativer Pfad zu Trainingsbildern
 val: images/val # Relativer Pfad zu Validierungsbildern
 # test: images/test # (Optional, falls Testdaten vorhanden)
-nc: 3 # Anzahl der Klassen
+nc: 2 # Anzahl der Klassen
 names:
 0: digital_display_ofen
 1: digital_display_temperature
-2: analog_display_pressure 
+# 2: analog_display_pressure 
 # analoge und digitale Anzeigen wurden getrennt, um die Klassifikation zu verbessern
