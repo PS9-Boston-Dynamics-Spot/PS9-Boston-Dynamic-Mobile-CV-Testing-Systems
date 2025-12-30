@@ -1,9 +1,11 @@
 from PIL import Image
 import io
 
-from key_point_detection.key_point_extraction import full_key_point_extraction
-from key_point_detection.model import load_model
-from key_point_detection.key_point_dataset import custom_transforms
+from cvision.analog.key_point_detection.key_point_extraction import (
+    full_key_point_extraction,
+)
+from cvision.analog.key_point_detection.model import load_model
+from cvision.analog.key_point_detection.key_point_dataset import custom_transforms
 
 
 class KeyPointInference:

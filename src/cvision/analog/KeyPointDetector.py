@@ -1,18 +1,26 @@
-from key_point_detection.key_point_inference import KeyPointInference, detect_key_points
+from cvision.analog.key_point_detection.key_point_inference import (
+    KeyPointInference,
+    detect_key_points,
+)
 import numpy as np
 from PIL import Image, ImageDraw
 import io
-from common.imports.Typing import Literal, Tuple
+from common.imports.Typing import Tuple
+
 
 class KeyPointDetector:
 
     RESOLUTION = (448, 448)
 
-    def __init__(self, key_point_model_path: str = "./models/key_point_model.pt") -> None:
+    def __init__(
+        self, key_point_model_path: str = "src/cvision/analog/models/key_point_model.pt"
+    ) -> None:
         self.key_point_model_path = key_point_model_path
         self.key_point_inferencer = KeyPointInference(key_point_model_path)
 
-    def detect_key_points(self, image_bytes: bytes) -> tuple[np.ndarray, np.ndarray, tuple[int, int]]:
+    def detect_key_points(
+        self, image_bytes: bytes
+    ) -> Tuple[np.ndarray, np.ndarray, Tuple[int, int]]:
 
         img_resized = self.resize_image_bytes(image_bytes)
 
@@ -35,11 +43,7 @@ class KeyPointDetector:
         return img_resized
 
 
-
 def save_image_with_keypoints(img_pil, key_point_list, out_path):
-    """
-    Draw keypoints ON THE RESIZED IMAGE
-    """
     draw = ImageDraw.Draw(img_pil)
 
     start_point, end_point = key_point_list

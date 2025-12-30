@@ -12,8 +12,7 @@ def full_key_point_extraction(heatmaps, threshold=0.5, bandwidth=20):
     for i in range(heatmaps.shape[0]):
         # middle
         if i == 1:
-            cluster_centers = extract_key_points(heatmaps[i], threshold,
-                                                 bandwidth)
+            cluster_centers = extract_key_points(heatmaps[i], threshold, bandwidth)
             key_point_list.append(cluster_centers)
         # start and end
         else:
@@ -78,17 +77,19 @@ def key_point_metrics(predicted, ground_truth, threshold=10):
     distances = cdist(predicted, ground_truth)
 
     cor_pred_indices = np.argmin(
-        distances, axis=1)  # indices of truth that are closest to predictions
+        distances, axis=1
+    )  # indices of truth that are closest to predictions
     cor_true_indices = np.argmin(
-        distances, axis=0)  # indices of predictions that are closest to truth
+        distances, axis=0
+    )  # indices of predictions that are closest to truth
 
     # extract the corresponding ground truth points
     corresponding_truth = ground_truth[cor_pred_indices]
 
     # calculate the Euclidean distances between predicted points and corresponding groundtruths
-    pred_distances = np.linalg.norm(predicted[:len(corresponding_truth)] -
-                                    corresponding_truth,
-                                    axis=1)
+    pred_distances = np.linalg.norm(
+        predicted[: len(corresponding_truth)] - corresponding_truth, axis=1
+    )
     mean_distance = np.mean(pred_distances)
 
     non_assigned = np.sum(pred_distances > threshold)
@@ -97,9 +98,9 @@ def key_point_metrics(predicted, ground_truth, threshold=10):
     # extract the corresponding predicted points
     corresponding_pred = predicted[cor_true_indices]
 
-    gt_distances = np.linalg.norm(ground_truth[:len(corresponding_pred)] -
-                                  corresponding_pred,
-                                  axis=1)
+    gt_distances = np.linalg.norm(
+        ground_truth[: len(corresponding_pred)] - corresponding_pred, axis=1
+    )
     correct = np.sum(gt_distances <= threshold)
     pck = correct / len(
         ground_truth
@@ -108,6 +109,6 @@ def key_point_metrics(predicted, ground_truth, threshold=10):
     results_dict = {
         MEAN_DIST_KEY: mean_distance,
         PCK_KEY: pck,
-        NON_ASSIGNED_KEY: p_non_assigned
+        NON_ASSIGNED_KEY: p_non_assigned,
     }
     return results_dict

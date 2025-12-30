@@ -1,5 +1,4 @@
 import imghdr
-import hashlib
 
 
 class MapperHelper:

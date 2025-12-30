@@ -15,11 +15,23 @@ parent_dir = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir))
 sys.path.append(parent_dir)
 
 # pylint: disable=wrong-import-position
-from key_point_dataset import RUN_PATH, KeypointImageDataSet, \
-    TRAIN_PATH, IMG_PATH, LABEL_PATH
+from key_point_dataset import (
+    RUN_PATH,
+    KeypointImageDataSet,
+    TRAIN_PATH,
+    IMG_PATH,
+    LABEL_PATH,
+)
 from key_point_validator import KeyPointVal
-from model import ENCODER_MODEL_NAME, Encoder, Decoder, EncoderDecoder, \
-    INPUT_SIZE, N_HEATMAPS, N_CHANNELS
+from model import (
+    ENCODER_MODEL_NAME,
+    Encoder,
+    Decoder,
+    EncoderDecoder,
+    INPUT_SIZE,
+    N_HEATMAPS,
+    N_CHANNELS,
+)
 
 BATCH_SIZE = 8
 
@@ -38,11 +50,11 @@ class KeyPointTrain:
             img_dir=image_folder,
             annotations_dir=annotation_folder,
             train=True,
-            val=False)
-        self.train_dataloader = DataLoader(self.train_dataset,
-                                           batch_size=BATCH_SIZE,
-                                           shuffle=True,
-                                           num_workers=4)
+            val=False,
+        )
+        self.train_dataloader = DataLoader(
+            self.train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
+        )
 
         self.decoder = self._create_decoder()
 
@@ -53,25 +65,23 @@ class KeyPointTrain:
         self.loss = {}
 
     def _create_decoder(self):
-        n_feature_channels = self.feature_extractor.get_number_output_channels(
-        )
+        n_feature_channels = self.feature_extractor.get_number_output_channels()
         if self.debug:
             print(f"Number of feature channels is {n_feature_channels}")
         return Decoder(n_feature_channels, N_CHANNELS, INPUT_SIZE, N_HEATMAPS)
 
     def train(self, num_epochs, learning_rate):
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.debug:
             print(f"Using {device} device")
 
         self.full_model.to(device)
 
         optimizer = optim.Adam(self.full_model.parameters(), lr=learning_rate)
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,
-                                                         mode='min',
-                                                         factor=0.5,
-                                                         patience=50)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=50
+        )
 
         # Train the model
         for epoch in range(num_epochs):
@@ -101,7 +111,7 @@ class KeyPointTrain:
             print(loss_msg)
             logging.info(loss_msg)
 
-        print('Finished Training')
+        print("Finished Training")
 
     def get_full_model(self):
         return self.full_model
@@ -122,7 +132,7 @@ def main():
 
     # Setup run directory
     time_str = time.strftime("%Y%m%d-%H%M%S")
-    run_path = os.path.join(base_path, RUN_PATH + '_' + time_str)
+    run_path = os.path.join(base_path, RUN_PATH + "_" + time_str)
     os.makedirs(run_path, exist_ok=True)
 
     # Setup logger
@@ -130,9 +140,10 @@ def main():
 
     logging.basicConfig(
         filename=log_path,
-        filemode='w',
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO)
+        filemode="w",
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.INFO,
+    )
 
     # initialize trainer
     if debug:
@@ -165,11 +176,11 @@ def main():
 
     # save parameters to text file
     params = {
-        'encoder': ENCODER_MODEL_NAME,
-        'number of decoder channels': N_CHANNELS,
-        'initial learning rate': learning_rate,
-        'epochs': num_epochs,
-        'batch size': BATCH_SIZE
+        "encoder": ENCODER_MODEL_NAME,
+        "number of decoder channels": N_CHANNELS,
+        "initial learning rate": learning_rate,
+        "epochs": num_epochs,
+        "batch size": BATCH_SIZE,
     }
 
     param_file_path = os.path.join(run_path, "paramaters.txt")
@@ -181,7 +192,7 @@ def main():
 
 
 def write_parameter_file(filename, params):
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         for key, value in params.items():
             f.write(f"{key}: {value}\n")
 
@@ -189,25 +200,26 @@ def write_parameter_file(filename, params):
 def read_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--epochs',
-                        type=int,
-                        required=False,
-                        default=50,
-                        help="Number of epochs for training")
-    parser.add_argument('--learning_rate',
-                        type=float,
-                        required=False,
-                        default=3e-4,
-                        help="Learning rate for training")
-    parser.add_argument('--data',
-                        type=str,
-                        required=True,
-                        help="Base path of data")
-    parser.add_argument('--val', action='store_true')
-    parser.add_argument('--debug', action='store_true')
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        required=False,
+        default=50,
+        help="Number of epochs for training",
+    )
+    parser.add_argument(
+        "--learning_rate",
+        type=float,
+        required=False,
+        default=3e-4,
+        help="Learning rate for training",
+    )
+    parser.add_argument("--data", type=str, required=True, help="Base path of data")
+    parser.add_argument("--val", action="store_true")
+    parser.add_argument("--debug", action="store_true")
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

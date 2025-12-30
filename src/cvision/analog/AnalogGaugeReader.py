@@ -19,7 +19,6 @@ class GaugeCalibration:
     max_angle: float
     min_value: float
     max_value: float
-    units: str
 
 
 @dataclass
@@ -36,27 +35,27 @@ class GaugeDetectionConfig:
     CANNY_THRESHOLD_HIGH = 150
     GAUSSIAN_KERNEL = (9, 9)
     MEDIAN_BLUR_KERNEL = 5
-    
+
     # Morphological operations
     MORPH_KERNEL_SIZE = (7, 7)
-    
+
     # Hough line detection
     HOUGH_RHO = 2
     HOUGH_THETA = np.pi / 180 * 2
     HOUGH_THRESHOLD = 90
     HOUGH_MIN_LINE_LENGTH = 5
     HOUGH_MAX_LINE_GAP = 10
-    
+
     # Line filtering (relative to radius)
     LINE_FILTER_MIN_D1 = 0.05
     LINE_FILTER_MAX_D1 = 0.3
     LINE_FILTER_MIN_D2 = 0.5
     LINE_FILTER_MAX_D2 = 1.05
-    
+
     # Angle visualization
     ANGLE_SEPARATION = 3.0
     ANGLE_ADJUSTMENT = -2.0  # Degrees to subtract from min/max angles
-    
+
     # Ellipse fitting
     MIN_CONTOUR_POINTS = 5
 
@@ -67,25 +66,25 @@ class AnalogGaugeReader:
         self._settings_manager = SettingsManager()
         self._category = category
         self._img_bytes = img
-        
+
         img_array = np.frombuffer(img, dtype=np.uint8)
         self._img: MatLike = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-        
+
         if self._img is None:
             raise ValueError("Failed to decode image")
-        
+
         self.kp_detector = KeyPointDetector()
         self._images_log: List[bytes] = []
         self._calibration: Optional[GaugeCalibration] = None
 
     def __enter__(self):
-        self.start_point, self.end_point, self.kp_resolution = \
+        self.start_point, self.end_point, self.kp_resolution = (
             self.kp_detector.detect_key_points(self._img_bytes)
-        
-        self.min_value, self.max_value = \
-            self._settings_manager.getMinMaxValue(category_name=self._category)
-        self.units = self._settings_manager.getUnit(category_name=self._category)
-        
+        )
+
+        self.min_value, self.max_value = self._settings_manager.getMinMaxValue(
+            category_name=self._category
+        )
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -113,7 +112,7 @@ class AnalogGaugeReader:
         edges = cv2.Canny(
             gray,
             GaugeDetectionConfig.CANNY_THRESHOLD_LOW,
-            GaugeDetectionConfig.CANNY_THRESHOLD_HIGH
+            GaugeDetectionConfig.CANNY_THRESHOLD_HIGH,
         )
         return edges
 
@@ -126,8 +125,7 @@ class AnalogGaugeReader:
 
         if use_morph:
             kernel_close = cv2.getStructuringElement(
-                cv2.MORPH_ELLIPSE,
-                GaugeDetectionConfig.MORPH_KERNEL_SIZE
+                cv2.MORPH_ELLIPSE, GaugeDetectionConfig.MORPH_KERNEL_SIZE
             )
             edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel_close)
 
@@ -136,7 +134,7 @@ class AnalogGaugeReader:
         contours, _ = cv2.findContours(
             edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        
+
         if not contours:
             print("Warning: No contours found")
             return []
@@ -158,8 +156,10 @@ class AnalogGaugeReader:
 
         cnt = max(all_large_contours, key=cv2.contourArea)
         if len(cnt) < GaugeDetectionConfig.MIN_CONTOUR_POINTS:
-            print(f"Warning: Contour too small for ellipse fitting "
-                  f"(need {GaugeDetectionConfig.MIN_CONTOUR_POINTS} points)")
+            print(
+                f"Warning: Contour too small for ellipse fitting "
+                f"(need {GaugeDetectionConfig.MIN_CONTOUR_POINTS} points)"
+            )
             return 0, 0, 0
 
         ellipse = cv2.fitEllipse(cnt)
@@ -174,7 +174,7 @@ class AnalogGaugeReader:
 
         print(f"Ellipse center: ({cx}, {cy}), approximate radius: {radius}")
         return cx, cy, radius
-    
+
     def _scale_keypoints(self) -> ScaledPoints:
         h, w = self._img.shape[:2]
         rx, ry = self.kp_resolution
@@ -190,7 +190,7 @@ class AnalogGaugeReader:
         self._log_image(img=dbg)
 
         return ScaledPoints(start_x, start_y, end_x, end_y)
-    
+
     def _point_to_gauge_angle(
         self,
         cx: int,
@@ -202,11 +202,9 @@ class AnalogGaugeReader:
         dy = py - cy
         angle_rad = np.arctan2(dy, dx)
         return (np.rad2deg(angle_rad) - 90) % 360
-    
+
     def _calculate_angle_range(
-        self,
-        center_x: int,
-        center_y: int
+        self, center_x: int, center_y: int
     ) -> Tuple[float, float]:
         scaled = self._scale_keypoints()
 
@@ -225,13 +223,7 @@ class AnalogGaugeReader:
 
         return min_angle, max_angle
 
-    def _visualize_angles(
-        self,
-        img: MatLike,
-        x: int,
-        y: int,
-        r: int
-    ) -> MatLike:
+    def _visualize_angles(self, img: MatLike, x: int, y: int, r: int) -> MatLike:
         separation = GaugeDetectionConfig.ANGLE_SEPARATION
         angles = np.arange(0, 360, separation)
         rad = np.deg2rad(angles)
@@ -240,10 +232,9 @@ class AnalogGaugeReader:
         p2 = np.column_stack((x + 1.0 * r * np.cos(rad), y + 1.0 * r * np.sin(rad)))
 
         label_rad = np.deg2rad(angles + 90)
-        p_text = np.column_stack((
-            x + 1.2 * r * np.cos(label_rad),
-            y + 1.2 * r * np.sin(label_rad)
-        ))
+        p_text = np.column_stack(
+            (x + 1.2 * r * np.cos(label_rad), y + 1.2 * r * np.sin(label_rad))
+        )
 
         for i, angle in enumerate(angles):
             cv2.line(
@@ -268,7 +259,7 @@ class AnalogGaugeReader:
 
     def calibrate(self) -> Tuple[int, int, int]:
         center_x, center_y, radius = self.find_gauge_center_combined(self._img)
-        
+
         if radius == 0:
             raise CenterNotFound(error_code=1765392500)
 
@@ -282,14 +273,10 @@ class AnalogGaugeReader:
             max_angle=max_angle,
             min_value=self.min_value,
             max_value=self.max_value,
-            units=self.units
         )
 
         img = self._visualize_angles(
-            img=self._img.copy(),
-            x=center_x,
-            y=center_y,
-            r=radius
+            img=self._img.copy(), x=center_x, y=center_y, r=radius
         )
         self._log_image(img)
 
@@ -298,46 +285,45 @@ class AnalogGaugeReader:
         return center_x, center_y, radius
 
     def _filter_lines_by_radius(
-        self,
-        lines: np.ndarray,
-        center_x: int,
-        center_y: int,
-        radius: int
+        self, lines: np.ndarray, center_x: int, center_y: int, radius: int
     ) -> List[List[int]]:
         final_lines = []
-        
+
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            
+
             d1 = self._calculate_distance(center_x, center_y, x1, y1)
             d2 = self._calculate_distance(center_x, center_y, x2, y2)
-            
+
             if d1 > d2:
                 d1, d2 = d2, d1
-            
-            if (GaugeDetectionConfig.LINE_FILTER_MIN_D1 * radius < d1 < GaugeDetectionConfig.LINE_FILTER_MAX_D1 * radius and
-                GaugeDetectionConfig.LINE_FILTER_MIN_D2 * radius < d2 < GaugeDetectionConfig.LINE_FILTER_MAX_D2 * radius):
+
+            if (
+                GaugeDetectionConfig.LINE_FILTER_MIN_D1 * radius
+                < d1
+                < GaugeDetectionConfig.LINE_FILTER_MAX_D1 * radius
+                and GaugeDetectionConfig.LINE_FILTER_MIN_D2 * radius
+                < d2
+                < GaugeDetectionConfig.LINE_FILTER_MAX_D2 * radius
+            ):
                 final_lines.append([x1, y1, x2, y2])
-        
+
         return final_lines
 
     def _find_pointer_tip(
-        self,
-        line: List[int],
-        center_x: int,
-        center_y: int
+        self, line: List[int], center_x: int, center_y: int
     ) -> Tuple[int, int]:
         x1, y1, x2, y2 = line
-        
+
         d1 = self._calculate_distance(center_x, center_y, x1, y1)
         d2 = self._calculate_distance(center_x, center_y, x2, y2)
-        
+
         return (x1, y1) if d1 > d2 else (x2, y2)
 
     def _angle_to_value(self, gauge_angle: float) -> float:
         if self._calibration is None:
             raise RuntimeError("Gauge must be calibrated before reading values")
-        
+
         if gauge_angle < self._calibration.min_angle:
             gauge_angle += 360
 
@@ -347,7 +333,7 @@ class AnalogGaugeReader:
         new_value = (
             (gauge_angle - self._calibration.min_angle) / old_range
         ) * new_range + self._calibration.min_value
-        
+
         return float(new_value)
 
     def get_current_value(self, x: int, y: int, r: int) -> float:
@@ -381,7 +367,9 @@ class AnalogGaugeReader:
 
         best_line = max(
             final_lines,
-            key=lambda line: self._calculate_distance(line[0], line[1], line[2], line[3])
+            key=lambda line: self._calculate_distance(
+                line[0], line[1], line[2], line[3]
+            ),
         )
 
         tip = self._find_pointer_tip(best_line, x, y)
@@ -392,8 +380,11 @@ class AnalogGaugeReader:
         gauge_angle = (np.rad2deg(angle_rad) - 90) % 360
 
         if gauge_angle <= self._calibration.min_angle:
-            return 0.0
-        
+            return self.min_value
+
+        if gauge_angle >= self._calibration.max_angle:
+            return self.max_value
+
         print(f"Debug: gauge_angle = {gauge_angle:.2f}°")
 
         img_circles = self._img.copy()
@@ -402,25 +393,25 @@ class AnalogGaugeReader:
         self._log_image(img_circles)
 
         gauge_value = self._angle_to_value(gauge_angle)
-        print(f"Debug: gauge_value = {gauge_value:.2f} {self.units}")
-        
+        print(f"Debug: gauge_value = {gauge_value:.2f}")
+
         return gauge_value
 
 
-def main() -> None:
-    with open("test2.jpg", "rb") as f:
-        image_bytes = f.read()
+# def main() -> None:
+#     with open("test2.jpg", "rb") as f:
+#         image_bytes = f.read()
 
-    with AnalogGaugeReader(image_bytes, category="pressure") as gauge:
-        cx, cy, r = gauge.calibrate()
-        value = gauge.get_current_value(cx, cy, r)
-        
-        print(f"Gauge Value: {value:.2f} {gauge.units}")
+#     with AnalogGaugeReader(image_bytes, category="pressure") as gauge:
+#         cx, cy, r = gauge.calibrate()
+#         value = gauge.get_current_value(cx, cy, r)
 
-        for idx, img_bytes in enumerate(gauge.get_images_log()):
-            with open(f"test-{idx}.png", "wb") as f:
-                f.write(img_bytes)
+#         print(f"Gauge Value: {value:.2f} {gauge.units}")
+
+#         for idx, img_bytes in enumerate(gauge.get_images_log()):
+#             with open(f"test-{idx}.png", "wb") as f:
+#                 f.write(img_bytes)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

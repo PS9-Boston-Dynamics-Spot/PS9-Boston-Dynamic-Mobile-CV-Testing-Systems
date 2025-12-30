@@ -20,8 +20,10 @@ if __name__ == "__main__":
 
     aruco_id_analog = None
     category_name_analog = "pressure"
-    opcua_node_id = services.settings_manager.getOPCUANodeByID(aruco_id=aruco_id_analog, category_name=category_name_analog)
-    
+    opcua_node_id = services.settings_manager.getOPCUANodeByID(
+        aruco_id=aruco_id_analog, category_name=category_name_analog
+    )
+
     with DataAccessLayer() as dal:
         dto_raw_image = services.raw_image_mapper.map_image(image_data=image_bytes)
         raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
@@ -38,7 +40,7 @@ if __name__ == "__main__":
             raw_image_id=raw_image_id,
             opcua_node_id=opcua_node_id,
             aruco_id=aruco_id_analog,
-            category_name=category_name_analog
+            category_name=category_name_analog,
         )
 
         is_anomaly = check_anomaly_analog_gauge(
@@ -46,7 +48,7 @@ if __name__ == "__main__":
             analyzed_image_id=analyzed_image_id,
             detected_value=detected_value,
             aruco_id=aruco_id_analog,
-            category_name=category_name_analog
+            category_name=category_name_analog,
         )
 
         handle_anomaly(is_anomaly=is_anomaly)

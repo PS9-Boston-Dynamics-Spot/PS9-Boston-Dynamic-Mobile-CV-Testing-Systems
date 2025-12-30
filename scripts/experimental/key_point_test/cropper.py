@@ -84,6 +84,7 @@ class AnalogGaugeCropper:
         pil_img.save(buffer, format="PNG")
         return buffer.getvalue()
 
+
 if __name__ == "__main__":
     cropper = AnalogGaugeCropper()
     with open("gauge-4.jpg", "rb") as f:

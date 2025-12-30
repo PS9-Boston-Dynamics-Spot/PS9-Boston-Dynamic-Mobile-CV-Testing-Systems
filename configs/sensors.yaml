@@ -4,9 +4,7 @@ nodes:
   analog_gauge:
     aruco_id: null
     categories:
-      - name: !!str 'pressure' 
-        min_angle: !!float 42.50
-        max_angle: !!float 212.0
+      - name: !!str 'pressure'
 
         opcua_node: !!str ''
         unit: !!str 'bar'
