@@ -36,3 +36,16 @@ Um das Projekt einzurichten und zu nutzen, folge den Anleitungen in den jeweilig
 
 - **Installation:** [Install](./docs/setup/install.md) – beschreibt, wie das Projekt in einer Container-Umgebung eingerichtet wird.  
 - **Nutzung:** [Usage](./docs/setup/usage.md) – zeigt, wie du das Projekt startest, testest und betreibst.
+
+---
+
+## Team & Contributors
+
+### Projektleitung
+- **Prof. Dr. Dirk Reichelt** – Auftraggeber
+- **Felix Fritzsche** - Projektbetreuer
+
+### Entwicklungsteam
+[![Contributors](https://contrib.rocks/image?repo=PS9-Boston-Dynamics-Spot/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems)](https://github.com/PS9-Boston-Dynamics-Spot/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/graphs/contributors)
+
+---
