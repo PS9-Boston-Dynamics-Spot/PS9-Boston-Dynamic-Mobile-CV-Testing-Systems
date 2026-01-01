@@ -88,7 +88,7 @@ class AnalyzedImageDTO:
 
         if not isinstance(self.unit, str):
             raise TypeError("'unit' must be a string")
-        
+
         if not isinstance(self.category, str):
             print("category: ", self.category)
             print(type(self.category))
@@ -145,7 +145,7 @@ class AnalyzedImageMapper:
             aruco_id=aruco_id,
             value=value,
             unit=unit,
-            category=category
+            category=category,
         )
 
         return dto
