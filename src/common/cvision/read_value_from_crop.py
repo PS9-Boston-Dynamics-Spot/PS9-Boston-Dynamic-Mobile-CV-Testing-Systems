@@ -3,162 +3,209 @@ import re
 import cv2
 import easyocr
 
+# -----------------------------
+# CONFIG
+# -----------------------------
+CROP_DIR = Path(__file__).resolve().parents[3] / "data" / "images" / "crop"
 READER = easyocr.Reader(["en", "de"], gpu=False)
-NUM_RE = re.compile(r"[-+]?\d+(?:[.,]\d+)?")
 
+NUM_RE = re.compile(r"-?\d+(?:[\.,]\d+)?")
 
-# 1) Filter: nur digitale Crops zulassen
-
+# -----------------------------
+# FILTER: nur digitale Crops
+# -----------------------------
 def is_digital_crop(path: Path) -> bool:
     name = path.name.lower()
-
-    # harte Ausschlüsse (alles was sicher analog ist)
-    if "analog" in name:
+    if "analog" in name or "druck" in name or "pressure" in name or "manometer" in name:
         return False
-    if "pressure" in name or "druck" in name or "manometer" in name:
-        return False
+    # alles, was nach digital aussieht, zulassen
+    return True
 
-    # harte Einschlüsse (alles was sicher digital ist)
-    if "digital" in name:
-        return True
+# -----------------------------
+# CLASSIFY: welcher Display-Typ?
+# -----------------------------
+def classify_crop(path: Path) -> str:
+    """
+    Entscheidet anhand Dateiname:
+    - 'temperatur'/'temperature' -> tempdisplay
+    - 'ofen' -> ofen
+    - Fallback: cls1 -> tempdisplay, cls0 -> ofen
+    """
+    name = path.name.lower()
+
     if "temperatur" in name or "temperature" in name:
-        return True
+        return "tempdisplay"
     if "ofen" in name:
-        return True
+        return "ofen"
 
-    # sonst lieber nicht 
-    return False
+    # Fallback für det*_cls*.jpg
+    if "cls1" in name:
+        return "tempdisplay"
+    if "cls0" in name:
+        return "ofen"
 
+    return "unknown"
 
-# 2) OCR + Vorverarbeitung
-
+# -----------------------------
+# PREPROCESSING
+# -----------------------------
 def preprocess(img_bgr):
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    gray = cv2.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_CUBIC)
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
-    thr = cv2.adaptiveThreshold(
+    gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    th = cv2.adaptiveThreshold(
         gray, 255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY,
         31, 5
     )
-    return thr
+    return th
 
-def parse_number(text):
-    m = NUM_RE.search(text.strip())
-    if not m:
-        return None
-    s = m.group(0).replace(",", ".")
-    try:
-        return float(s), s
-    except ValueError:
-        return None
+# -----------------------------
+# OCR helpers
+# -----------------------------
+def clean_numeric_text(s: str) -> str:
+    s = s.strip()
+    s = s.replace(",", ".")
+    s = s.replace(";", ".")
+    s = s.replace(":", ".")
+    s = s.replace("*", ".")   # "21*2" -> "21.2"
+    s = s.replace("O", "0").replace("o", "0")
+    s = re.sub(r"[^0-9.\-]", "", s)
+    s = re.sub(r"\.+", ".", s)
+    return s
 
-def bbox_stats(bbox):
-    xs = [p[0] for p in bbox]
-    ys = [p[1] for p in bbox]
-    x1, x2 = min(xs), max(xs)
-    y1, y2 = min(ys), max(ys)
-    w = x2 - x1
-    h = y2 - y1
-    area = w * h
-    cx = (x1 + x2) / 2
-    cy = (y1 + y2) / 2
-    return area, cx, cy
-
-def pick_main_value(ocr_results, img_w, img_h):
+def ocr_value_in_roi(img_bgr, roi, min_val=None, max_val=None, prefer_decimal=True):
     """
-    Heuristik für eure Displays:
-    - bevorzugt Dezimalzahlen (z.B. 0.1 / 21.2 / 38.9)
-    - filtert unrealistische Werte 
-    - bevorzugt größere Box + eher zentral
+    roi = (x1_rel, y1_rel, x2_rel, y2_rel) in 0..1
     """
+    h, w, _ = img_bgr.shape
+    x1, y1 = int(w * roi[0]), int(h * roi[1])
+    x2, y2 = int(w * roi[2]), int(h * roi[3])
+
+    crop = img_bgr[y1:y2, x1:x2]
+    proc = preprocess(crop)
+    results = READER.readtext(proc)
+
+    raw_text = []
     candidates = []
-    for bbox, text, conf in ocr_results:
-        if conf < 0.20:
+
+    for _, text, conf in results:
+        raw_text.append(text)
+        if conf < 0.15:
             continue
 
-        parsed = parse_number(text)
-        if not parsed:
+        cleaned = clean_numeric_text(text)
+        m = NUM_RE.search(cleaned)
+        if not m:
             continue
 
-        val, raw = parsed
-
-        # unrealistische Werte herausfiltern
-        if abs(val) > 1000:
+        try:
+            val = float(m.group())
+        except ValueError:
             continue
 
-        area, cx, cy = bbox_stats(bbox)
-        rx = cx / img_w
-        ry = cy / img_h
-        has_decimal = ("." in raw)
+        if min_val is not None and val < min_val:
+            continue
+        if max_val is not None and val > max_val:
+            continue
 
-        score = 0.0
-        score += 6.0 if has_decimal else 0.0
-        score += min(area / (img_w * img_h), 0.2) * 10.0
-        score += (1.0 - abs(rx - 0.5)) * 1.5
-        score += ry * 0.5
-        score += conf * 1.0
+        score = conf
+        if prefer_decimal and "." in m.group():
+            score += 1.5
 
-        candidates.append((score, val))
+        candidates.append((score, val, text))
 
     if not candidates:
-        return None
+        return None, raw_text
 
     candidates.sort(reverse=True, key=lambda x: x[0])
-    return float(candidates[0][1])
+    return candidates[0][1], raw_text
 
 def read_unit_from_roi(img_bgr):
-    """Einheit sitzt meist rechts oben: °C / %."""
+    # Einheit sitzt meist rechts oben
+    roi = (0.65, 0.0, 1.0, 0.3)
     h, w, _ = img_bgr.shape
-    x1 = int(w * 0.70)
-    y1 = int(h * 0.00)
-    x2 = int(w * 1.00)
-    y2 = int(h * 0.35)
+    x1, y1 = int(w * roi[0]), int(h * roi[1])
+    x2, y2 = int(w * roi[2]), int(h * roi[3])
 
-    roi = img_bgr[y1:y2, x1:x2]
-    proc = preprocess(roi)
-    r = READER.readtext(proc)
+    crop = img_bgr[y1:y2, x1:x2]
+    proc = preprocess(crop)
+    results = READER.readtext(proc)
+    texts = [t.lower() for _, t, _ in results]
 
-    texts = " ".join([t for _, t, _ in r]).lower()
-
-    if "°" in texts or "c" in texts:
+    if any("°" in t or "c" in t for t in texts):
         return "°C"
-    if "%" in texts:
+    if any("%" in t for t in texts):
         return "%"
-    if "bar" in texts:
+    if any("bar" in t for t in texts):
         return "bar"
     return None
 
-def read_value_and_unit(image_path: Path):
-    img_bgr = cv2.imread(str(image_path))
-    if img_bgr is None:
-        raise FileNotFoundError(f"Kann Bild nicht laden: {image_path}")
+# -----------------------------
+# MAIN per file
+# -----------------------------
+def read_value_from_crop(image_path: Path):
+    img = cv2.imread(str(image_path))
+    if img is None:
+        raise FileNotFoundError(image_path)
 
-    h, w, _ = img_bgr.shape
-    proc = preprocess(img_bgr)
-    ocr_results = READER.readtext(proc)
+    display_type = classify_crop(image_path)
+    unit = read_unit_from_roi(img)
 
-    # preprocess resize x2 => bbox coords ebenfalls x2
-    value = pick_main_value(ocr_results, img_w=w*2, img_h=h*2)
-    unit = read_unit_from_roi(img_bgr)
+    # --- Temperaturdisplay: immer NUR oben lesen (damit Humidity nicht gewinnt)
+    if display_type == "tempdisplay":
+        # ROI oben, wo Temperatur-Zahl steht
+        temp_roi = (0.10, 0.05, 0.90, 0.45)
+        value, raw = ocr_value_in_roi(img, temp_roi, min_val=-50, max_val=400, prefer_decimal=True)
 
+
+        return {
+            "file": image_path.name,
+            "type": "temperature_display",
+            "value": value,
+            "unit": unit or "°C",
+            "raw_text": raw,
+        }
+
+    # --- Ofen: ROI mittig (statt global), Dezimal bevorzugen
+    if display_type == "ofen":
+        # Ofen-Wert steht unten rechts 
+        ofen_roi = (0.55, 0.65, 0.98, 0.95)
+
+        value, raw = ocr_value_in_roi(
+            img,
+            ofen_roi,
+            min_val=0.0,
+            max_val=500.0,
+            prefer_decimal=True
+        )
+
+        return {
+            "file": image_path.name,
+            "type": "ofen_display",
+            "value": value,
+            "unit": None,   # Ofen hat hier keine explizite Einheit
+            "raw_text": raw,
+        }
+
+
+    # --- Unbekannt: konservativ -> nichts machen, damit keine falschen Werte rauskommen
     return {
         "file": image_path.name,
-        "value": value,
+        "type": "unknown",
+        "value": None,
         "unit": unit,
-        "raw_text": [t for _, t, _ in ocr_results],
+        "raw_text": [],
     }
 
-
-# Main
-
+# -----------------------------
+# RUN
+# -----------------------------
 if __name__ == "__main__":
-    project_root = Path(__file__).resolve().parents[3]
-    crop_dir = project_root / "data" / "images" / "crop"
+    print("Using CPU. Note: This module is much faster with a GPU.")
 
-    for img_path in sorted(crop_dir.glob("*.jpg")):
+    for img_path in sorted(CROP_DIR.glob("*.jpg")):
         if not is_digital_crop(img_path):
             continue
-        print(read_value_and_unit(img_path))
-
+        print(read_value_from_crop(img_path))
