@@ -1,8 +1,7 @@
 import cv2
-from cv2.typing import MatLike
+from common.imports.Typing import MatLike, Tuple, List, Optional
 import numpy as np
 from dataclasses import dataclass
-from typing import Tuple, List, Optional
 
 from cvision.analog.exceptions.ImageEncodingFailed import ImageEncodingFailed
 from cvision.analog.exceptions.CenterNotFound import CenterNotFound

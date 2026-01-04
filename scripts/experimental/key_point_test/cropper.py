@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 import cv2
-from cv2.typing import MatLike
+from common.imports.Typing import MatLike
 import io
 from cvision.analog.exceptions.GaugeDetectionFailed import GaugeDetectionFailed
 import os
