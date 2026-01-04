@@ -1,0 +1,9 @@
+path: data/dataset
+
+train: images/train
+val: images/val
+
+names:
+  0: digital_display_ofen
+  1: digital_display_temperatur
+  2: analog_display_pressure

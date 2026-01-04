@@ -1,23 +1,20 @@
-from pathlib import Path
 import os
 import cv2
 import base64
 import requests
 import json
 
-# Projektroot automatisch bestimmen (roboflow.py liegt in src/common/cvision)
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-
-RAW_FOLDER = PROJECT_ROOT / "data" / "images" / "raw"
-CROP_FOLDER = PROJECT_ROOT / "data" / "images" / "crop"
+projectdir = "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems"
+RAW_FOLDER = f"{projectdir}/data/images/raw"
+CROP_FOLDER = f"{projectdir}/data/images/crop"
 
 WORKSPACE = "ps-9"
 WORKFLOW_ID = "find-displayofens-and-displaytemperaturs"
+
 API_URL = f"https://serverless.roboflow.com/{WORKSPACE}/workflows/{WORKFLOW_ID}"
 API_KEY = "RYmNlhCjTmyi92J0pOwr"
 
-CROP_FOLDER.mkdir(parents=True, exist_ok=True)
-
+os.makedirs(CROP_FOLDER, exist_ok=True)
 
 def run_roboflow_inference(image_path: str):
     """Send image to Roboflow workflow and return predictions."""
