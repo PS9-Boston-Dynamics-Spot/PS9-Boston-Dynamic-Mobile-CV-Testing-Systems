@@ -9,6 +9,7 @@ from cvision.analog.AnalogGaugeReader import AnalogGaugeReader
 from cvision.analog.AnalogGaugeCropper import AnalogGaugeCropper
 from cvision.aruco.ArUcoIDExtractor import ArUcoIDExtraktor
 from db.dal.DataAccessLayer import DataAccessLayer
+from cvision.digital.ReadDigitalSensor import (crop_and_quality, extract_value_tesseract, process_images)
 
 
 @dataclass
@@ -169,3 +170,23 @@ def handle_anomaly(is_anomaly: bool) -> None:
     else:
         print("✅No anomaly detected✅")
         # TODO: continue to next machine)
+
+def process_digital_image(
+    dal: DataAccessLayer,
+    image_bytes: bytes,
+    raw_image_id: int,
+    opcua_node_id: str,
+    aruco_id: Optional[int] = None,
+    category_name: Optional[str] = "pressure",
+):
+    return
+
+def check_anomaly_digital_sensor(
+    dal: DataAccessLayer,
+    analyzed_image_id: int,
+    detected_value: float,
+    category_name: str,
+    aruco_id: Optional[int] = None,
+) -> bool:
+    
+    return
