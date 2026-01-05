@@ -1,0 +1,9 @@
+created_at_utc: 2026-01-05T21:31:10.976808Z
+source_name: 20260105_155110
+idx: 0
+class_id: 1
+confidence: 0.8585
+bbox_xyxy: [1926, 1017, 2322, 1328]
+crop_format: jpg
+crop_content_type: image/jpeg
+quality_image: 1.000
