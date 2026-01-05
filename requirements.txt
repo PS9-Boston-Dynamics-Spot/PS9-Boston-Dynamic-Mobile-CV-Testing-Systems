@@ -27,3 +27,4 @@ ultralytics>=8.0.0
 torch
 pillow==12.0.0
 scikit-learn==1.8.0
+pytesseract==0.3.13
