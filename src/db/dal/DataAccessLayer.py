@@ -1,5 +1,3 @@
-from typing import Any
-
 from db.meta.repository.MetaRepository import MetaRepository
 from db.media.repository.MediaRepository import MediaRepository
 from db.opcua.repository.OPCUARepository import OPCUARepository
@@ -9,9 +7,10 @@ from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 from db.dal.exceptions.DataAccessLayerError import DataAccessLayerError
 from db.opcua.exceptions.OPCUARepositoryError import OPCUARepositoryError
 
-from db.mapping.RawImageMapper import RawImageDTO
-from db.mapping.AnalyzedImageMapper import AnalyzedImageDTO
-from db.mapping.AnomalyMapper import AnomalyDTO
+from db.mapping.input.RawImageMapper import RawImageDTO
+from db.mapping.input.AnalyzedImageMapper import AnalyzedImageDTO
+from db.mapping.input.AnomalyMapper import AnomalyDTO
+from db.mapping.output.OPCUANodeMapper import OPCUADTO
 
 
 class DataAccessLayer:
@@ -97,7 +96,7 @@ class DataAccessLayer:
         except Exception as e:
             raise DataAccessLayerError(exception=e, error_code=1762882030)
 
-    def get_value_from_opcua_node(self, opcua_node_id: str) -> Any:
+    def get_value_from_opcua_node(self, opcua_node_id: str) -> OPCUADTO:
         try:
             return self.opcua_repository.get_node_value_by_id(
                 opcua_node_id=opcua_node_id

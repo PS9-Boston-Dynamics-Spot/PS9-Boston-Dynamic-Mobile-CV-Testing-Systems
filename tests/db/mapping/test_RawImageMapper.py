@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from db.mapping.RawImageMapper import RawImageDTO, RawImageMapper
+from db.mapping.input.RawImageMapper import RawImageDTO, RawImageMapper
 
 
 class TestRawImageDTO(unittest.TestCase):

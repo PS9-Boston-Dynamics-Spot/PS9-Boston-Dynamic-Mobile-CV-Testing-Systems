@@ -68,10 +68,9 @@ class DatabaseWriter:
         sensor_type: str,
         opcua_node_id: str,
         aruco_id: int,
-        category: str,
-        quality: float,
         value: float,
         unit: str,
+        category: str,
     ) -> tuple[int, str]:
         query = """
             INSERT INTO cvision_images_analyzed (
@@ -86,11 +85,11 @@ class DatabaseWriter:
                 sensor_type,
                 opcua_node_id,
                 aruco_id,
-                category, 
-                quality, 
                 value, 
-                unit)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                unit,
+                category
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         try:
@@ -109,10 +108,9 @@ class DatabaseWriter:
                         sensor_type,
                         opcua_node_id,
                         aruco_id,
-                        category,
-                        quality,
                         value,
                         unit,
+                        category,
                     ),
                 )
                 return cursor.lastrowid, name

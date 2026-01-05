@@ -1,4 +1,4 @@
-from typing import Optional
+from common.imports.Typing import Optional
 from credentials.configs.loader.ConfigLoader import ConfigLoader
 from credentials.configs.enum.ConfigEnum import ConfigEnum, MINIO_BUCKETS
 

@@ -23,7 +23,6 @@ class MediaRepository:
         try:
             bucket_name = self.__initialize_bucket()
             with MinioWriter(bucket_name) as minio:
-                print("Conten Type:", content_type)
                 minio.put_media(
                     object_name=object_name,
                     image_data=image_data,

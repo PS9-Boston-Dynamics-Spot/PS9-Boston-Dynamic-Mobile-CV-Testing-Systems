@@ -1,116 +1,56 @@
 import os
 
 from db.dal.DataAccessLayer import DataAccessLayer
-from db.mapping.RawImageMapper import RawImageMapper
-from db.mapping.AnalyzedImageMapper import AnalyzedImageMapper
-
-from db.mapping.AnomalyMapper import AnomalyMapper
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
-from anomaly.AnomalyChecker import AnomalyChecker
-#raw Daten Croppen und speichern in Bytestream + crop folder
-from common.cvision.roboflow import run_roboflow_inference, crop_predictions
+from app_lifespan import (
+    services,
+    process_analog_image,
+    check_anomaly_analog_gauge,
+    handle_anomaly,
+)
 
 if __name__ == "__main__":
 
-    settings_manager = UnifiedCredentialsManager()
-    robot_settings = settings_manager.getRobotCredentials()
-    print(robot_settings)
+    path = os.path.join(os.getcwd(), "spot2.jpg")
 
-    path = os.path.join(os.getcwd(), "test.jpg")
-
+    # TODO: move spot to machine and capture picture + for loop
     with open(path, "rb") as f:
         image_bytes = f.read()
 
-        raw_image_mapper = RawImageMapper()
-        analyzed_image_mapper = AnalyzedImageMapper()
+    aruco_id = services.aruco_extractor.get_id(image_bytes=image_bytes)
 
-        with DataAccessLayer() as dal:
-            image_name = "sensor_captasduaspsasvasgasdhhdaasdsdassdsasadfsddamdasdasdasdsasdsjhkdfgdffgfdsdasdfdre_001"
+    aruco_id_analog = None
+    category_name_analog = "pressure"
+    opcua_node_id = services.settings_manager.getOPCUANodeByID(
+        aruco_id=aruco_id_analog, category_name=category_name_analog
+    )
 
-            opcua_node_id = ""#aruco_node_mapper.get_opcua_node_by_id(aruco_i=46
+    with DataAccessLayer() as dal:
+        dto_raw_image = services.raw_image_mapper.map_image(image_data=image_bytes)
+        raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
 
-            dto_raw_image = raw_image_mapper.map_image(
-                image_data=image_bytes, size=22223429223
-            )
-            raw_image_id = dal.insert_raw_image(raw_image_with_metadata=dto_raw_image)
+        # at first, process analog gauge
+        print("Aruco IDs: ", aruco_id)
 
-            # get the aruco id through image extraction
-            aruco_id = 46
-            
-            #analyzed image mit metadata in db speichern
+        if aruco_id is None:
+            raise Exception("No aruco id found in image")
 
-            result = run_roboflow_inference(path)
+        analyzed_image_id, detected_value = process_analog_image(
+            dal=dal,
+            image_bytes=image_bytes,
+            raw_image_id=raw_image_id,
+            opcua_node_id=opcua_node_id,
+            aruco_id=aruco_id_analog,
+            category_name=category_name_analog,
+        )
 
-            predictions = result["outputs"][0]["predictions"]["predictions"][:2]
-            print(f"Roboflow returned {len(predictions)} predictions.")
+        is_anomaly = check_anomaly_analog_gauge(
+            dal=dal,
+            analyzed_image_id=analyzed_image_id,
+            detected_value=detected_value,
+            aruco_id=aruco_id_analog,
+            category_name=category_name_analog,
+        )
 
-            # Crops erzeugen (JPG speichern + Bytes erzeugen)
-            cropped_images = crop_predictions(path, predictions)
-            print(f"{len(cropped_images)} Cropped images created.")
+        handle_anomaly(is_anomaly=is_anomaly)
 
-            # Erfassung der Daten aus dem Crop wird noch implementiert
-            detected_value = 23.0
-            unit = "°C"
-            category = "temperature"
-
-
-            # # JEDEN CROP in cvision_images_analyzed speichern
-            
-            # for crop in cropped_images:
-
-            #     dto_analyzed_image = analyzed_image_mapper.map_image(
-            #         image_data=crop["bytes"],        # BYTES → DB
-            #         raw_image_id=raw_image_id,       # Verbindung zum Raw-Bild
-            #         sensor_type=crop["sensor_type"],         # aus Roboflow
-            #         opcua_node_id=opcua_node_id,
-            #         aruco_id=aruco_id,
-            #         category=category,
-            #         quality=1.0,
-            #         value=detected_value,
-            #         unit=unit
-            #     )
-
-            # analyzed_image_id = dal.insert_analyzed_image(
-            #     analyzed_image_with_metadata=dto_analyzed_image
-            # )
-
-            # #########################################################################################################################
-            # # TODO: get the comparative value from the opcua node / config file + image extraction and check if value is an anomaly #
-            # #                                                                                                                       #
-            # # extratc value from image (digital value)                                                                              #
-            # # do something ....                                                                                                     #
-            # #                                                                                                                       #
-            # # get comparative value from opcua (digital value)                                                                      #
-            # # value = dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)                                                    #
-            # #                                                                                                                       #
-            # # extract value from image (analog value)                                                                               #
-            # # do something ...                                                                                                      #
-            # #                                                                                                                       #
-            # # get comparative value from config file (analog value)                                                                 #
-            # # value = settings_manager.getAnalogComparativeValue(aruco_id=aruco_id)                                                 #
-            # #########################################################################################################################
-
-            # min_value, max_value = settings_manager.getMinMaxValue(aruco_id=aruco_id)
-
-            # anomaly_checker = AnomalyChecker()
-            # anomaly_score, is_anomaly = anomaly_checker.is_anomaly(
-            #     value_to_check=detected_value,
-            #     aruco_id=aruco_id,
-            # )
-            # print(anomaly_score, is_anomaly)
-
-            # parameters = settings_manager.getParametersForAnomalyMapper(
-            #     aruco_id=aruco_id
-            # )
-
-            # anomaly_mapper = AnomalyMapper()
-            # anomaly_dto = anomaly_mapper.map_anomaly(
-            #     analyzed_image_id=analyzed_image_id,
-            #     is_anomaly=is_anomaly,
-            #     anomaly_score=anomaly_score,
-            #     used_funtion=settings_manager.getScoreFunctionStr(aruco_id=aruco_id),
-            #     **parameters,
-            # )
-
-            # dal.insert_anomaly(anomaly_with_metadata=anomaly_dto)
-            # print("Inserted both images:", id)
+        # TODO: same for digital sensors

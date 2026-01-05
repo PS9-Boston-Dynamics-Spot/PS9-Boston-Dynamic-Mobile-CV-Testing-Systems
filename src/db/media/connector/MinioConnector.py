@@ -1,6 +1,6 @@
 import ssl
 from minio import Minio
-from credentials.manager.UnifiedCredentialsManager import UnifiedCredentialsManager
+from credentials.manager.CredentialsManager import CredentialsManager
 from minio.error import S3Error
 from db.media.exceptions.MinioConnectionError import MinioConnectionError
 from db.media.exceptions.MinioInitError import MinioInitError
@@ -9,8 +9,8 @@ from db.media.exceptions.MinioInitError import MinioInitError
 class MinioConnector:
 
     def __init__(self):
-        self.credentials_manager = UnifiedCredentialsManager()
-        self.credentials = self.credentials_manager.getMinioCredentials()
+        self._credentials_manager = CredentialsManager()
+        self.credentials = self._credentials_manager.getMinioCredentials()
         self.host = self.credentials["host"]
         self.port = self.credentials["port"]
         self.access_key = self.credentials["access_key"]
