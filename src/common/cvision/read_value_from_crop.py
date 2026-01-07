@@ -3,26 +3,23 @@ import re
 import cv2
 import easyocr
 
-# -----------------------------
+
 # CONFIG
-# -----------------------------
 CROP_DIR = Path(__file__).resolve().parents[3] / "data" / "images" / "crop"
 READER = easyocr.Reader(["en", "de"], gpu=False)
 
 NUM_RE = re.compile(r"-?\d+(?:[\.,]\d+)?")
 
-# -----------------------------
+
 # FILTER: nur digitale Crops
-# -----------------------------
 def is_digital_crop(path: Path) -> bool:
     name = path.name.lower()
     if "analog" in name or "druck" in name or "pressure" in name or "manometer" in name:
         return False
     return True
 
-# -----------------------------
+
 # PREPROCESSING
-# -----------------------------
 def preprocess_variants(img_bgr):
     """
     Liefert mehrere Varianten zurück, weil 7-Segment/LED je nach Belichtung
@@ -45,9 +42,8 @@ def preprocess_variants(img_bgr):
     # Zusätzlich: nur Graustufen (ohne Threshold) als Fallback
     return [th, th_inv, gray2]
 
-# -----------------------------
+
 # OCR helpers
-# -----------------------------
 def clean_numeric_text(s: str) -> str:
     s = s.strip()
     s = s.replace(",", ".")
@@ -150,9 +146,8 @@ def read_unit_from_roi(img_bgr):
         return "bar"
     return None
 
-# -----------------------------
+
 # DISPLAY-TYP per Text erkennen
-# -----------------------------
 def classify_display_by_text(img_bgr):
     # oben links steht bei euch "Temperatur" oder "Öfen/Ofen AAC"
     title_roi = (0.00, 0.00, 0.65, 0.32)
@@ -175,9 +170,8 @@ def classify_display_by_text(img_bgr):
 
     return "unknown", joined, raw
 
-# -----------------------------
+
 # MAIN per file
-# -----------------------------
 def read_value_from_crop(image_path: Path):
     img = cv2.imread(str(image_path))
     if img is None:
@@ -235,9 +229,8 @@ def read_value_from_crop(image_path: Path):
         "raw_text": [],
     }
 
-# -----------------------------
+
 # RUN
-# -----------------------------
 if __name__ == "__main__":
 
     for img_path in sorted(CROP_DIR.glob("*.jpg")):
