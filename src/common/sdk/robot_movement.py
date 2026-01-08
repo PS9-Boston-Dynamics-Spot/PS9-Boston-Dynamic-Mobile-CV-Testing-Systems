@@ -41,7 +41,9 @@ from bosdyn.client.gripper_camera_param import GripperCameraParamClient
 
 
 from dotenv import load_dotenv
-load_dotenv()
+
+# Load robot credentials explicitly from the container root.
+load_dotenv(dotenv_path="/.env")
 
 
 class RobotController:
@@ -148,8 +150,8 @@ class RobotController:
 
         # Format: YYYYMMDD_HHmmss (z.B. 20251201_172530)
         now_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        name = 'spot-img-' + now_str + '.jpg'
-        
+        #name = 'spot-img-' + now_str + '.jpg'
+        name = 'spot.jpg'
         # Bestimme den vollständigen Pfad
         if path is not None and os.path.isdir(path):
             full_path = os.path.join(path, name)
@@ -830,7 +832,8 @@ def main():
                             OUTPUT_DIR = None # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
 
                     rc.set_high_res_auto_params()
-                    for i in range(2):
+                    time.sleep(4)
+                    for i in range(1):
                         image_request = build_image_request(
                             'hand_color_image',
                             quality_percent=100,  # Maximum quality
