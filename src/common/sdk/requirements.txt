@@ -1,0 +1,7 @@
+bosdyn-api==5.1.0
+bosdyn-client==5.1.0
+bosdyn-core==5.1.0
+grpcio==1.66.1
+protobuf==4.25.3
+python-dotenv==1.0.1
+Pillow==10.4.0
