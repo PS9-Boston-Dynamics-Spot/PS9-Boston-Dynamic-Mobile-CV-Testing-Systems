@@ -16,6 +16,11 @@ pillow==12.0.0
 bosdyn-client==5.1.0
 bosdyn-core==5.1.0
 bosdyn-api==5.1.0
+bosdyn-choreography-client==5.1.0
+bosdyn-choreography-protos==5.1.0
+bosdyn-mission==5.1.0
+bosdyn-orbit==5.1.0
+bosdyn-scout==5.1.0
 grpcio==1.66.1
 protobuf==4.25.3
 
