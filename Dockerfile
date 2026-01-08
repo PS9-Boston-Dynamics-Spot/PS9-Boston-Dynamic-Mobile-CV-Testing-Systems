@@ -22,6 +22,10 @@ RUN python3 -m venv /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.ve
 
 COPY . .
 
+# Ensure the Spot SDK is available inside the container for downstream tools.
+RUN rm -rf src/common/sdk/spot-sdk \
+    && git clone https://github.com/boston-dynamics/spot-sdk.git src/common/sdk/spot-sdk
+
 ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv"
 ENV PYTHONPATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src"
