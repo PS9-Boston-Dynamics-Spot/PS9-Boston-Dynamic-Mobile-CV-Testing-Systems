@@ -237,3 +237,6 @@ if __name__ == "__main__":
         if not is_digital_crop(img_path):
             continue
         print(read_value_from_crop(img_path))
+
+
+dsdeg
