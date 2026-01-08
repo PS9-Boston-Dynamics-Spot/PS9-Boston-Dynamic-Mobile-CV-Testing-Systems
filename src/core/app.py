@@ -1,4 +1,7 @@
 import os
+import subprocess
+import sys
+from pathlib import Path
 
 from db.dal.DataAccessLayer import DataAccessLayer
 from app_lifespan import (
@@ -10,9 +13,20 @@ from app_lifespan import (
 
 if __name__ == "__main__":
 
-    path = os.path.join(os.getcwd(), "spot2.jpg")
+    project_root = Path(__file__).resolve().parents[2]
+    robot_script = project_root / "src/common/sdk/robot_movement.py"
+    graph_path = project_root / "data/map/downloaded_graph"
 
-    # TODO: move spot to machine and capture picture + for loop
+    subprocess.run(
+        [sys.executable, str(robot_script), "192.168.80.3", "-u", str(graph_path)],
+        check=True,
+        cwd=str(robot_script.parent),
+    )
+
+    path = project_root / "src/common/sdk/spot_bilder/spot.jpg"
+
+    
+
     with open(path, "rb") as f:
         image_bytes = f.read()
 
