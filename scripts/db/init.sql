@@ -21,10 +21,23 @@ CREATE TABLE IF NOT EXISTS cvision_images_analyzed (
     compressed BOOLEAN NOT NULL DEFAULT 0,
     compression_method TEXT,
     sensor_type TEXT NOT NULL, -- e.g. digital / analog / both (NOT NULL)
-    category TEXT NOT NULL, -- category: e.g. temperature, pressure (NOT NULL)
-    quality REAL, -- means the image quality, any value between 0 and 1, --> 1 is the best
+    opcua_node_id TEXT, -- if analog sensor, node_id is empty
+    aruco_id INTEGER, -- if analog sensor, aruco_id is empty 
     value REAL NOT NULL, -- e.g. 20.0 °C (NOT NULL)
     unit TEXT NOT NULL, -- e.g. °C (NOT NULL)
+    category TEXT NOT NULL, -- e.g. temperature, pressure, humidity ... (NOT NULL)
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (raw_image_id) REFERENCES cvision_images_raw(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS anomalies(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    analyzed_image_id INTEGER NOT NULL,
+
+    is_anomaly BOOLEAN NOT NULL,
+    anomaly_score REAL NOT NULL,
+    used_function TEXT,
+    parameters TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (analyzed_image_id) REFERENCES cvision_images_analyzed(id) ON DELETE CASCADE
 );

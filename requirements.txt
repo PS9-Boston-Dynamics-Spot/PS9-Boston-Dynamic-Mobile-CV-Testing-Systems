@@ -1,11 +1,33 @@
+# Code Quality & Testing
 ruff==0.6.0
 black==25.9.0
 pytest==8.4.2
 pytest-sugar==1.1.1
+
+# Config & Utilities
 pyyaml==6.0.3
-bosdyn-client==5.0.1.1
-bosdyn-mission==5.0.1.1
-bosdyn-choreography-client==5.0.1.1
-bosdyn-orbit==5.0.1.1
-logging==0.4.9.6
+cryptography==46.0.3
+python-dotenv==1.0.1
+
+#General
+pillow==12.0.0
+
+# Boston Dynamics SDK
+bosdyn-client==5.1.0
+bosdyn-core==5.1.0
+bosdyn-api==5.1.0
+grpcio==1.66.1
+protobuf==4.25.3
+
+
+# Industrial / Infrastructure
+opcua==0.98.13
 minio==7.2.18
+
+# Computer Vision & ML
+opencv-python==4.12.0.88
+numpy==2.2.6
+matplotlib==3.10.7
+ultralytics>=8.0.0
+torch
+scikit-learn==1.8.0

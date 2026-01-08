@@ -1,3 +1,3 @@
 buckets:
-  raw_bucket: "ps9-raw"
-  analyzed_bucket: "ps9-analyzed"
+  raw_bucket: !!str "ps9-raw"
+  analyzed_bucket: !!str "ps9-analyzed"

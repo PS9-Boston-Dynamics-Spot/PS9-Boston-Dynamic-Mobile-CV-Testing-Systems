@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from common.imports.Typing import Optional
 
 
 class LogHandler:

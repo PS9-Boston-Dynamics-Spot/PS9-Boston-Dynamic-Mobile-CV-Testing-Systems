@@ -1,0 +1,8 @@
+{
+    "python.analysis.extraPaths": [
+        "./src",
+        "./src/core",
+        "./src/core",
+        "./scripts/key_point_test"
+    ]
+}
