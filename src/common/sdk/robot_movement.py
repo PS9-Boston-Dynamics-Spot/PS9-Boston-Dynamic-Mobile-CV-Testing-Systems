@@ -43,7 +43,7 @@ from bosdyn.client.gripper_camera_param import GripperCameraParamClient
 from dotenv import load_dotenv
 
 # Load robot credentials explicitly from the container root.
-load_dotenv(dotenv_path="/.env")
+load_dotenv(dotenv_path="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.env")
 
 
 class RobotController:
