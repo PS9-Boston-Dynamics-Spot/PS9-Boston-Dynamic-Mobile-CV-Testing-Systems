@@ -18,7 +18,7 @@ if __name__ == "__main__":
     graph_path = project_root / "data/map/downloaded_graph"
 
     subprocess.run(
-        [sys.executable, str(robot_script), "192.168.80.3", "-u", str(graph_path)],
+        [sys.executable, str(robot_script), "-u", str(graph_path)],
         check=True,
         cwd=str(robot_script.parent),
     )

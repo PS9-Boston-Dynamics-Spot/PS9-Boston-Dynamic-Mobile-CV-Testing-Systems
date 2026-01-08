@@ -7,6 +7,7 @@ import sys
 import time
 import datetime
 import math 
+from pathlib import Path
 
 from google.protobuf import wrappers_pb2
 
@@ -42,9 +43,15 @@ from bosdyn.client.gripper_camera_param import GripperCameraParamClient
 
 from dotenv import load_dotenv
 
-# Load robot credentials explicitly from the container root.
-load_dotenv(dotenv_path="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.env")
+# Load robot credentials from a single well-known location; fall back to default behavior.
+_WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
+_ROBOT_CREDENTIALS_PATH = os.environ.get(
+    "ROBOT_CREDENTIALS_ENV_PATH",
+    _WORKSPACE_ROOT / ".env" / "robot-credentials.env",
+)
 
+if _ROBOT_CREDENTIALS_PATH and Path(_ROBOT_CREDENTIALS_PATH).exists():
+    load_dotenv(dotenv_path=_ROBOT_CREDENTIALS_PATH)
 
 class RobotController:
     """Zentrale Verwaltung aller Robot-Clients und Power-/TimeSync-Handling."""
@@ -725,14 +732,20 @@ def main():
                         help='Full filepath to graph and snapshots to be uploaded.', required=True)
     parser.add_argument('--dock-id', type=int, default=520,
                         help='Dock-ID für das automatische Andocken (Standard: 520).')
-    bosdyn.client.util.add_base_arguments(parser)
+    parser.add_argument('hostname', nargs='?', default=None,
+                        help='Hostname or address of robot, e.g.  "192.168.80.3"')
     options = parser.parse_args()
 
 
 
     # Setup and authenticate the robot.
+    hostname = options.hostname or os.environ.get("YOUR_ROBOT_IP")
+    if not hostname:
+        raise RuntimeError(
+            "No hostname provided. Pass --hostname, set BOSDYN CLI args, or define YOUR_ROBOT_IP."
+        )
     sdk = bosdyn.client.create_standard_sdk('SeminarClient')
-    robot = sdk.create_robot(options.hostname)
+    robot = sdk.create_robot(hostname)
     bosdyn.client.util.authenticate(robot)
 
     # --- RobotController erzeugen ---
