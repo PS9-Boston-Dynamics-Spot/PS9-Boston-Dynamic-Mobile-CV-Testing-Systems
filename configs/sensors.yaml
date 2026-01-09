@@ -28,7 +28,7 @@ nodes:
   oven_node:
     aruco_id: !!int 46
     categories: 
-      - name: !!str 'temperature'
+      - name: !!str 'tempdisplay'
         opcua_node: !!str 'ns=3;s="dbAppCtrl"."Hmi"."Obj"."EB"."Proc"."rActVal"'
         unit: !!str '°C'
         value_tolerance: !!float 0.1 # deviation of measured values, before opcua fallabck is used
@@ -57,7 +57,7 @@ nodes:
           uncertain_range: !!float 0.5 # Möglicher Anomaliebereich
           anomaly_range: !!float 0.0 # Definitv Anomaliebereich
       
-      - name: !!str 'humidity'
+      - name: !!str 'unknown'
         opcua_node: !!str ''
         unit: !!str '%'
         value_tolerance: !!float 0.1
@@ -76,7 +76,7 @@ nodes:
           uncertain_range: !!float 0.5
           anomaly_range: !!float 0.0
 
-      - name: !!str 'alternating current'
+      - name: !!str 'ofen'
         opcua_node: !!str ''
         unit: !!str 'A'
         value_tolerance: !!float 0.1

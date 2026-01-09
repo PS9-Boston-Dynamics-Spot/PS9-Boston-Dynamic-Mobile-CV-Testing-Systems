@@ -28,3 +28,4 @@ torch
 pillow==12.0.0
 scikit-learn==1.8.0
 pytesseract==0.3.13
+easyocr==1.7.2
