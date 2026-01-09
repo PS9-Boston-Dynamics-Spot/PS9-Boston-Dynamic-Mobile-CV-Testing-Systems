@@ -218,3 +218,26 @@ Der Cropper ist bereits so gebaut, dass er direkt in Services / Lifespan injizie
 - geeignet für MinIO + DB Pipeline
 
 ---
+
+## 9) Quellen und Literatur
+
+"How to install yolov8?," yolov8.org. [Online]. https://yolov8.org/how-to-install-yolov8/
+​
+
+"Object Tracking with YOLOv8 and Python," PyImageSearch, Jun. 16, 2024. [Online]. https://pyimagesearch.com/2024/06/17/object-tracking-with-yolov8-and-python/
+​
+
+"YOLOv8 Python implementation," Labelvisor, May 9, 2024. [Online]. https://www.labelvisor.com/yolov8-python-implementation/
+​
+
+"Python Usage," Ultralytics Documentation, Oct. 4, 2025. [Online]. https://docs.ultralytics.com/usage/python/
+​
+
+"Object detection Python in YOLOv8," yolov8.org. [Online]. https://yolov8.org/object-detection-python-in-yolov8/
+​
+
+OpenCV Documentation. [Online]. https://docs.opencv.org/
+​
+
+NumPy Documentation. [Online]. https://numpy.org/doc/
+​
