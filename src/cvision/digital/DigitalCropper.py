@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 from common.imports.Typing import Optional, Tuple, List
 from datetime import datetime
-import os 
+import os
 
 import cv2
 import numpy as np
@@ -36,7 +37,7 @@ def sharpness_quality_0_1(img_bgr: np.ndarray) -> float:
 @dataclass(frozen=True)
 class CropResult:
     source_name: str
-    idx: int 
+    idx: int
     cls_id: int
     conf: float
     bbox_xyxy: Tuple[int, int, int, int]  # x1,y1,x2,y2
@@ -76,12 +77,22 @@ class DebugWriter:
         if self.verbose:
             print(f"[DebugWriter] enabled={self.enabled}")
             print(f"[DebugWriter] out_dir={self.out_dir}")
-            print(f"[DebugWriter] exists={self.out_dir.exists()} is_dir={self.out_dir.is_dir()} writable={writable}")
+            print(
+                f"[DebugWriter] exists={self.out_dir.exists()} "
+                f"is_dir={self.out_dir.is_dir()} writable={writable}"
+            )
 
             # Häufiger Fehler: Data vs data
-            alt = Path(str(self.out_dir).replace("/Data/", "/data/")) if "/Data/" in str(self.out_dir) else None
+            alt = (
+                Path(str(self.out_dir).replace("/Data/", "/data/"))
+                if "/Data/" in str(self.out_dir)
+                else None
+            )
             if alt and alt != self.out_dir:
-                print(f"[DebugWriter] hint: check path case-sensitivity. Alternative would be: {alt}")
+                print(
+                    "[DebugWriter] hint: check path case-sensitivity. "
+                    f"Alternative would be: {alt}"
+                )
 
     def write(self, crop: CropResult, extra_txt_lines: Optional[List[str]] = None) -> None:
         if not self.enabled:
@@ -120,16 +131,17 @@ class YoloDisplayCropper:
     """
     Byte-in -> YOLO detect -> crop bytes out
     Optional: DebugWriter schreibt Crop + TXT.
+
+    Änderung: gibt maximal 2 Crops zurück (beste Box pro Klasse, dann Top-2 nach Conf).
     """
+
     def __init__(
         self,
-        model_path: str = os.path.join(
-            os.getcwd(), "src/cvision/digital/models/display_cropper.pt"
-        ),
+        model_path: str = os.path.join(os.getcwd(), "src/cvision/digital/models/display_cropper.pt"),
         conf: float = 0.30,
         jpeg_quality: int = 95,
         debug: Optional[DebugWriter] = None,
-        verbose: bool = True,  # <-- neu
+        verbose: bool = True,
     ):
         self._model = YOLO(model_path)
         self._conf = conf
@@ -165,7 +177,20 @@ class YoloDisplayCropper:
                 print("[YoloDisplayCropper] WARNING: no boxes detected -> no crops -> nothing to debug-write")
             return crops
 
-        for idx, b in enumerate(res.boxes):
+        # Auswahl: max. 2 Crops best box per class_id (highest conf)
+        best_by_cls = {}
+        for b in res.boxes:
+            cls_id = int(b.cls)
+            conf = float(b.conf) if b.conf is not None else 0.0
+            if (cls_id not in best_by_cls) or (conf > best_by_cls[cls_id][0]):
+                best_by_cls[cls_id] = (conf, b)
+
+        # take best per class, then sort by confidence desc, then keep max 2
+        selected_boxes = [pair[1] for pair in best_by_cls.values()]
+        selected_boxes = sorted(selected_boxes, key=lambda bb: float(bb.conf), reverse=True)[:2]
+
+        # Crops nur für selected_boxes erzeugen
+        for idx, b in enumerate(selected_boxes):
             cls_id = int(b.cls)
             conf = float(b.conf) if b.conf is not None else 0.0
             x1, y1, x2, y2 = map(int, b.xyxy[0])
@@ -173,7 +198,7 @@ class YoloDisplayCropper:
             crop_bgr = img[y1:y2, x1:x2]
             if crop_bgr.size == 0:
                 if self._verbose:
-                    print(f"[YoloDisplayCropper] skip empty crop idx={idx} bbox={(x1,y1,x2,y2)}")
+                    print(f"[YoloDisplayCropper] skip empty crop idx={idx} bbox={(x1, y1, x2, y2)}")
                 continue
 
             q_img = sharpness_quality_0_1(crop_bgr)
@@ -193,7 +218,10 @@ class YoloDisplayCropper:
             crops.append(cr)
 
             if self._verbose:
-                print(f"[YoloDisplayCropper] crop idx={idx} cls={cls_id} conf={conf:.3f} q_img={q_img:.3f} bytes={len(crop_bytes)}")
+                print(
+                    f"[YoloDisplayCropper] crop idx={idx} cls={cls_id} "
+                    f"conf={conf:.3f} q_img={q_img:.3f} bytes={len(crop_bytes)}"
+                )
 
             if self._debug:
                 self._debug.write(cr)
@@ -203,20 +231,19 @@ class YoloDisplayCropper:
 
         return crops
 
+
 if __name__ == "__main__":
-    from pathlib import Path
-
+    
+    MODEL_PATH = "runs_cv_model_digital_display/spot_cv_model_v2/weights/best.pt"
     # --- konfig für standalone test ---
-    MODEL_PATH = "runs_display/spot_v12/weights/best.pt"
     RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
-
     DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/crop_debug")
 
     print("[MAIN] starting digital_cropper self-test")
     print(f"[MAIN] model_path={MODEL_PATH}")
     print(f"[MAIN] raw_dir={RAW_DIR} exists={RAW_DIR.exists()}")
 
-    # Nimm das erste JPG aus RAW_DIR
+    # Nimmt das erste JPG aus RAW_DIR
     images = sorted(list(RAW_DIR.glob("*.jpg")))
     if not images:
         print(f"[MAIN] ERROR: no .jpg found in {RAW_DIR}")
@@ -242,7 +269,13 @@ if __name__ == "__main__":
     print(f"[MAIN] crops returned: {len(crops)}")
 
     if crops:
-        print("[MAIN] example crop:", crops[0].source_name, crops[0].cls_id, crops[0].conf, len(crops[0].crop_bytes))
+        print(
+            "[MAIN] example crop:",
+            crops[0].source_name,
+            crops[0].cls_id,
+            crops[0].conf,
+            len(crops[0].crop_bytes),
+        )
         print(f"[MAIN] debug output should be in: {DEBUG_DIR}")
     else:
         print("[MAIN] WARNING: 0 crops -> nothing written. (YOLO detected nothing on this image)")
