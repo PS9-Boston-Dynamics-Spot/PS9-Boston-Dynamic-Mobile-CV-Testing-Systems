@@ -123,3 +123,36 @@ make install
 + Run `make qa-check` before committing
 + Add new dependencies to `requirements.txt`
 + Use `make format` to maintain consistent code style
+
+# Accessing MinIO Console in Browser from Windows
+
+To access MinIO's web interface when running in WSL, you need to find your WSL network adapter's IP address:
+
+## Steps
+
+1. Open Command Prompt or PowerShell
+2. Run the `ipconfig` command
+3. Look for an adapter named similar to:
+   - `Ethernet adapter vEthernet (WSL (Hyper-V firewall))`
+   - `Ethernet adapter vEthernet (WSL)`
+4. Note the **IPv4 Address** shown for this adapter
+5. Open your browser and navigate to: `http://<IP_ADDRESS>:9001`
+
+## Example
+```
+Ethernet adapter vEthernet (WSL (Hyper-V firewall)):
+
+   Connection-specific DNS Suffix  . :
+   Link-local IPv6 Address . . . . . : fe80::d03:a45f:1997:bb8f%52
+   IPv4 Address. . . . . . . . . . . : 172.20.80.1
+   Subnet Mask . . . . . . . . . . . : 255.255.240.0
+   Default Gateway . . . . . . . . . :
+```
+
+In this example, you would access MinIO at: `http://172.20.80.1:9001`
+
+## Troubleshooting
+
+- If you cannot find the WSL adapter, ensure WSL 2 is running
+- The IP address may change after system restarts
+- Ensure MinIO is running and bound to `0.0.0.0` or the WSL IP address
