@@ -22,33 +22,33 @@ class SettingsManager:
 
         self._initialized = True
         self._minio_bucket_reader = minio_bucket_reader or MinioBucketConfigReader()
-        self._sensor_config_reader = (
-            sensor_config_reader or SensorConfigReader()
-        )
+        self._sensor_config_reader = sensor_config_reader or SensorConfigReader()
 
     def getMinioRawBucket(self) -> Optional[str]:
         return self._minio_bucket_reader.getRawBucket()
 
     def getMinioAnalyzedBucket(self) -> Optional[str]:
         return self._minio_bucket_reader.getAnalyzedBucket()
-    
-
-
-
 
     def getArUcoOverallDict(self) -> dict:
         return self._sensor_config_reader.getOverallDict()
 
-    def getOPCUANodeByID(self, category_name: str, aruco_id: Optional[int] = None) -> Optional[str]:
-        return self._sensor_config_reader.getOPCUANodeByID(aruco_id=aruco_id, category_name=category_name)
-    
+    def getOPCUANodeByID(
+        self, category_name: str, aruco_id: Optional[int] = None
+    ) -> Optional[str]:
+        return self._sensor_config_reader.getOPCUANodeByID(
+            aruco_id=aruco_id, category_name=category_name
+        )
+
     def getCategoriesNameByNodeID(self, aruco_id: int) -> List[str]:
         return self._sensor_config_reader.getCategoriesNameByNodeID(aruco_id=aruco_id)
 
-    def getCategoryByCategoryNameAndArucoID(self, category_name: str, aruco_id: int) -> Dict[str, Any]:
-        return self._sensor_config_reader.getCategoryByCategoryNameAndArucoID(category_name=category_name, aruco_id=aruco_id)
-
-
+    def getCategoryByCategoryNameAndArucoID(
+        self, category_name: str, aruco_id: int
+    ) -> Dict[str, Any]:
+        return self._sensor_config_reader.getCategoryByCategoryNameAndArucoID(
+            category_name=category_name, aruco_id=aruco_id
+        )
 
     def getScoreFunctionStr(
         self, category_name: str, aruco_id: Optional[int] = None
@@ -103,19 +103,16 @@ class SettingsManager:
         )
         return {**parameters, **risk_management}
 
-    def getMinMaxAngle(
-        self, category_name: str, aruco_id: Optional[int] = None
-    ) -> Optional[Tuple[float, float]]:
-        return self._sensor_config_reader.getMinMaxAngle(
-            aruco_id=aruco_id, category_name=category_name
-        )
-
     def getUnit(
         self, category_name: str, aruco_id: Optional[int] = None
     ) -> Optional[str]:
         return self._sensor_config_reader.getUnit(
             aruco_id=aruco_id, category_name=category_name
         )
-    
-    def getValueTolerance(self, category_name: str, aruco_id: Optional[int] = None) -> Optional[float]:
-        return self._sensor_config_reader.getValueTolerance(aruco_id=aruco_id, category_name=category_name)
+
+    def getValueTolerance(
+        self, category_name: str, aruco_id: Optional[int] = None
+    ) -> Optional[float]:
+        return self._sensor_config_reader.getValueTolerance(
+            aruco_id=aruco_id, category_name=category_name
+        )

@@ -4,7 +4,7 @@ import math
 
 parameters = {
     "min_value": 20.0,
-    "max_value": 25.0,
+    "max_value": 50.0,
     "min_score": 0.0,
     "left_scale": 7.0,
     "left_power": 2.0,

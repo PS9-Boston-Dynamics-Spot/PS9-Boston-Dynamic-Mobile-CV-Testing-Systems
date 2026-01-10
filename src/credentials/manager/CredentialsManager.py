@@ -38,7 +38,7 @@ class CredentialsManager:
         self._opcua_config_reader = opcua_config_reader or OPCUAConfigReader()
         self._minio_env_reader = minio_env_reader or MinioEnvReader()
         self._robot_env_reader = robot_env_reader or RobotEnvReader()
-        
+
     def getMinioCredentials(self) -> dict[str, Any]:
         return {
             "host": self._minio_config_reader.getHost(),

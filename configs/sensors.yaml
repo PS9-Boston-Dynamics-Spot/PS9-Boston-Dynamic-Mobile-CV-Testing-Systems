@@ -4,9 +4,7 @@ nodes:
   analog_gauge:
     aruco_id: null
     categories:
-      - name: !!str 'pressure' 
-        min_angle: !!float 42.50
-        max_angle: !!float 212.0
+      - name: !!str 'pressure'
 
         opcua_node: !!str ''
         unit: !!str 'bar'
@@ -15,7 +13,7 @@ nodes:
         score_function: !!str '1.0 if min_value <= x <= max_value else min_score+(1-min_score)*exp(-pow((min_value-x)/left_scale,left_power)) if x < min_value else min_score+(1-min_score)*exp(-pow((x-max_value)/right_scale,right_power))'
         parameters:
           min_value: !!float 0.0
-          max_value: !!float 6.0
+          max_value: !!float 10.0
           min_score: !!float 0.0
           left_scale: !!float 7.0
           left_power: !!float 2.0

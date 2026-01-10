@@ -19,9 +19,7 @@ class Initializer:
         default_factory=AnalyzedImageMapper
     )
     anomaly_mapper: AnomalyMapper = field(default_factory=AnomalyMapper)
-    settings_manager: SettingsManager = field(
-        default_factory=SettingsManager
-    )
+    settings_manager: SettingsManager = field(default_factory=SettingsManager)
     aruco_extractor: ArUcoIDExtraktor = field(default_factory=ArUcoIDExtraktor)
     anomaly_checker: AnomalyChecker = field(default_factory=AnomalyChecker)
     analog_gauge_cropper: AnalogGaugeCropper = field(default_factory=AnalogGaugeCropper)
@@ -70,23 +68,35 @@ def process_analog_image(
 ) -> Tuple[int, int]:
 
     cropped_analog_gauge_image = services.analog_gauge_cropper.process(img=image_bytes)
-    analog_unit = services.settings_manager.getUnit(aruco_id=aruco_id, category_name=category_name)
-    
-    value_tolerance = services.settings_manager.getValueTolerance(aruco_id=aruco_id, category_name=category_name)
-    real_value = 0.13 #dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)
+    analog_unit = services.settings_manager.getUnit(
+        aruco_id=aruco_id, category_name=category_name
+    )
+
+    value_tolerance = services.settings_manager.getValueTolerance(
+        aruco_id=aruco_id, category_name=category_name
+    )
+    real_value = 0.13  # dal.get_value_from_opcua_node(opcua_node_id=opcua_node_id)
     lower_bound = real_value * (1 - value_tolerance)
     upper_bound = real_value * (1 + value_tolerance)
 
-    with AnalogGaugeReader(img=cropped_analog_gauge_image) as analog_gauge_reader:
-        x, y, r = analog_gauge_reader.calibrate_gauge()
-        detected_value = analog_gauge_reader.get_current_value(x, y, r)
-    
+    with AnalogGaugeReader(
+        img=cropped_analog_gauge_image, category=category_name
+    ) as analog_gauge_reader:
+        center_x, center_y, radius = analog_gauge_reader.calibrate()
+        detected_value = analog_gauge_reader.get_current_value(
+            x=center_x, y=center_y, r=radius
+        )
+
         if detected_value == -1:
-            print("Debug: no value detected, using fallabck value:", real_value)
+            print("Debug: no value detected, using fallback value:", real_value)
             detected_value = real_value
 
         if not (lower_bound <= detected_value <= upper_bound):
-            print("Debug: detected value is out of tolerance range, using real value", detected_value, real_value)
+            print(
+                "Debug: detected value is out of tolerance range, using real value",
+                detected_value,
+                real_value,
+            )
             detected_value = real_value
 
         analyzed_image_id = safe_analyzed_image(
