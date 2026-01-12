@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # 🔹 Torch Hub Cache Location
-ENV TORCH_HOME=/opt/torch
+#ENV TORCH_HOME=/opt/torch
 
 COPY requirements.txt .
 
@@ -23,15 +23,15 @@ RUN python3 -m venv /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.ve
     && /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/pip install --upgrade pip \
     && /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# 🔥 DINOv2 beim Build vorladen
-RUN /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python - <<'EOF'
-import torch
-torch.hub.load(
-    "facebookresearch/dinov2",
-    "dinov2_vits14",
-    pretrained=True
-)
-EOF
+# # 🔥 DINOv2 beim Build vorladen
+# RUN /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python - <<'EOF'
+# import torch
+# torch.hub.load(
+#     "facebookresearch/dinov2",
+#     "dinov2_vits14",
+#     pretrained=True
+# )
+# EOF
 
 COPY . .
 
