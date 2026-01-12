@@ -27,19 +27,15 @@ from bosdyn.client.math_helpers import SE2Pose
 from bosdyn.client.frame_helpers import (BODY_FRAME_NAME, ODOM_FRAME_NAME, VISION_FRAME_NAME,
                                          get_se2_a_tform_b)
 
-
 from bosdyn.client import math_helpers
 
 from bosdyn.api.basic_command_pb2 import RobotCommandFeedbackStatus
 
 from bosdyn.client.docking import DockingClient, blocking_dock_robot, blocking_undock
 
-
 from bosdyn.client.image import ImageClient, build_image_request
 from bosdyn.client.estop import EstopClient, EstopEndpoint, EstopKeepAlive
 from bosdyn.client.gripper_camera_param import GripperCameraParamClient
-
-
 
 from dotenv import load_dotenv
 
@@ -69,13 +65,9 @@ class RobotController:
         self.graph_nav_client: GraphNavClient = robot.ensure_client(GraphNavClient.default_service_name)
         self.lease_client: LeaseClient = robot.ensure_client(LeaseClient.default_service_name)
         self.estop_client: EstopClient = robot.ensure_client(EstopClient.default_service_name)
-        
         self.image_client: ImageClient = robot.ensure_client(ImageClient.default_service_name)
-
         self.state_client: RobotStateClient = robot.ensure_client(RobotStateClient.default_service_name)
-
         self.dock_client: DockingClient = robot.ensure_client(DockingClient.default_service_name)
-
         self.gripper_camera_param_client: GripperCameraParamClient = robot.ensure_client(GripperCameraParamClient.default_service_name)
 
         # Power-State merken
@@ -157,7 +149,7 @@ class RobotController:
 
         # Format: YYYYMMDD_HHmmss (z.B. 20251201_172530)
         now_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        #name = 'spot-img-' + now_str + '.jpg'
+        # name = 'spot-img-' + now_str + '.jpg'
         name = 'spot.jpg'
         # Bestimme den vollständigen Pfad
         if path is not None and os.path.isdir(path):
@@ -270,9 +262,6 @@ class EstopNoGui():
     def allow(self):
         self.estop_keep_alive.allow()
 
-    def settle_then_cut(self):
-        self.estop_keep_alive.settle_then_cut()
-
 class GraphNavInterface(object):
     #-GNU
     def id_to_short_code(self, id):
@@ -339,15 +328,6 @@ class GraphNavInterface(object):
             print(f"Fehler beim Hochladen des Graphen: {e}")
             raise
 
-    def _get_localization_state(self, *args):
-        """Get the current localization and state of the robot."""
-        state = self.rc.graph_nav_client.get_localization_state(request_gps_state=self.use_gps)
-        print(f'Got localization: \n{state.localization}')
-        odom_tform_body = get_odom_tform_body(state.robot_kinematics.transforms_snapshot)
-        print(f'Got robot state in kinematic odometry frame: \n{odom_tform_body}')
-        if self.use_gps:
-            print(f'GPS info:\n{state.gps}')
-
     def _set_initial_localization_fiducial(self, *args):
         """Trigger localization when near a fiducial."""
         robot_state = self.rc.state_client.get_robot_state()
@@ -358,11 +338,7 @@ class GraphNavInterface(object):
         localization = nav_pb2.Localization()
         self.rc.graph_nav_client.set_localization(initial_guess_localization=localization,
                                                 ko_tform_body=current_odom_tform_body)
-
-    def _clear_graph_and_cache(self, *args):
-        """Clear the state of the map on the robot, removing all waypoints and edges. Also clears the disk cache."""
-        return self.rc.graph_nav_client.clear_graph_and_cache()
-    #
+    
     def _upload_graph_and_snapshots(self, *args):
         """Upload the graph and snapshots to the robot."""
         print('Loading the graph from disk into local storage...')
@@ -421,23 +397,7 @@ class GraphNavInterface(object):
         siny_cosp = 2.0 * (rotation.w * rotation.z + rotation.x * rotation.y)
         cosy_cosp = 1.0 - 2.0 * (rotation.y * rotation.y + rotation.z * rotation.z)
         return math.atan2(siny_cosp, cosy_cosp)
-                      
-    def pose_error(self, map_T_goal, map_T_robot):
-        """Returns (dist[m], yaw_err[rad], dx_map[m], dy_map[m]) in the map/ko frame."""
-        dx = map_T_goal.position.x - map_T_robot.position.x
-        dy = map_T_goal.position.y - map_T_robot.position.y
-        dist = math.hypot(dx, dy)
-
-        yaw_goal = self.quat_to_yaw(map_T_goal.rotation)
-        yaw_robot = self.quat_to_yaw(map_T_robot.rotation)
-        yaw_err = yaw_goal - yaw_robot
-
-        # normalize to [-pi, pi]
-        yaw_err = (yaw_err + math.pi) % (2.0 * math.pi) - math.pi
-
-        return dist, yaw_err, dx, dy
-
-
+                    
     @staticmethod
     def relative_move(dx, dy, dyaw, frame_name, robot_command_client, robot_state_client, stairs=False):
         transforms = robot_state_client.get_robot_state().kinematic_state.transforms_snapshot
@@ -473,7 +433,6 @@ class GraphNavInterface(object):
             time.sleep(1)
 
         return True
-
 
     def _navigate_to(self, *args):
         """Navigate to a specific waypoint."""
@@ -525,9 +484,7 @@ class GraphNavInterface(object):
             else:
                 is_finished = False
 
-        # -----------------------------
-        # 2) Feinpositionierung nur bei REACHED_GOAL
-        # -----------------------------
+        # Feinpositionierung nur bei REACHED_GOAL
         if nav_status != graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL:
             return False
         # Stelle sicher, dass der Roboter wirklich steht, bevor du kleine SE2-Schritte sendest
@@ -547,8 +504,8 @@ class GraphNavInterface(object):
         last_timestamp = None
         for i in range(10):  # iterativ
 
-            #Once the robot’s location has been initialized in GraphNav, clients can use the GetLocalizationState RPC.
-            #The response message will contain a localization object which reports the pose of the robot relative to a particular waypoint on the map.
+            # Once the robot’s location has been initialized in GraphNav, clients can use the GetLocalizationState RPC.
+            # The response message will contain a localization object which reports the pose of the robot relative to a particular waypoint on the map.
             loc_state = None
             for _ in range(10): # Max 2 Sekunden warten (10 * 0.2s)
                 temp_state = self.rc.graph_nav_client.get_localization_state(waypoint_id=waypoint.id)
@@ -618,7 +575,7 @@ class GraphNavInterface(object):
 
             print(f" -> Korrektur: dx={dx_body:.3f}, dy={dy_body:.3f}, dyaw={yaw_cmd:.3f}")
 
-            #self._move_relative(dx=dx_body, dy=dy_body, dyaw=yaw_cmd)
+            # self._move_relative(dx=dx_body, dy=dy_body, dyaw=yaw_cmd)
             # self.relative_move(dx_body, dy_body, yaw_cmd,
             #                    frame_name=ODOM_FRAME_NAME,
             #                    robot_command_client=self.rc.command_client,
@@ -626,102 +583,90 @@ class GraphNavInterface(object):
             #                    stairs=False)
 
         return True
-    #-
-    def _match_edge(self, current_edges, waypoint1, waypoint2):
-        """Find an edge in the graph that is between two waypoint ids."""
-        # Return the correct edge id as soon as it's found.
-        for edge_to_id in current_edges:
-            for edge_from_id in current_edges[edge_to_id]:
-                if (waypoint1 == edge_to_id) and (waypoint2 == edge_from_id):
-                    # This edge matches the pair of waypoints! Add it the edge list and continue.
-                    return map_pb2.Edge.Id(from_waypoint=waypoint2, to_waypoint=waypoint1)
-                elif (waypoint2 == edge_to_id) and (waypoint1 == edge_from_id):
-                    # This edge matches the pair of waypoints! Add it the edge list and continue.
-                    return map_pb2.Edge.Id(from_waypoint=waypoint1, to_waypoint=waypoint2)
-        return None
-    #-
-    def _navigate_route(self, *args):
-        """Navigate through a specific route of waypoints."""
-        if len(args) < 1 or len(args[0]) < 1:
-            # If no waypoint ids are given as input, then return without requesting navigation.
-            print('No waypoints provided for navigate route.')
-            return
-        waypoint_ids = list(args[0])
+    
 
-        resolved_waypoint_ids = []
-        for i in range(len(waypoint_ids)):
-            resolved_id = self.find_unique_waypoint_id(
-                waypoint_ids[i], self._current_graph, self._current_annotation_name_to_wp_id)
-            if not resolved_id:
-                # Failed to find the unique waypoint id.
-                print(f"Fehler: Waypoint-ID für '{waypoint_ids[i]}' konnte nicht aufgelöst werden.")
-                return False  # Navigation wird abgebrochen
-            resolved_waypoint_ids.append(resolved_id)
-            
-        waypoint_ids = resolved_waypoint_ids
-        edge_ids_list = []
-        all_edges_found = True
-        # Attempt to find edges in the current graph that match the ordered waypoint pairs.
-        # These are necessary to create a valid route.
-        for i in range(len(waypoint_ids) - 1):
-            start_wp = waypoint_ids[i]
-            end_wp = waypoint_ids[i + 1]
-            edge_id = self._match_edge(self._current_edges, start_wp, end_wp)
-            if edge_id is not None:
-                edge_ids_list.append(edge_id)
-            else:
-                all_edges_found = False
-                print(f'Failed to find an edge between waypoints: {start_wp} and {end_wp}')
-                print(
-                    'List the graph\'s waypoints and edges to ensure pairs of waypoints has an edge.'
-                )
-                break
+def execute_arm_sequence(rc):
+    """
+    Führt die Arm- und Greifer-Sequenz aus, inklusive Bildaufnahme.
+    """
+    print("Waypoint erreicht: Starte Arm- und Greifer-Sequenz")
 
-        if all_edges_found:
-            if not self.rc.toggle_power(should_power_on=True):
-                print('Failed to power on the robot, and cannot complete navigate route request.')
-                return
+    # 1. Arm ausklappen / bereit machen
+    print("Arm wird ausgeklappt...")
+    command = RobotCommandBuilder.arm_ready_command()
 
-            # Navigate a specific route.
-            route = self.rc.graph_nav_client.build_route(waypoint_ids, edge_ids_list)
-            is_finished = False
-            while not is_finished:
-                # Issue the route command about twice a second such that it is easy to terminate the
-                # navigation command (with estop or killing the program).
-                nav_route_command_id = self.rc.graph_nav_client.navigate_route(
-                    route, cmd_duration=1.0)
-                time.sleep(.5)  # Sleep for half a second to allow for command execution.
-                # Poll the robot for feedback to determine if the route is complete. Then sit
-                # the robot down once it is finished.
-                is_finished = self._check_success(nav_route_command_id)
+    # Get robot pose in vision frame from robot state (we want to send commands in vision
+    # frame relative to where the robot stands now)
+    robot_state = rc.state_client.get_robot_state()
 
-            # Power off the robot if appropriate.
-            if self.rc._powered_on and not self.rc._started_powered_on:
-                # Sit the robot down + power off after the navigation command is complete.
-                self.rc.toggle_power(should_power_on=False)
-    #
-    def _check_success(self, command_id=-1):
-        """Use a navigation command id to get feedback from the robot and sit when command succeeds."""
-        if command_id == -1:
-            # No command, so we have no status to check.
-            return False
-        status = self.rc.graph_nav_client.navigation_feedback(command_id)
-        if status.status == graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL:
-            # Successfully completed the navigation commands!
-            return True
-        elif status.status == graph_nav_pb2.NavigationFeedbackResponse.STATUS_LOST:
-            print('Robot got lost when navigating the route, the robot will now sit down.')
-            return True
-        elif status.status == graph_nav_pb2.NavigationFeedbackResponse.STATUS_STUCK:
-            print('Robot got stuck when navigating the route, the robot will now sit down.')
-            return True
-        elif status.status == graph_nav_pb2.NavigationFeedbackResponse.STATUS_ROBOT_IMPAIRED:
-            print('Robot is impaired.')
-            return True
-        else:
-            # Navigation command is not complete yet.
-            return False
+    # 3. Arm bewegen (z.B. hochheben oder vorziehen)
+    print("Arm wird leicht nach vorne oben bewegt...")
 
+    x = 0.28563416004180908
+    y = -0.338711678981781
+    z = 0.70670175552368164
+
+    qx = 0.28764960169792175
+    qy = 0.33570674061775208
+    qz = -0.64407461881637573
+    qw = 0.62428086996078491
+
+    command = RobotCommandBuilder.arm_pose_command(
+        x, y, z,
+        qw, qx, qy, qz,
+        'body',
+        seconds=3.0
+    )
+    rc.command_client.robot_command(command)
+    time.sleep(3)
+
+    # 4. Greifer öffnen (z.B. wieder loslassen)
+    print("Greifer öffnet...")
+    command = RobotCommandBuilder.claw_gripper_open_command()
+    rc.command_client.robot_command(command)
+    time.sleep(14)
+
+    # Bild aufnehmen
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) # 1. Absoluten Pfad des Skript-Ordners bestimmen
+    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "spot_bilder") # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
+    
+    print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
+    try:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+    except Exception as e:
+            print(f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}")
+            OUTPUT_DIR = None # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
+
+    rc.set_high_res_auto_params()
+    time.sleep(4)
+    for i in range(1):
+        image_request = build_image_request(
+            'hand_color_image',
+            quality_percent=100,  # Maximum quality
+            image_format=image_pb2.Image.FORMAT_JPEG,
+            resize_ratio=1.0  # No downsampling
+        )
+
+        # Request the image
+        image_response = rc.image_client.get_image([image_request])[0]
+
+        rc.maybe_save_image(image_response.shot.image, path=OUTPUT_DIR)
+        print("Bild erfolgreich gespeichert")
+        time.sleep(6)
+
+    time.sleep(4)
+
+    print("Greiferschließen...")
+    command = RobotCommandBuilder.claw_gripper_close_command()
+    rc.command_client.robot_command(command)
+    time.sleep(2)
+
+    # 5. Arm wieder verstauen
+    print("Arm wird verstaut...")
+    command = RobotCommandBuilder.arm_stow_command()
+    rc.command_client.robot_command(command)
+    time.sleep(3)
+    print("Arm-Sequenz erfolgreich abgeschlossen")
 
 def main():
 
@@ -735,8 +680,6 @@ def main():
     parser.add_argument('hostname', nargs='?', default=None,
                         help='Hostname or address of robot, e.g.  "192.168.80.3"')
     options = parser.parse_args()
-
-
 
     # Setup and authenticate the robot.
     hostname = options.hostname or os.environ.get("YOUR_ROBOT_IP")
@@ -752,8 +695,8 @@ def main():
     rc = RobotController(robot)
 
     # Create nogui estop
-    #estop_nogui = EstopNoGui(rc.estop_client, 'Estop NoGUI')
-    #estop_nogui.allow()
+    # estop_nogui = EstopNoGui(rc.estop_client, 'Estop NoGUI')
+    # estop_nogui.allow()
 
     # Initialize GraphNavInterface
     navigation = GraphNavInterface(rc, options.upload_filepath)
@@ -767,17 +710,12 @@ def main():
                 rc.toggle_power(should_power_on=True)
                 print("Powered on")
                 
-
-
-
-
-                #Location setzen jetz nach undock -> Prüfen wie genau lokalisierung, was besser ist
+                # Location setzen jetz nach undock -> Prüfen wie genau lokalisierung, was besser ist
                 print("Starte Undocking...")
 
                 if not rc.undock():
                     print("Undocking fehlgeschlagen – Programm wird beendet.")
                     return False
-
 
                 print("Commanding robot to stand...")
                 blocking_stand(rc.command_client)
@@ -785,100 +723,16 @@ def main():
                 time.sleep(3)
                 robot_state = rc.state_client.get_robot_state()
 
-                                # # Navigation zu Waypoint
+                # Navigation zu Waypoint
                 print("Setze Location")
                 navigation._set_initial_localization_fiducial()
-                
                 
                 print("Gehe zu Location")
                 is_finished = navigation._navigate_to(["smudgy-egg-bSeP0QBNrPEnUlmjxrvTNw=="])  # default
                 
                 if is_finished:
-                    print("Waypoint erreicht: Starte Arm- und Greifer-Sequenz")
+                    execute_arm_sequence(rc)
 
-                    # 1. Arm ausklappen / bereit machen
-                    print("Arm wird ausgeklappt...")
-                    command = RobotCommandBuilder.arm_ready_command()
-
-
-                    # Get robot pose in vision frame from robot state (we want to send commands in vision
-                    # frame relative to where the robot stands now)
-                    robot_state = rc.state_client.get_robot_state()
-
-                    # 3. Arm bewegen (z.B. hochheben oder vorziehen)
-                    print("Arm wird leicht nach vorne oben bewegt...")
-
-                    x = 0.28563416004180908
-                    y = -0.338711678981781
-                    z = 0.70670175552368164
-
-                    qx = 0.28764960169792175
-                    qy = 0.33570674061775208
-                    qz = -0.64407461881637573
-                    qw = 0.62428086996078491
-
-                    command = RobotCommandBuilder.arm_pose_command(
-                        x, y, z,
-                        qw, qx, qy, qz,
-                        'body',
-                        seconds=3.0
-                    )
-                    rc.command_client.robot_command(command)
-                    time.sleep(3)
-
-                    # 4. Greifer öffnen (z.B. wieder loslassen)
-                    print("Greifer öffnet...")
-                    command = RobotCommandBuilder.claw_gripper_open_command()
-                    rc.command_client.robot_command(command)
-                    time.sleep(14)
-
-                    # Bild aufnehmen
-                    
-                    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) # 1. Absoluten Pfad des Skript-Ordners bestimmen
-                    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "spot_bilder") # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
-                    
-                    print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
-                    try:
-                        os.makedirs(OUTPUT_DIR, exist_ok=True)
-                    except Exception as e:
-                            print(f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}")
-                            OUTPUT_DIR = None # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
-
-                    rc.set_high_res_auto_params()
-                    time.sleep(4)
-                    for i in range(1):
-                        image_request = build_image_request(
-                            'hand_color_image',
-                            quality_percent=100,  # Maximum quality
-                            image_format=image_pb2.Image.FORMAT_JPEG,
-                            resize_ratio=1.0  # No downsampling
-                        )
-
-                        # Request the image
-                        image_response = rc.image_client.get_image([image_request])[0]
-
-                        rc.maybe_save_image(image_response.shot.image, path=OUTPUT_DIR)
-                        print("Bild erfolgreich gespeichert")
-                        time.sleep(6)
-
-
-                    time.sleep(4)
-
-
-                    print("Greiferschließen...")
-                    command = RobotCommandBuilder.claw_gripper_close_command()
-                    rc.command_client.robot_command(command)
-                    time.sleep(2)
-
-
-                    # 5. Arm wieder verstauen
-                    print("Arm wird verstaut...")
-                    command = RobotCommandBuilder.arm_stow_command()
-                    rc.command_client.robot_command(command)
-                    time.sleep(3)
-                    print("Arm-Sequenz erfolgreich abgeschlossen")
-                    # -----------------------------
-                
                 is_finished = False
                 is_finished = navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="]) # waypoint 2 wieder zurück irgendwo hin
                 if is_finished:
@@ -890,11 +744,10 @@ def main():
                     else:
                         print("Docking fehlgeschlagen – manuelles Eingreifen erforderlich.")
 
-
                 return True
 
             except Exception as exc:
-                #estop_nogui.stop()
+                # estop_nogui.stop()
                 print(exc)
                 print('main run error.')
                 return False
