@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     print("[MAIN] starting digital_value_reader self-test (ALL crops)")
 
-    # ✅ Pfade korrigiert: data (klein) statt Data
+    # Pfade korrigiert: data (klein) statt Data
     #CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
     #CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
 
@@ -296,14 +296,28 @@ if __name__ == "__main__":
 
         print("[MAIN] RESULT")
         print(" display_type:", result.display_type)
-        print(" temperature:", result.temperature, result.temperature_unit)
-        print(" humidity:", result.humidity, result.humidity_unit)
-        print(" ofen_value:", result.ofen_value, result.ofen_unit)
-        print(" conf_temp:", result.ocr_confidence_temp)
-        print(" conf_hum :", result.ocr_confidence_hum)
-        print(" conf_ofen:", result.ocr_confidence_ofen)
-        print(" title_text:", result.title_text)
-        print(" title_raw:", result.title_raw)
-        print(" raw_text_temp:", result.raw_text_temp)
-        print(" raw_text_hum :", result.raw_text_hum)
-        print(" raw_text_ofen:", result.raw_text_ofen)
+
+        if result.display_type == "tempdisplay":
+            print(" temperature:", result.temperature, result.temperature_unit)                                                                                                                                                                                                                 
+            print(" humidity   :", result.humidity, result.humidity_unit)
+            print(" conf_temp  :", result.ocr_confidence_temp)
+            print(" conf_hum   :", result.ocr_confidence_hum)
+            print(" title_text :", result.title_text)
+            print(" title_raw  :", result.title_raw)
+            print(" raw_temp   :", result.raw_text_temp)
+            print(" raw_hum    :", result.raw_text_hum)
+
+        elif result.display_type == "ofen":
+            print(" ofen_value :", result.ofen_value, result.ofen_unit)
+            print(" conf_ofen  :", result.ocr_confidence_ofen)
+            print(" title_text :", result.title_text)
+            print(" title_raw  :", result.title_raw)
+            print(" raw_ofen   :", result.raw_text_ofen)
+
+        else:
+            print(" (skipped) unknown display — no values read")
+            print(" title_text :", result.title_text)
+            print(" title_raw  :", result.title_raw)
+
+
+
