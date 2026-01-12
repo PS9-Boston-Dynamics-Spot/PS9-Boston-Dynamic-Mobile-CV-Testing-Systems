@@ -236,7 +236,11 @@ if __name__ == "__main__":
     
     MODEL_PATH = "runs_cv_model_digital_display/spot_cv_model_v2/weights/best.pt"
     # --- konfig für standalone test ---
-    RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
+    #local debug Path
+    #RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
+    #projekt Path
+    RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src/common/sdk/spot_bilder")
+    #debug Path
     DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/crop_debug")
 
     print("[MAIN] starting digital_cropper self-test")
@@ -244,7 +248,10 @@ if __name__ == "__main__":
     print(f"[MAIN] raw_dir={RAW_DIR} exists={RAW_DIR.exists()}")
 
     # Nimmt das erste JPG aus RAW_DIR
-    images = sorted(list(RAW_DIR.glob("*.jpg")))
+    #lokal debug Path
+    #images = sorted(list(RAW_DIR.glob("*.jpg")))
+    #projekt Path
+    images = sorted(list(RAW_DIR.glob("spot.jpg")))
     if not images:
         print(f"[MAIN] ERROR: no .jpg found in {RAW_DIR}")
         raise SystemExit(1)

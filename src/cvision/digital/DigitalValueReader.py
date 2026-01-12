@@ -52,7 +52,7 @@ class OcrValueResult:
     temperature: Optional[float]
     temperature_unit: Optional[str]
 
-    # Humidity (neu)
+    # Humidity
     humidity: Optional[float]
     humidity_unit: Optional[str]
 
@@ -259,9 +259,12 @@ if __name__ == "__main__":
     # Pfade korrigiert: data (klein) statt Data
     #CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
     #CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+    # Pfade korrigiert: data (klein) statt Data
+    CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
+    CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
 
-    CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+    #CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
+    #CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
 
 
     candidates = []
