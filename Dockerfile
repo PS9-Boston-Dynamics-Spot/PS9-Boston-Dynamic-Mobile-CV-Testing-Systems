@@ -14,11 +14,24 @@ RUN apt-get update && apt-get install -y \
     && ldconfig \
     && rm -rf /var/lib/apt/lists/*
 
+# 🔹 Torch Hub Cache Location
+ENV TORCH_HOME=/opt/torch
+
 COPY requirements.txt .
 
 RUN python3 -m venv /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv \
     && /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/pip install --upgrade pip \
     && /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# 🔥 DINOv2 beim Build vorladen
+RUN /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python - <<'EOF'
+import torch
+torch.hub.load(
+    "facebookresearch/dinov2",
+    "dinov2_vits14",
+    pretrained=True
+)
+EOF
 
 COPY . .
 
@@ -34,6 +47,6 @@ ENV PYTHONPATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src"
 
 COPY scripts/entrypoint.sh /scripts/entrypoint.sh
 RUN chmod +x /scripts/entrypoint.sh \
-    && apt-get update && apt-get install -y dos2unix \
     && dos2unix /scripts/entrypoint.sh
+
 ENTRYPOINT ["/scripts/entrypoint.sh"]

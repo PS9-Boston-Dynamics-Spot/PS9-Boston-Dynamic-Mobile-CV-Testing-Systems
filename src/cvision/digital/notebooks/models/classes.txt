@@ -1,0 +1,3 @@
+analog
+digital_ac
+digital_temp

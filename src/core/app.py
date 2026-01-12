@@ -7,8 +7,9 @@ from db.dal.DataAccessLayer import DataAccessLayer
 from app_lifespan import (
     services,
     process_analog_image,
-    check_anomaly_analog_gauge,
+    check_anomaly,
     handle_anomaly,
+    process_digital_image
 )
 
 if __name__ == "__main__":
@@ -57,7 +58,7 @@ if __name__ == "__main__":
             category_name=category_name_analog,
         )
 
-        is_anomaly = check_anomaly_analog_gauge(
+        is_anomaly = check_anomaly(
             dal=dal,
             analyzed_image_id=analyzed_image_id,
             detected_value=detected_value,
@@ -68,3 +69,20 @@ if __name__ == "__main__":
         handle_anomaly(is_anomaly=is_anomaly)
 
         # TODO: same for digital sensors
+
+        for analyzed_image_id, detected_value, category in process_digital_image(
+            dal=dal,
+            image_bytes=image_bytes,
+            raw_image_id=raw_image_id,
+            opcua_node_id=opcua_node_id,
+            aruco_id=aruco_id,
+        ):
+            is_anomaly = check_anomaly(
+                dal=dal,
+                analyzed_image_id=analyzed_image_id,
+                detected_value=detected_value,
+                aruco_id=aruco_id,
+                category_name=category,
+            )
+
+            handle_anomaly(is_anomaly=is_anomaly)

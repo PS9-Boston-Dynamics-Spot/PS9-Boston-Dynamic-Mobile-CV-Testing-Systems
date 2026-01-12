@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from common.imports.Typing import Optional, Tuple
+from common.imports.Typing import Optional, Tuple, Generator
 from db.mapping.input.RawImageMapper import RawImageMapper
 from db.mapping.input.AnalyzedImageMapper import AnalyzedImageMapper
 from db.mapping.input.AnomalyMapper import AnomalyMapper
@@ -9,7 +9,8 @@ from cvision.analog.AnalogGaugeReader import AnalogGaugeReader
 from cvision.analog.AnalogGaugeCropper import AnalogGaugeCropper
 from cvision.aruco.ArUcoIDExtractor import ArUcoIDExtraktor
 from db.dal.DataAccessLayer import DataAccessLayer
-
+from cvision.digital.DigitalCropper import YoloDisplayCropper
+from cvision.digital.DigitalValueReader import EasyOcrDisplayValueReader
 
 @dataclass
 class Initializer:
@@ -23,6 +24,7 @@ class Initializer:
     aruco_extractor: ArUcoIDExtraktor = field(default_factory=ArUcoIDExtraktor)
     anomaly_checker: AnomalyChecker = field(default_factory=AnomalyChecker)
     analog_gauge_cropper: AnalogGaugeCropper = field(default_factory=AnalogGaugeCropper)
+    digital_sensor_cropper: YoloDisplayCropper = field(default_factory=YoloDisplayCropper)
 
 
 initializer = Initializer()
@@ -65,7 +67,7 @@ def process_analog_image(
     opcua_node_id: str,
     aruco_id: Optional[int] = None,
     category_name: Optional[str] = "pressure",
-) -> Tuple[int, int]:
+) -> Tuple[int, float]:
 
     cropped_analog_gauge_image = services.analog_gauge_cropper.process(img=image_bytes)
     analog_unit = services.settings_manager.getUnit(
@@ -128,7 +130,7 @@ def process_analog_image(
     return analyzed_image_id, detected_value
 
 
-def check_anomaly_analog_gauge(
+def check_anomaly(
     dal: DataAccessLayer,
     analyzed_image_id: int,
     detected_value: float,
@@ -169,3 +171,48 @@ def handle_anomaly(is_anomaly: bool) -> None:
     else:
         print("✅No anomaly detected✅")
         # TODO: continue to next machine)
+
+def process_digital_image(
+    dal: DataAccessLayer,
+    image_bytes: bytes,
+    raw_image_id: int,
+    opcua_node_id: str,
+    aruco_id: Optional[int] = None,
+) -> Generator[int, float, str]:
+    reader = EasyOcrDisplayValueReader(languages=["en", "de"], gpu=False, verbose=True)
+
+    cropped_digital_images = services.digital_sensor_cropper.crop_from_bytes(raw_image_bytes=image_bytes)
+
+    for cropped_digital_image in cropped_digital_images:
+
+        result = reader.read_from_crop_bytes(crop_jpg_bytes=cropped_digital_image.crop_bytes)
+
+        unit = services.settings_manager.getUnit(
+            aruco_id=aruco_id, category_name=result.display_type
+        )
+
+        
+        print("[MAIN] RESULT")
+        print(" display_type:", result.display_type)
+        print(" value:", result.value)
+        print(" unit:", result.unit)
+        print(" ocr_confidence:", result.ocr_confidence)
+        print(" title_text:", result.title_text)
+        print(" title_raw:", result.title_raw)
+        print(" raw_text:", result.raw_text)
+
+        analyzed_image_id = safe_analyzed_image(
+            dal=dal,
+            image_bytes=cropped_digital_image.crop_bytes,
+            raw_image_id=raw_image_id,
+            sensor_type=result.display_type,
+            opcua_node_id=opcua_node_id,
+            aruco_id=aruco_id,
+            detected_value=result.value,
+            unit=unit,
+            category=result.display_type,
+        )
+
+        yield analyzed_image_id, result.value, result.display_type
+
+    return
