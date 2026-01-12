@@ -1,7 +1,15 @@
+import os
+from pathlib import Path
 from torch import nn
 import torch
 
 ENCODER_MODEL_NAME = "dinov2_vits14"
+
+DINOV2_SUBMODULE_PATH = Path(__file__).resolve().parents[3] / "third_party" / "dinov2"
+DINOV2_WEIGHTS_ENV = "DINOV2_WEIGHTS"
+DEFAULT_DINOV2_WEIGHTS = (
+    DINOV2_SUBMODULE_PATH / "checkpoints" / "dinov2_vits14.pth"
+)
 
 N_HEATMAPS = 3
 N_CHANNELS = 50  # Number of intermediate channels for Nonlinearity
@@ -10,12 +18,38 @@ INPUT_SIZE = (448, 448)
 DINO_CHANNELS = 384
 
 
+def _resolve_weights_path() -> Path:
+    """Get local weights path from env or default location."""
+
+    candidate = os.getenv(DINOV2_WEIGHTS_ENV, str(DEFAULT_DINOV2_WEIGHTS))
+    weights_path = Path(candidate).expanduser().resolve()
+    if not weights_path.exists():
+        raise FileNotFoundError(
+            "DINOv2 weights not found. Ensure the Docker build downloaded them "
+            f"or set {DINOV2_WEIGHTS_ENV} accordingly (expected {weights_path})."
+        )
+    return weights_path
+
+
 class Encoder(nn.Module):
     def __init__(self, pretrained=True):
         super().__init__()
+        if not DINOV2_SUBMODULE_PATH.exists():
+            raise FileNotFoundError(
+                "dinov2 submodule missing. Run 'git submodule update --init --recursive'."
+            )
+
         self.model = torch.hub.load(
-            "facebookresearch/dinov2", ENCODER_MODEL_NAME, pretrained=pretrained
+            DINOV2_SUBMODULE_PATH.as_posix(),
+            ENCODER_MODEL_NAME,
+            source="local",
+            # pretrained=pretrained, Online weights loading is disabled
+            pretrained=False, # Loading from local weights file instead
         )
+        weights_path = _resolve_weights_path()
+        # Explicit weights_only=False to remain compatible with PyTorch >=2.6 defaults
+        state_dict = torch.load(weights_path, map_location="cpu", weights_only=False)
+        self.model.load_state_dict(state_dict)
         self.model.eval()
         for param in self.model.parameters():
             param.requires_grad = False
@@ -75,5 +109,6 @@ def load_model(model_path):
     decoder = Decoder(n_feature_channels, N_CHANNELS, INPUT_SIZE, N_HEATMAPS)
 
     model = EncoderDecoder(encoder, decoder)
-    model.load_state_dict(torch.load(model_path))
+    # DDP-saved checkpoints require weights_only=False starting in PyTorch 2.6
+    model.load_state_dict(torch.load(model_path, weights_only=False))
     return model
