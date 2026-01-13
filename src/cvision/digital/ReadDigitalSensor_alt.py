@@ -2,14 +2,17 @@ import cv2
 import pytesseract
 from pathlib import Path
 from ultralytics import YOLO
-import numpy as np
 
 # -------------------------------------------------
 # Konfiguration
 # -------------------------------------------------
 
-RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
-CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/crop")
+RAW_DIR = Path(
+    "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw"
+)
+CROP_DIR = Path(
+    "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/crop"
+)
 CROP_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_PATH = "runs_display/spot_v12/weights/best.pt"
@@ -29,6 +32,7 @@ model = YOLO(MODEL_PATH)
 # Hilfsfunktionen
 # -------------------------------------------------
 
+
 def crop_and_quality(img, box):
     x1, y1, x2, y2 = map(int, box.xyxy[0])
     crop = img[y1:y2, x1:x2]
@@ -39,11 +43,11 @@ def crop_and_quality(img, box):
 
     return crop, quality
 
+
 def extract_value_tesseract(crop):
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
     gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-    _, thresh = cv2.threshold(gray, 0, 255,
-                              cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     config = "--psm 7 -c tessedit_char_whitelist=0123456789.-"
     text = pytesseract.image_to_string(thresh, config=config)
@@ -53,9 +57,11 @@ def extract_value_tesseract(crop):
     except ValueError:
         return None, text.strip()
 
+
 # -------------------------------------------------
 # Hauptpipeline
 # -------------------------------------------------
+
 
 def process_images():
     for img_path in RAW_DIR.glob("*.jpg"):
@@ -89,6 +95,7 @@ def process_images():
                 f.write(f"value: {value}\n")
 
             print(f"[OK] Crop gespeichert: {crop_img_path.name}")
+
 
 # -------------------------------------------------
 # Start

@@ -7,9 +7,7 @@ ENCODER_MODEL_NAME = "dinov2_vits14"
 
 DINOV2_SUBMODULE_PATH = Path(__file__).resolve().parents[3] / "third_party" / "dinov2"
 DINOV2_WEIGHTS_ENV = "DINOV2_WEIGHTS"
-DEFAULT_DINOV2_WEIGHTS = (
-    DINOV2_SUBMODULE_PATH / "checkpoints" / "dinov2_vits14.pth"
-)
+DEFAULT_DINOV2_WEIGHTS = DINOV2_SUBMODULE_PATH / "checkpoints" / "dinov2_vits14.pth"
 
 N_HEATMAPS = 3
 N_CHANNELS = 50  # Number of intermediate channels for Nonlinearity
@@ -44,7 +42,7 @@ class Encoder(nn.Module):
             ENCODER_MODEL_NAME,
             source="local",
             # pretrained=pretrained, Online weights loading is disabled
-            pretrained=False, # Loading from local weights file instead
+            pretrained=False,  # Loading from local weights file instead
         )
         weights_path = _resolve_weights_path()
         # Explicit weights_only=False to remain compatible with PyTorch >=2.6 defaults

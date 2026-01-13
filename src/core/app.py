@@ -1,4 +1,3 @@
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -9,7 +8,7 @@ from app_lifespan import (
     process_analog_image,
     check_anomaly,
     handle_anomaly,
-    process_digital_image
+    process_digital_image,
 )
 
 if __name__ == "__main__":
@@ -25,8 +24,6 @@ if __name__ == "__main__":
     )
 
     path = project_root / "src/common/sdk/spot_bilder/spot.jpg"
-
-    
 
     with open(path, "rb") as f:
         image_bytes = f.read()

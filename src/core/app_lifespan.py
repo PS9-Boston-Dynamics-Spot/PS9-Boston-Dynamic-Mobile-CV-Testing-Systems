@@ -12,6 +12,7 @@ from db.dal.DataAccessLayer import DataAccessLayer
 from cvision.digital.DigitalCropper import YoloDisplayCropper
 from cvision.digital.DigitalValueReader import EasyOcrDisplayValueReader
 
+
 @dataclass
 class Initializer:
 
@@ -24,7 +25,9 @@ class Initializer:
     aruco_extractor: ArUcoIDExtraktor = field(default_factory=ArUcoIDExtraktor)
     anomaly_checker: AnomalyChecker = field(default_factory=AnomalyChecker)
     analog_gauge_cropper: AnalogGaugeCropper = field(default_factory=AnalogGaugeCropper)
-    digital_sensor_cropper: YoloDisplayCropper = field(default_factory=YoloDisplayCropper)
+    digital_sensor_cropper: YoloDisplayCropper = field(
+        default_factory=YoloDisplayCropper
+    )
 
 
 initializer = Initializer()
@@ -172,6 +175,7 @@ def handle_anomaly(is_anomaly: bool) -> None:
         print("✅No anomaly detected✅")
         # TODO: continue to next machine)
 
+
 def process_digital_image(
     dal: DataAccessLayer,
     image_bytes: bytes,
@@ -181,17 +185,20 @@ def process_digital_image(
 ) -> Generator[int, float, str]:
     reader = EasyOcrDisplayValueReader(languages=["en", "de"], gpu=False, verbose=True)
 
-    cropped_digital_images = services.digital_sensor_cropper.crop_from_bytes(raw_image_bytes=image_bytes)
+    cropped_digital_images = services.digital_sensor_cropper.crop_from_bytes(
+        raw_image_bytes=image_bytes
+    )
 
     for cropped_digital_image in cropped_digital_images:
 
-        result = reader.read_from_crop_bytes(crop_jpg_bytes=cropped_digital_image.crop_bytes)
+        result = reader.read_from_crop_bytes(
+            crop_jpg_bytes=cropped_digital_image.crop_bytes
+        )
 
         unit = services.settings_manager.getUnit(
             aruco_id=aruco_id, category_name=result.display_type
         )
 
-        
         print("[MAIN] RESULT")
         print(" display_type:", result.display_type)
         print(" value:", result.value)

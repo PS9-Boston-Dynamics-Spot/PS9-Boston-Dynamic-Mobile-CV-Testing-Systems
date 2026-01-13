@@ -2,7 +2,6 @@ import os
 import cv2
 import base64
 import requests
-import json
 
 projectdir = "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems"
 RAW_FOLDER = f"{projectdir}/data/images/raw"
@@ -16,6 +15,7 @@ API_KEY = "RYmNlhCjTmyi92J0pOwr"
 
 os.makedirs(CROP_FOLDER, exist_ok=True)
 
+
 def run_roboflow_inference(image_path: str):
     """Send image to Roboflow workflow and return predictions."""
     with open(image_path, "rb") as f:
@@ -23,17 +23,13 @@ def run_roboflow_inference(image_path: str):
 
     payload = {
         "api_key": API_KEY,
-        "inputs": {
-            "image": {
-                "type": "base64",
-                "value": b64
-            }
-        }
+        "inputs": {"image": {"type": "base64", "value": b64}},
     }
 
     response = requests.post(API_URL, json=payload)
     response.raise_for_status()
     return response.json()
+
 
 def crop_predictions(image_path: str, predictions: list):
     """Crop detected bounding boxes, save JPGs and return bytes for DB."""
@@ -49,7 +45,7 @@ def crop_predictions(image_path: str, predictions: list):
 
     for i, pred in enumerate(predictions):
 
-        sensor_type = pred.get("class", "unknown")   # Label aus Roboflow
+        sensor_type = pred.get("class", "unknown")  # Label aus Roboflow
 
         x, y = pred["x"], pred["y"]
         pw, ph = pred["width"], pred["height"]
@@ -81,16 +77,19 @@ def crop_predictions(image_path: str, predictions: list):
         if not ok:
             raise ValueError("JPEG-Encoding fehlgeschlagen!")
 
-        cropped_results.append({
-            "index": i,
-            "filename": crop_filename,
-            "bytes": encoded.tobytes(),
-            "sensor_type": sensor_type,
-        })
+        cropped_results.append(
+            {
+                "index": i,
+                "filename": crop_filename,
+                "bytes": encoded.tobytes(),
+                "sensor_type": sensor_type,
+            }
+        )
 
     return cropped_results
 
-#Nur speicherung der crops als jpg
+
+# Nur speicherung der crops als jpg
 
 # def crop_predictions(image_path: str, predictions: list):
 #     """Crop detected bounding boxes and store in images/crop folder."""
@@ -129,7 +128,11 @@ def crop_predictions(image_path: str, predictions: list):
 
 def process_all_images():
     """Processes every image in images/raw and saves crops."""
-    files = [f for f in os.listdir(RAW_FOLDER) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
+    files = [
+        f
+        for f in os.listdir(RAW_FOLDER)
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
+    ]
 
     if not files:
         print("Keine Bilder im images/raw Ordner gefunden.")

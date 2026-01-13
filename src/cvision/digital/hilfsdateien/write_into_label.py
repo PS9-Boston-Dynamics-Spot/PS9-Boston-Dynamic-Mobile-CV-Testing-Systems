@@ -2,13 +2,13 @@ from pathlib import Path
 
 # Mapping: Ordnername oder Keyword im Dateinamen → Klassen-ID
 CLASS_MAP = {
-    'digital_ac': 0,
-    'analog_pressure': 1,
-    'digital_temp': 2,
-    'not_category': 3,
+    "digital_ac": 0,
+    "analog_pressure": 1,
+    "digital_temp": 2,
+    "not_category": 3,
 }
 
-for split in ['train', 'val']:
+for split in ["train", "val"]:
     img_dir = Path(f"data/images/{split}")
     label_dir = Path(f"data/labels/{split}")
     label_dir.mkdir(parents=True, exist_ok=True)

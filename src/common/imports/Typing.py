@@ -3,4 +3,14 @@
 from typing import Optional, Dict, Any, Callable, Tuple, List, Literal, Generator
 from cv2.typing import MatLike
 
-__all__ = ["Optional", "Dict", "Any", "Callable", "Tuple", "List", "Literal", "MatLike", "Generator"]
+__all__ = [
+    "Optional",
+    "Dict",
+    "Any",
+    "Callable",
+    "Tuple",
+    "List",
+    "Literal",
+    "MatLike",
+    "Generator",
+]

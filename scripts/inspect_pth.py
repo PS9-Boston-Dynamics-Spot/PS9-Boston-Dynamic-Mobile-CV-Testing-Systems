@@ -1,5 +1,10 @@
 import sys, torch, json
-p = sys.argv[1] if len(sys.argv)>1 else "src/common/cvision/notebooks/models/resnet34-stage-final.pth"
+
+p = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else "src/common/cvision/notebooks/models/resnet34-stage-final.pth"
+)
 print("Path:", p)
 try:
     obj = torch.load(p, map_location="cpu", weights_only=True)
@@ -9,6 +14,7 @@ except Exception as e:
     try:
         # controlled unpickle only for inspection (requires fastcore installed)
         import fastcore.foundation as _ff
+
         try:
             with torch.serialization.safe_globals([_ff.L]):
                 obj = torch.load(p, map_location="cpu", weights_only=False)
@@ -35,6 +41,8 @@ else:
         try:
             sd = getattr(obj, "model")
             if hasattr(sd, "state_dict"):
-                print("model.state_dict keys sample:", list(sd.state_dict().keys())[:20])
+                print(
+                    "model.state_dict keys sample:", list(sd.state_dict().keys())[:20]
+                )
         except Exception:
             pass

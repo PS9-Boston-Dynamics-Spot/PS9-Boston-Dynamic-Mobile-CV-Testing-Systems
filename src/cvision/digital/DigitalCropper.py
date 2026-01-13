@@ -72,7 +72,9 @@ class DebugWriter:
         except Exception as e:
             writable = False
             if self.verbose:
-                print(f"[DebugWriter] ERROR: out_dir not writable: {self.out_dir} ({e})")
+                print(
+                    f"[DebugWriter] ERROR: out_dir not writable: {self.out_dir} ({e})"
+                )
 
         if self.verbose:
             print(f"[DebugWriter] enabled={self.enabled}")
@@ -94,11 +96,15 @@ class DebugWriter:
                     f"Alternative would be: {alt}"
                 )
 
-    def write(self, crop: CropResult, extra_txt_lines: Optional[List[str]] = None) -> None:
+    def write(
+        self, crop: CropResult, extra_txt_lines: Optional[List[str]] = None
+    ) -> None:
         if not self.enabled:
             return
 
-        safe_source = "".join(c if c.isalnum() or c in "-_." else "_" for c in crop.source_name)
+        safe_source = "".join(
+            c if c.isalnum() or c in "-_." else "_" for c in crop.source_name
+        )
         base = f"{safe_source}_det{crop.idx}_cls{crop.cls_id}"
 
         img_path = self.out_dir / f"{base}.jpg"
@@ -137,7 +143,9 @@ class YoloDisplayCropper:
 
     def __init__(
         self,
-        model_path: str = os.path.join(os.getcwd(), "src/cvision/digital/models/display_cropper.pt"),
+        model_path: str = os.path.join(
+            os.getcwd(), "src/cvision/digital/models/display_cropper.pt"
+        ),
         conf: float = 0.30,
         jpeg_quality: int = 95,
         debug: Optional[DebugWriter] = None,
@@ -157,9 +165,13 @@ class YoloDisplayCropper:
             if debug is not None:
                 print(f"[YoloDisplayCropper] debug_out_dir={debug.out_dir}")
 
-    def crop_from_bytes(self, raw_image_bytes: bytes, source_name: str = "raw") -> List[CropResult]:
+    def crop_from_bytes(
+        self, raw_image_bytes: bytes, source_name: str = "raw"
+    ) -> List[CropResult]:
         if self._verbose:
-            print(f"\n[YoloDisplayCropper] crop_from_bytes source={source_name} bytes={len(raw_image_bytes)}")
+            print(
+                f"\n[YoloDisplayCropper] crop_from_bytes source={source_name} bytes={len(raw_image_bytes)}"
+            )
 
         img = bgr_from_bytes(raw_image_bytes)
 
@@ -174,7 +186,9 @@ class YoloDisplayCropper:
 
         if res.boxes is None or len(res.boxes) == 0:
             if self._verbose:
-                print("[YoloDisplayCropper] WARNING: no boxes detected -> no crops -> nothing to debug-write")
+                print(
+                    "[YoloDisplayCropper] WARNING: no boxes detected -> no crops -> nothing to debug-write"
+                )
             return crops
 
         # Auswahl: max. 2 Crops best box per class_id (highest conf)
@@ -187,7 +201,9 @@ class YoloDisplayCropper:
 
         # take best per class, then sort by confidence desc, then keep max 2
         selected_boxes = [pair[1] for pair in best_by_cls.values()]
-        selected_boxes = sorted(selected_boxes, key=lambda bb: float(bb.conf), reverse=True)[:2]
+        selected_boxes = sorted(
+            selected_boxes, key=lambda bb: float(bb.conf), reverse=True
+        )[:2]
 
         # Crops nur für selected_boxes erzeugen
         for idx, b in enumerate(selected_boxes):
@@ -198,7 +214,9 @@ class YoloDisplayCropper:
             crop_bgr = img[y1:y2, x1:x2]
             if crop_bgr.size == 0:
                 if self._verbose:
-                    print(f"[YoloDisplayCropper] skip empty crop idx={idx} bbox={(x1, y1, x2, y2)}")
+                    print(
+                        f"[YoloDisplayCropper] skip empty crop idx={idx} bbox={(x1, y1, x2, y2)}"
+                    )
                 continue
 
             q_img = sharpness_quality_0_1(crop_bgr)
@@ -233,24 +251,28 @@ class YoloDisplayCropper:
 
 
 if __name__ == "__main__":
-    
+
     MODEL_PATH = "runs_cv_model_digital_display/spot_cv_model_v2/weights/best.pt"
     # --- konfig für standalone test ---
-    #local debug Path
-    #RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
-    #projekt Path
-    RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src/common/sdk/spot_bilder")
-    #debug Path
-    DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/crop_debug")
+    # local debug Path
+    # RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
+    # projekt Path
+    RAW_DIR = Path(
+        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src/common/sdk/spot_bilder"
+    )
+    # debug Path
+    DEBUG_DIR = Path(
+        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/crop_debug"
+    )
 
     print("[MAIN] starting digital_cropper self-test")
     print(f"[MAIN] model_path={MODEL_PATH}")
     print(f"[MAIN] raw_dir={RAW_DIR} exists={RAW_DIR.exists()}")
 
     # Nimmt das erste JPG aus RAW_DIR
-    #lokal debug Path
-    #images = sorted(list(RAW_DIR.glob("*.jpg")))
-    #projekt Path
+    # lokal debug Path
+    # images = sorted(list(RAW_DIR.glob("*.jpg")))
+    # projekt Path
     images = sorted(list(RAW_DIR.glob("spot.jpg")))
     if not images:
         print(f"[MAIN] ERROR: no .jpg found in {RAW_DIR}")
@@ -285,4 +307,6 @@ if __name__ == "__main__":
         )
         print(f"[MAIN] debug output should be in: {DEBUG_DIR}")
     else:
-        print("[MAIN] WARNING: 0 crops -> nothing written. (YOLO detected nothing on this image)")
+        print(
+            "[MAIN] WARNING: 0 crops -> nothing written. (YOLO detected nothing on this image)"
+        )

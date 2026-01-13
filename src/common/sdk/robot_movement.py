@@ -6,26 +6,27 @@ import os
 import sys
 import time
 import datetime
-import math 
+import math
 from pathlib import Path
 
 from google.protobuf import wrappers_pb2
 
 import bosdyn.client.util
 from bosdyn.api import robot_state_pb2, image_pb2, gripper_camera_param_pb2, header_pb2
-from bosdyn.api.docking import docking_pb2
 from bosdyn.api.graph_nav import graph_nav_pb2, map_pb2, nav_pb2
 from bosdyn.client.exceptions import ResponseError
 from bosdyn.client.frame_helpers import get_odom_tform_body
 from bosdyn.client.graph_nav import GraphNavClient
 from bosdyn.client.lease import LeaseClient, LeaseKeepAlive, ResourceAlreadyClaimedError
 from bosdyn.client.power import PowerClient, power_on_motors, safe_power_off_motors
-from bosdyn.client.robot_command import RobotCommandBuilder, RobotCommandClient, blocking_stand
+from bosdyn.client.robot_command import (
+    RobotCommandBuilder,
+    RobotCommandClient,
+    blocking_stand,
+)
 from bosdyn.client.robot_state import RobotStateClient
-from bosdyn.client.math_helpers import SE2Pose
 
-from bosdyn.client.frame_helpers import (BODY_FRAME_NAME, ODOM_FRAME_NAME, VISION_FRAME_NAME,
-                                         get_se2_a_tform_b)
+from bosdyn.client.frame_helpers import BODY_FRAME_NAME, get_se2_a_tform_b
 
 from bosdyn.client import math_helpers
 
@@ -49,6 +50,7 @@ _ROBOT_CREDENTIALS_PATH = os.environ.get(
 if _ROBOT_CREDENTIALS_PATH and Path(_ROBOT_CREDENTIALS_PATH).exists():
     load_dotenv(dotenv_path=_ROBOT_CREDENTIALS_PATH)
 
+
 class RobotController:
     """Zentrale Verwaltung aller Robot-Clients und Power-/TimeSync-Handling."""
 
@@ -59,20 +61,40 @@ class RobotController:
         self.robot.time_sync.wait_for_sync()
 
         # Clients erstellen
-        self.power_client: PowerClient = robot.ensure_client(PowerClient.default_service_name)
-        self.state_client: RobotStateClient = robot.ensure_client(RobotStateClient.default_service_name)
-        self.command_client: RobotCommandClient = robot.ensure_client(RobotCommandClient.default_service_name)
-        self.graph_nav_client: GraphNavClient = robot.ensure_client(GraphNavClient.default_service_name)
-        self.lease_client: LeaseClient = robot.ensure_client(LeaseClient.default_service_name)
-        self.estop_client: EstopClient = robot.ensure_client(EstopClient.default_service_name)
-        self.image_client: ImageClient = robot.ensure_client(ImageClient.default_service_name)
-        self.state_client: RobotStateClient = robot.ensure_client(RobotStateClient.default_service_name)
-        self.dock_client: DockingClient = robot.ensure_client(DockingClient.default_service_name)
-        self.gripper_camera_param_client: GripperCameraParamClient = robot.ensure_client(GripperCameraParamClient.default_service_name)
+        self.power_client: PowerClient = robot.ensure_client(
+            PowerClient.default_service_name
+        )
+        self.state_client: RobotStateClient = robot.ensure_client(
+            RobotStateClient.default_service_name
+        )
+        self.command_client: RobotCommandClient = robot.ensure_client(
+            RobotCommandClient.default_service_name
+        )
+        self.graph_nav_client: GraphNavClient = robot.ensure_client(
+            GraphNavClient.default_service_name
+        )
+        self.lease_client: LeaseClient = robot.ensure_client(
+            LeaseClient.default_service_name
+        )
+        self.estop_client: EstopClient = robot.ensure_client(
+            EstopClient.default_service_name
+        )
+        self.image_client: ImageClient = robot.ensure_client(
+            ImageClient.default_service_name
+        )
+        self.state_client: RobotStateClient = robot.ensure_client(
+            RobotStateClient.default_service_name
+        )
+        self.dock_client: DockingClient = robot.ensure_client(
+            DockingClient.default_service_name
+        )
+        self.gripper_camera_param_client: GripperCameraParamClient = (
+            robot.ensure_client(GripperCameraParamClient.default_service_name)
+        )
 
         # Power-State merken
         power_state = self.state_client.get_robot_state().power_state
-        self._started_powered_on = (power_state.motor_power_state == power_state.STATE_ON)
+        self._started_powered_on = power_state.motor_power_state == power_state.STATE_ON
         self._powered_on = self._started_powered_on
 
     def dock(self, dock_id: int, timeout_sec: int = 60):
@@ -114,12 +136,16 @@ class RobotController:
             while not motors_on:
                 future = self.state_client.get_robot_state_async()
                 state_response = future.result(
-                    timeout=10)  # 10 second timeout for waiting for the state response.
-                if state_response.power_state.motor_power_state == robot_state_pb2.PowerState.STATE_ON:
+                    timeout=10
+                )  # 10 second timeout for waiting for the state response.
+                if (
+                    state_response.power_state.motor_power_state
+                    == robot_state_pb2.PowerState.STATE_ON
+                ):
                     motors_on = True
                 else:
                     # Motors are not yet fully powered on.
-                    time.sleep(.25)
+                    time.sleep(0.25)
         elif is_powered_on and not should_power_on:
             # Safe power off (robot will sit then power down) when it is in a
             # powered-on state.
@@ -134,7 +160,7 @@ class RobotController:
     def check_is_powered_on(self):
         """Determine if the robot is powered on or off."""
         power_state = self.state_client.get_robot_state().power_state
-        self._powered_on = (power_state.motor_power_state == power_state.STATE_ON)
+        self._powered_on = power_state.motor_power_state == power_state.STATE_ON
         return self._powered_on
 
     def maybe_save_image(self, image, path):
@@ -144,37 +170,36 @@ class RobotController:
 
             from PIL import Image
         except ImportError:
-            print('Missing dependencies. Can\'t save image.')
+            print("Missing dependencies. Can't save image.")
             return
 
         # Format: YYYYMMDD_HHmmss (z.B. 20251201_172530)
-        now_str = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         # name = 'spot-img-' + now_str + '.jpg'
-        name = 'spot.jpg'
+        name = "spot.jpg"
         # Bestimme den vollständigen Pfad
         if path is not None and os.path.isdir(path):
             full_path = os.path.join(path, name)
-            print(f'Saving image to specified directory: {full_path}')
+            print(f"Saving image to specified directory: {full_path}")
         else:
             # Fallback auf das aktuelle Arbeitsverzeichnis (CWD), wenn kein oder ungültiger Pfad
             full_path = name
-            print(f'Saving image to working directory as {full_path}')
+            print(f"Saving image to working directory as {full_path}")
 
         try:
             image = Image.open(io.BytesIO(image.data))
             image.save(full_path)
         except Exception as exc:
-            
-            print('Exception thrown saving image. %r', exc)
 
-    
+            print("Exception thrown saving image. %r", exc)
+
     def set_high_res_auto_params(self):
         """
-        Setzt die höchste Auflösung (4208x3120) und aktiviert alle Auto-Modi 
+        Setzt die höchste Auflösung (4208x3120) und aktiviert alle Auto-Modi
         (Auto-Exposure, Auto-Focus, Auto-White-Balance) für die Greiferkamera.
         """
         print("--- Starte Greiferkamera-Setup: 4K (4208x3120) und AUTO-Modi ---")
-        
+
         # 1. Client initialisieren
         try:
             gripper_camera_param_client = self.robot.ensure_client(
@@ -186,7 +211,7 @@ class RobotController:
 
         # 2. Parameter festlegen (Hardcoded für 4K und AUTO)
         camera_mode = gripper_camera_param_pb2.GripperCameraParams.MODE_4096_2160
-        print(f"Setze Auflösung auf: 4096x2160")
+        print("Setze Auflösung auf: 4096x2160")
 
         # Auto-Fokus aktivieren
         auto_focus = wrappers_pb2.BoolValue(value=True)
@@ -203,34 +228,40 @@ class RobotController:
         # HDR-Modus auf Auto setzen (optional, kann aber helfen)
         hdr = gripper_camera_param_pb2.HDR_AUTO
         print("Setze HDR-Modus auf Auto")
-        
+
         # 3. Das GripperCameraParams-Objekt erstellen
         params = gripper_camera_param_pb2.GripperCameraParams(
             camera_mode=camera_mode,
             focus_auto=auto_focus,
             exposure_auto=auto_exposure,
             white_balance_temperature_auto=white_balance_temperature_auto,
-            hdr=hdr
+            hdr=hdr,
             # Andere nicht spezifizierte Parameter bleiben auf None und werden ignoriert
         )
 
         request = gripper_camera_param_pb2.GripperCameraParamRequest(params=params)
-        
+
         # 4. Request senden
         try:
             response = gripper_camera_param_client.set_camera_params(request)
-            print('Anforderung zum Setzen der Parameter gesendet.')
+            print("Anforderung zum Setzen der Parameter gesendet.")
 
-            if response.header.error and response.header.error.code != header_pb2.CommonError.CODE_OK:
-                print('FEHLER beim Setzen der Parameter:')
+            if (
+                response.header.error
+                and response.header.error.code != header_pb2.CommonError.CODE_OK
+            ):
+                print("FEHLER beim Setzen der Parameter:")
                 print(response.header.error)
                 return False
 
         except Exception as e:
-            print(f"Kritischer Fehler bei der Kommunikation mit dem Roboter bei Gripper Cam Paramater einstellung: {e}")
+            print(
+                f"Kritischer Fehler bei der Kommunikation mit dem Roboter bei Gripper Cam Paramater einstellung: {e}"
+            )
             return False
 
-class EstopNoGui():
+
+class EstopNoGui:
     """Provides a software estop without a GUI.
 
     To use this estop, create an instance of the EstopNoGui class and use the stop() and allow()
@@ -238,7 +269,7 @@ class EstopNoGui():
     """
 
     def __init__(self, client, name=None):
-        timeout_sec=5
+        timeout_sec = 5
         # Force server to set up a single endpoint system
         ep = EstopEndpoint(client, name, timeout_sec)
         ep.force_simple_setup()
@@ -262,20 +293,22 @@ class EstopNoGui():
     def allow(self):
         self.estop_keep_alive.allow()
 
+
 class GraphNavInterface(object):
-    #-GNU
+    # -GNU
     def id_to_short_code(self, id):
         """Convert a unique id to a 2 letter short code."""
-        tokens = id.split('-')
+        tokens = id.split("-")
         if len(tokens) > 2:
-            return f'{tokens[0][0]}{tokens[1][0]}'
+            return f"{tokens[0][0]}{tokens[1][0]}"
         return None
-    #-GNU
+
+    # -GNU
     def find_unique_waypoint_id(self, short_code, graph, name_to_id):
         """Convert either a 2 letter short code or an annotation name into the associated unique id."""
         if graph is None:
             print(
-                'Please list the waypoints in the map before trying to navigate to a specific one (Option #4).'
+                "Please list the waypoints in the map before trying to navigate to a specific one (Option #4)."
             )
             return
 
@@ -288,8 +321,9 @@ class GraphNavInterface(object):
                     return name_to_id[short_code]
                 else:
                     print(
-                        f'The waypoint name {short_code} is used for multiple different unique waypoints. Please use '
-                        f'the waypoint id.')
+                        f"The waypoint name {short_code} is used for multiple different unique waypoints. Please use "
+                        f"the waypoint id."
+                    )
                     return None
             # Also not a waypoint annotation name, so we will operate under the assumption that it is a
             # unique waypoint id.
@@ -304,20 +338,20 @@ class GraphNavInterface(object):
         return ret
 
     def __init__(self, robot_controller: RobotController, upload_path):
-        self.use_gps=False
+        self.use_gps = False
 
         self.rc = robot_controller
         self._robot = robot_controller.robot
 
         # Store the most recent knowledge of the state of the robot based on rpc calls.
         self._current_graph = None
-        self._current_edges = dict()  #maps to_waypoint to list(from_waypoint)
+        self._current_edges = dict()  # maps to_waypoint to list(from_waypoint)
         self._current_waypoint_snapshots = dict()  # maps id to waypoint snapshot
         self._current_edge_snapshots = dict()  # maps id to edge snapshot
         self._current_annotation_name_to_wp_id = dict()
 
         # Filepath for uploading a saved graph's and snapshots too.
-        if upload_path[-1] == '/':
+        if upload_path[-1] == "/":
             self._upload_filepath = upload_path[:-1]
         else:
             self._upload_filepath = upload_path
@@ -332,54 +366,63 @@ class GraphNavInterface(object):
         """Trigger localization when near a fiducial."""
         robot_state = self.rc.state_client.get_robot_state()
         current_odom_tform_body = get_odom_tform_body(
-            robot_state.kinematic_state.transforms_snapshot).to_proto()
+            robot_state.kinematic_state.transforms_snapshot
+        ).to_proto()
         # Create an empty instance for initial localization since we are asking it to localize
         # based on the nearest fiducial.
         localization = nav_pb2.Localization()
-        self.rc.graph_nav_client.set_localization(initial_guess_localization=localization,
-                                                ko_tform_body=current_odom_tform_body)
-    
+        self.rc.graph_nav_client.set_localization(
+            initial_guess_localization=localization,
+            ko_tform_body=current_odom_tform_body,
+        )
+
     def _upload_graph_and_snapshots(self, *args):
         """Upload the graph and snapshots to the robot."""
-        print('Loading the graph from disk into local storage...')
-        with open(self._upload_filepath + '/graph', 'rb') as graph_file:
+        print("Loading the graph from disk into local storage...")
+        with open(self._upload_filepath + "/graph", "rb") as graph_file:
             # Load the graph from disk.
             data = graph_file.read()
             self._current_graph = map_pb2.Graph()
             self._current_graph.ParseFromString(data)
             print(
-                f'Loaded graph has {len(self._current_graph.waypoints)} waypoints and {len(self._current_graph.edges)} edges'
+                f"Loaded graph has {len(self._current_graph.waypoints)} waypoints and {len(self._current_graph.edges)} edges"
             )
         for waypoint in self._current_graph.waypoints:
             # Load the waypoint snapshots from disk.
-            with open(f'{self._upload_filepath}/waypoint_snapshots/{waypoint.snapshot_id}',
-                      'rb') as snapshot_file:
+            with open(
+                f"{self._upload_filepath}/waypoint_snapshots/{waypoint.snapshot_id}",
+                "rb",
+            ) as snapshot_file:
                 waypoint_snapshot = map_pb2.WaypointSnapshot()
                 waypoint_snapshot.ParseFromString(snapshot_file.read())
-                self._current_waypoint_snapshots[waypoint_snapshot.id] = waypoint_snapshot
+                self._current_waypoint_snapshots[waypoint_snapshot.id] = (
+                    waypoint_snapshot
+                )
         for edge in self._current_graph.edges:
             if len(edge.snapshot_id) == 0:
                 continue
             # Load the edge snapshots from disk.
-            with open(f'{self._upload_filepath}/edge_snapshots/{edge.snapshot_id}',
-                      'rb') as snapshot_file:
+            with open(
+                f"{self._upload_filepath}/edge_snapshots/{edge.snapshot_id}", "rb"
+            ) as snapshot_file:
                 edge_snapshot = map_pb2.EdgeSnapshot()
                 edge_snapshot.ParseFromString(snapshot_file.read())
                 self._current_edge_snapshots[edge_snapshot.id] = edge_snapshot
         # Upload the graph to the robot.
-        print('Uploading the graph and snapshots to the robot...')
+        print("Uploading the graph and snapshots to the robot...")
         true_if_empty = not len(self._current_graph.anchoring.anchors)
-        response = self.rc.graph_nav_client.upload_graph(graph=self._current_graph,
-                                                       generate_new_anchoring=true_if_empty)
+        response = self.rc.graph_nav_client.upload_graph(
+            graph=self._current_graph, generate_new_anchoring=true_if_empty
+        )
         # Upload the snapshots to the robot.
         for snapshot_id in response.unknown_waypoint_snapshot_ids:
             waypoint_snapshot = self._current_waypoint_snapshots[snapshot_id]
             self.rc.graph_nav_client.upload_waypoint_snapshot(waypoint_snapshot)
-            print(f'Uploaded {waypoint_snapshot.id}')
+            print(f"Uploaded {waypoint_snapshot.id}")
         for snapshot_id in response.unknown_edge_snapshot_ids:
             edge_snapshot = self._current_edge_snapshots[snapshot_id]
             self.rc.graph_nav_client.upload_edge_snapshot(edge_snapshot)
-            print(f'Uploaded {edge_snapshot.id}')
+            print(f"Uploaded {edge_snapshot.id}")
 
         # The upload is complete! Check that the robot is localized to the graph,
         # and if it is not, prompt the user to localize the robot before attempting
@@ -387,20 +430,25 @@ class GraphNavInterface(object):
         localization_state = self.rc.graph_nav_client.get_localization_state()
         if not localization_state.localization.waypoint_id:
             # The robot is not localized to the newly uploaded graph.
-            print('\n')
+            print("\n")
             print(
-                'Upload complete! The robot is currently not localized to the map; please localize'
-                ' the robot using commands (2) or (3) before attempting a navigation command.')
-    
+                "Upload complete! The robot is currently not localized to the map; please localize"
+                " the robot using commands (2) or (3) before attempting a navigation command."
+            )
+
     @staticmethod
     def quat_to_yaw(rotation):
         siny_cosp = 2.0 * (rotation.w * rotation.z + rotation.x * rotation.y)
         cosy_cosp = 1.0 - 2.0 * (rotation.y * rotation.y + rotation.z * rotation.z)
         return math.atan2(siny_cosp, cosy_cosp)
-                    
+
     @staticmethod
-    def relative_move(dx, dy, dyaw, frame_name, robot_command_client, robot_state_client, stairs=False):
-        transforms = robot_state_client.get_robot_state().kinematic_state.transforms_snapshot
+    def relative_move(
+        dx, dy, dyaw, frame_name, robot_command_client, robot_state_client, stairs=False
+    ):
+        transforms = (
+            robot_state_client.get_robot_state().kinematic_state.transforms_snapshot
+        )
 
         # Build the transform for where we want the robot to be relative to where the body currently is.
         body_tform_goal = math_helpers.SE2Pose(x=dx, y=dy, angle=dyaw)
@@ -413,22 +461,32 @@ class GraphNavInterface(object):
         # Command the robot to go to the goal point in the specified frame. The command will stop at the
         # new position.
         robot_cmd = RobotCommandBuilder.synchro_se2_trajectory_point_command(
-            goal_x=out_tform_goal.x, goal_y=out_tform_goal.y, goal_heading=out_tform_goal.angle,
-            frame_name=frame_name, params=RobotCommandBuilder.mobility_params(stair_hint=stairs))
+            goal_x=out_tform_goal.x,
+            goal_y=out_tform_goal.y,
+            goal_heading=out_tform_goal.angle,
+            frame_name=frame_name,
+            params=RobotCommandBuilder.mobility_params(stair_hint=stairs),
+        )
         end_time = 10.0
-        cmd_id = robot_command_client.robot_command(lease=None, command=robot_cmd,
-                                                    end_time_secs=time.time() + end_time)
+        cmd_id = robot_command_client.robot_command(
+            lease=None, command=robot_cmd, end_time_secs=time.time() + end_time
+        )
         # Wait until the robot has reached the goal.
         while True:
             feedback = robot_command_client.robot_command_feedback(cmd_id)
-            mobility_feedback = feedback.feedback.synchronized_feedback.mobility_command_feedback
+            mobility_feedback = (
+                feedback.feedback.synchronized_feedback.mobility_command_feedback
+            )
             if mobility_feedback.status != RobotCommandFeedbackStatus.STATUS_PROCESSING:
-                print('Failed to reach the goal')
+                print("Failed to reach the goal")
                 return False
             traj_feedback = mobility_feedback.se2_trajectory_feedback
-            if (traj_feedback.status == traj_feedback.STATUS_AT_GOAL and
-                    traj_feedback.body_movement_status == traj_feedback.BODY_STATUS_SETTLED):
-                print('Arrived at the goal.')
+            if (
+                traj_feedback.status == traj_feedback.STATUS_AT_GOAL
+                and traj_feedback.body_movement_status
+                == traj_feedback.BODY_STATUS_SETTLED
+            ):
+                print("Arrived at the goal.")
                 return True
             time.sleep(1)
 
@@ -439,16 +497,19 @@ class GraphNavInterface(object):
         # Take the first argument as the destination waypoint.
         if len(args) < 1:
             # If no waypoint id is given as input, then return without requesting navigation.
-            print('No waypoint provided as a destination for navigate to.')
+            print("No waypoint provided as a destination for navigate to.")
             return
 
         destination_waypoint = self.find_unique_waypoint_id(
-            args[0][0], self._current_graph, self._current_annotation_name_to_wp_id)
+            args[0][0], self._current_graph, self._current_annotation_name_to_wp_id
+        )
         if not destination_waypoint:
             # Failed to find the appropriate unique waypoint id for the navigation command.
             return
         if not self.rc.toggle_power(should_power_on=True):
-            print('Failed to power on the robot, and cannot complete navigate to request.')
+            print(
+                "Failed to power on the robot, and cannot complete navigate to request."
+            )
             return
 
         nav_to_cmd_id = None
@@ -458,28 +519,34 @@ class GraphNavInterface(object):
             # Issue the navigation command about twice a second such that it is easy to terminate the
             # navigation command (with estop or killing the program).
             try:
-                nav_to_cmd_id = self.rc.graph_nav_client.navigate_to(destination_waypoint, 1.0,
-                                                                   command_id=nav_to_cmd_id)
+                nav_to_cmd_id = self.rc.graph_nav_client.navigate_to(
+                    destination_waypoint, 1.0, command_id=nav_to_cmd_id
+                )
             except ResponseError as e:
-                print(f'Error while navigating {e}')
-                #break
+                print(f"Error while navigating {e}")
+                # break
                 return False  # <- nicht "break"
-            time.sleep(.5)  # Sleep for half a second to allow for command execution.
+            time.sleep(0.5)  # Sleep for half a second to allow for command execution.
             # Poll the robot for feedback to determine if the navigation command is complete. Then sit
             # the robot down once it is finished.
 
-            # Status direkt abfragen 
+            # Status direkt abfragen
             feedback = self.rc.graph_nav_client.navigation_feedback(nav_to_cmd_id)
             nav_status = feedback.status
 
-            if nav_status == graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL:
+            if (
+                nav_status
+                == graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL
+            ):
                 is_finished = True
             elif nav_status in (
                 graph_nav_pb2.NavigationFeedbackResponse.STATUS_LOST,
                 graph_nav_pb2.NavigationFeedbackResponse.STATUS_STUCK,
                 graph_nav_pb2.NavigationFeedbackResponse.STATUS_ROBOT_IMPAIRED,
             ):
-                print(f"Navigation ended with status={nav_status}; skipping fine positioning.")
+                print(
+                    f"Navigation ended with status={nav_status}; skipping fine positioning."
+                )
                 return False
             else:
                 is_finished = False
@@ -489,17 +556,25 @@ class GraphNavInterface(object):
             return False
         # Stelle sicher, dass der Roboter wirklich steht, bevor du kleine SE2-Schritte sendest
         blocking_stand(self.rc.command_client)
-        POS_TOL = 0.02      # 3 cm
-        YAW_TOL = 0.05      # ~2.9°
-        MAX_STEP = 0.10     # 10 cm
+        POS_TOL = 0.02  # 3 cm
+        YAW_TOL = 0.05  # ~2.9°
+        MAX_STEP = 0.10  # 10 cm
 
         # destination_waypoint is an ID (string). Look up the waypoint object in the graph:
         print("Lookup Waypoint for Fine Positioning...")
-        waypoint = next((wp for wp in self._current_graph.waypoints if wp.id == destination_waypoint), None)
+        waypoint = next(
+            (
+                wp
+                for wp in self._current_graph.waypoints
+                if wp.id == destination_waypoint
+            ),
+            None,
+        )
         if waypoint is None:
-            print(f"Feinpositionierung: Waypoint '{destination_waypoint}' nicht im Graph gefunden.")
+            print(
+                f"Feinpositionierung: Waypoint '{destination_waypoint}' nicht im Graph gefunden."
+            )
             return True  # Navigation war erfolgreich, Feinpositionierung übersprungen
-
 
         last_timestamp = None
         for i in range(10):  # iterativ
@@ -507,47 +582,57 @@ class GraphNavInterface(object):
             # Once the robot’s location has been initialized in GraphNav, clients can use the GetLocalizationState RPC.
             # The response message will contain a localization object which reports the pose of the robot relative to a particular waypoint on the map.
             loc_state = None
-            for _ in range(10): # Max 2 Sekunden warten (10 * 0.2s)
-                temp_state = self.rc.graph_nav_client.get_localization_state(waypoint_id=waypoint.id)
-                current_ts = temp_state.localization.timestamp.seconds + temp_state.localization.timestamp.nanos * 1e-9
-                
+            for _ in range(10):  # Max 2 Sekunden warten (10 * 0.2s)
+                temp_state = self.rc.graph_nav_client.get_localization_state(
+                    waypoint_id=waypoint.id
+                )
+                current_ts = (
+                    temp_state.localization.timestamp.seconds
+                    + temp_state.localization.timestamp.nanos * 1e-9
+                )
+
                 if last_timestamp is None or current_ts > last_timestamp:
                     loc_state = temp_state
                     last_timestamp = current_ts
                     break
                 time.sleep(0.2)
-            
+
             if loc_state is None:
-                print("Warnung: Keine neuen Lokalisierungsdaten erhalten. Verwende alte Daten.")
-                loc_state = self.rc.graph_nav_client.get_localization_state(waypoint_id=waypoint.id)
+                print(
+                    "Warnung: Keine neuen Lokalisierungsdaten erhalten. Verwende alte Daten."
+                )
+                loc_state = self.rc.graph_nav_client.get_localization_state(
+                    waypoint_id=waypoint.id
+                )
 
             localization = loc_state.localization
-            
 
             # 3. Die Abweichung steht direkt in waypoint_tform_body
             # Das ist die Position des Roboters im Koordinatensystem des Waypoints.
             tform = localization.waypoint_tform_body
             print("tform:")
             print(tform)
-            
+
             # Aktuelle Abweichung (Ist-Zustand)
             dev_x = tform.position.x
             dev_y = tform.position.y
-            
+
             # Distanz zum Ziel (0,0)
             dist = math.hypot(dev_x, dev_y)
 
             # Aktueller Winkel des Roboters im Waypoint-Frame
             yaw_robot = self.quat_to_yaw(tform.rotation)
-            
+
             # Wir wollen zu Yaw = 0 (Ausrichtung des Waypoints)
             # Fehler = Soll - Ist = 0 - yaw_robot
             yaw_err = -yaw_robot
-            
+
             # Winkel normalisieren auf [-pi, pi]
             yaw_err = (yaw_err + math.pi) % (2.0 * math.pi) - math.pi
 
-            print(f"Iter {i}: Abweichung x={dev_x:.3f}m, y={dev_y:.3f}m | Dist={dist:.3f}m, YawErr={yaw_err:.3f}rad")
+            print(
+                f"Iter {i}: Abweichung x={dev_x:.3f}m, y={dev_y:.3f}m | Dist={dist:.3f}m, YawErr={yaw_err:.3f}rad"
+            )
 
             # 4. Check ob wir gut genug stehen
             if dist <= POS_TOL and abs(yaw_err) <= YAW_TOL:
@@ -558,7 +643,7 @@ class GraphNavInterface(object):
             # Wir wollen zum Ursprung, also müssen wir uns um (-dev_x, -dev_y) bewegen.
             # Aber: Diese Bewegung muss in das Koordinatensystem des Roboters (Body Frame) gedreht werden.
             # Der Roboter ist um 'yaw_robot' gedreht. Wir müssen also um '-yaw_robot' zurückdrehen.
-            
+
             move_x_map = -dev_x
             move_y_map = -dev_y
 
@@ -573,7 +658,9 @@ class GraphNavInterface(object):
             dy_body = max(-MAX_STEP, min(MAX_STEP, dy_body))
             yaw_cmd = max(-0.2, min(0.2, yaw_err))
 
-            print(f" -> Korrektur: dx={dx_body:.3f}, dy={dy_body:.3f}, dyaw={yaw_cmd:.3f}")
+            print(
+                f" -> Korrektur: dx={dx_body:.3f}, dy={dy_body:.3f}, dyaw={yaw_cmd:.3f}"
+            )
 
             # self._move_relative(dx=dx_body, dy=dy_body, dyaw=yaw_cmd)
             # self.relative_move(dx_body, dy_body, yaw_cmd,
@@ -583,7 +670,7 @@ class GraphNavInterface(object):
             #                    stairs=False)
 
         return True
-    
+
 
 def execute_arm_sequence(rc):
     """
@@ -612,10 +699,7 @@ def execute_arm_sequence(rc):
     qw = 0.62428086996078491
 
     command = RobotCommandBuilder.arm_pose_command(
-        x, y, z,
-        qw, qx, qy, qz,
-        'body',
-        seconds=3.0
+        x, y, z, qw, qx, qy, qz, "body", seconds=3.0
     )
     rc.command_client.robot_command(command)
     time.sleep(3)
@@ -627,24 +711,32 @@ def execute_arm_sequence(rc):
     time.sleep(14)
 
     # Bild aufnehmen
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)) # 1. Absoluten Pfad des Skript-Ordners bestimmen
-    OUTPUT_DIR = os.path.join(SCRIPT_DIR, "spot_bilder") # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
-    
+    SCRIPT_DIR = os.path.dirname(
+        os.path.abspath(__file__)
+    )  # 1. Absoluten Pfad des Skript-Ordners bestimmen
+    OUTPUT_DIR = os.path.join(
+        SCRIPT_DIR, "spot_bilder"
+    )  # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
+
     print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
     except Exception as e:
-            print(f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}")
-            OUTPUT_DIR = None # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
+        print(
+            f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}"
+        )
+        OUTPUT_DIR = (
+            None  # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
+        )
 
     rc.set_high_res_auto_params()
     time.sleep(4)
     for i in range(1):
         image_request = build_image_request(
-            'hand_color_image',
+            "hand_color_image",
             quality_percent=100,  # Maximum quality
             image_format=image_pb2.Image.FORMAT_JPEG,
-            resize_ratio=1.0  # No downsampling
+            resize_ratio=1.0,  # No downsampling
         )
 
         # Request the image
@@ -668,17 +760,30 @@ def execute_arm_sequence(rc):
     time.sleep(3)
     print("Arm-Sequenz erfolgreich abgeschlossen")
 
+
 def main():
 
     parser = argparse.ArgumentParser(
         description="Spot Navigation Script with Arm and Camera Functionality"
     )
-    parser.add_argument('-u', '--upload-filepath',
-                        help='Full filepath to graph and snapshots to be uploaded.', required=True)
-    parser.add_argument('--dock-id', type=int, default=520,
-                        help='Dock-ID für das automatische Andocken (Standard: 520).')
-    parser.add_argument('hostname', nargs='?', default=None,
-                        help='Hostname or address of robot, e.g.  "192.168.80.3"')
+    parser.add_argument(
+        "-u",
+        "--upload-filepath",
+        help="Full filepath to graph and snapshots to be uploaded.",
+        required=True,
+    )
+    parser.add_argument(
+        "--dock-id",
+        type=int,
+        default=520,
+        help="Dock-ID für das automatische Andocken (Standard: 520).",
+    )
+    parser.add_argument(
+        "hostname",
+        nargs="?",
+        default=None,
+        help='Hostname or address of robot, e.g.  "192.168.80.3"',
+    )
     options = parser.parse_args()
 
     # Setup and authenticate the robot.
@@ -687,7 +792,7 @@ def main():
         raise RuntimeError(
             "No hostname provided. Pass --hostname, set BOSDYN CLI args, or define YOUR_ROBOT_IP."
         )
-    sdk = bosdyn.client.create_standard_sdk('SeminarClient')
+    sdk = bosdyn.client.create_standard_sdk("SeminarClient")
     robot = sdk.create_robot(hostname)
     bosdyn.client.util.authenticate(robot)
 
@@ -709,7 +814,7 @@ def main():
                 print("Power on...")
                 rc.toggle_power(should_power_on=True)
                 print("Powered on")
-                
+
                 # Location setzen jetz nach undock -> Prüfen wie genau lokalisierung, was besser ist
                 print("Starte Undocking...")
 
@@ -726,15 +831,19 @@ def main():
                 # Navigation zu Waypoint
                 print("Setze Location")
                 navigation._set_initial_localization_fiducial()
-                
+
                 print("Gehe zu Location")
-                is_finished = navigation._navigate_to(["smudgy-egg-bSeP0QBNrPEnUlmjxrvTNw=="])  # default
-                
+                is_finished = navigation._navigate_to(
+                    ["smudgy-egg-bSeP0QBNrPEnUlmjxrvTNw=="]
+                )  # default
+
                 if is_finished:
                     execute_arm_sequence(rc)
 
                 is_finished = False
-                is_finished = navigation._navigate_to(["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="]) # waypoint 2 wieder zurück irgendwo hin
+                is_finished = navigation._navigate_to(
+                    ["soiled-lapdog-fPT7RjQ+8okX+FN9gHbFSg=="]
+                )  # waypoint 2 wieder zurück irgendwo hin
                 if is_finished:
                     dock_id = options.dock_id or 520
                     print(f"Starte Docking an Dock-ID {dock_id}...")
@@ -742,25 +851,28 @@ def main():
                     if dock_success:
                         print("Docking erfolgreich abgeschlossen.")
                     else:
-                        print("Docking fehlgeschlagen – manuelles Eingreifen erforderlich.")
+                        print(
+                            "Docking fehlgeschlagen – manuelles Eingreifen erforderlich."
+                        )
 
                 return True
 
             except Exception as exc:
                 # estop_nogui.stop()
                 print(exc)
-                print('main run error.')
+                print("main run error.")
                 return False
 
     except ResourceAlreadyClaimedError:
         # estop_nogui.stop()
         print(
-            'The robot\'s lease is currently in use. Check for a tablet connection or try again in a few seconds.'
+            "The robot's lease is currently in use. Check for a tablet connection or try again in a few seconds."
         )
         return False
 
     # estop_nogui.stop()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if not main():
         sys.exit(1)

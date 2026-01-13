@@ -7,7 +7,9 @@ import os
 # -------------------------
 rf = Roboflow(api_key="RYmNlhCjTmyi92J0pOwr")
 workspace = rf.workspace("ps-9")
-project = workspace.project("find-digitaldisplayofenacs-digitaldisplaytemperatures-and-analogdisplaypressures")
+project = workspace.project(
+    "find-digitaldisplayofenacs-digitaldisplaytemperatures-and-analogdisplaypressures"
+)
 model = project.version(1).model
 
 raw_folder = "images/raw"
@@ -45,10 +47,10 @@ for filename in os.listdir(raw_folder):
         label = det["class"]
 
         # --- Bounding Box ---
-        left   = int(x - w/2)
-        top    = int(y - h/2)
-        right  = int(x + w/2)
-        bottom = int(y + h/2)
+        left = int(x - w / 2)
+        top = int(y - h / 2)
+        right = int(x + w / 2)
+        bottom = int(y + h / 2)
 
         crop = image.crop((left, top, right, bottom))
 

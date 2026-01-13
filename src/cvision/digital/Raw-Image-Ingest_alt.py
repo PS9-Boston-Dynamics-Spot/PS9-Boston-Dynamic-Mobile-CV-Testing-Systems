@@ -1,16 +1,16 @@
-import os
 import io
 import mimetypes
 from pathlib import Path
 
 import cv2
-import numpy as np
 from ultralytics import YOLO
 from paddleocr import PaddleOCR
 
 # Konfiguration
 
-RAW_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw")
+RAW_DIR = Path(
+    "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/Data/images/raw"
+)
 
 RAW_BUCKET = "cvision-raw"
 ANALYZED_BUCKET = "cvision-analyzed"
@@ -21,26 +21,15 @@ MODEL_PATH = "runs_display/spot_v12/weights/best.pt"
 
 yolo_model = YOLO(MODEL_PATH)
 
-ocr = PaddleOCR(
-    use_angle_cls=True,
-    lang="en",
-    show_log=False
-)
+ocr = PaddleOCR(use_angle_cls=True, lang="en", show_log=False)
 
 CLASS_META = {
-    0: {
-        "sensor_type": "digital",
-        "category": "temperature",
-        "unit": "°C"
-    },
-    1: {
-        "sensor_type": "digital",
-        "category": "temperature",
-        "unit": "°C"
-    }
+    0: {"sensor_type": "digital", "category": "temperature", "unit": "°C"},
+    1: {"sensor_type": "digital", "category": "temperature", "unit": "°C"},
 }
 
 # Raw Image Ingest
+
 
 def ingest_raw_image(db, minio, path: Path):
     size = path.stat().st_size
@@ -52,31 +41,32 @@ def ingest_raw_image(db, minio, path: Path):
             object_name=path.name,
             data=f,
             length=size,
-            content_type=mime
+            content_type=mime,
         )
 
-    db.execute("""
+    db.execute(
+        """
         INSERT INTO cvision_images_raw
         (name, format, content_type, bucket, size)
         VALUES (?, ?, ?, ?, ?)
-    """, (
-        path.name,
-        path.suffix.replace(".", ""),
-        mime,
-        RAW_BUCKET,
-        size
-    ))
+    """,
+        (path.name, path.suffix.replace(".", ""), mime, RAW_BUCKET, size),
+    )
 
     return db.lastrowid
 
+
 # Detection mit dem davor trainierten YOLO Modell
+
 
 def detect_displays(image_path):
     img = cv2.imread(str(image_path))
     results = yolo_model(img, conf=0.3)[0]
     return img, results.boxes
 
+
 # Crop des Bildes und Qualitätsbewertung
+
 
 def crop_and_score(img, box):
     x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -88,7 +78,9 @@ def crop_and_score(img, box):
 
     return crop, quality
 
+
 # OCR (PaddleOCR) der Display-Werte
+
 
 def extract_value_from_display(crop):
     result = ocr.ocr(crop, cls=True)
@@ -111,11 +103,11 @@ def extract_value_from_display(crop):
 
     return best_text, best_conf
 
+
 # analisierte Bilder speichern
 
-def store_analyzed_image(
-    db, minio, crop, raw_id, cls_id, quality, value
-):
+
+def store_analyzed_image(db, minio, crop, raw_id, cls_id, quality, value):
     meta = CLASS_META[cls_id]
 
     _, buffer = cv2.imencode(".jpg", crop)
@@ -128,29 +120,33 @@ def store_analyzed_image(
         object_name=name,
         data=data,
         length=len(data.getvalue()),
-        content_type="image/jpeg"
+        content_type="image/jpeg",
     )
 
-    db.execute("""
+    db.execute(
+        """
         INSERT INTO cvision_images_analyzed (
             raw_image_id, name, format, content_type, bucket,
             size, sensor_type, aruco_id, category,
             quality, value, unit
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        raw_id,
-        name,
-        "jpg",
-        "image/jpeg",
-        ANALYZED_BUCKET,
-        len(data.getvalue()),
-        meta["sensor_type"],
-        0,
-        meta["category"],
-        quality,
-        value,
-        meta["unit"]
-    ))
+    """,
+        (
+            raw_id,
+            name,
+            "jpg",
+            "image/jpeg",
+            ANALYZED_BUCKET,
+            len(data.getvalue()),
+            meta["sensor_type"],
+            0,
+            meta["category"],
+            quality,
+            value,
+            meta["unit"],
+        ),
+    )
+
 
 def process_all_images(db, minio):
     for image_path in RAW_DIR.glob("*.jpg"):
@@ -175,5 +171,5 @@ def process_all_images(db, minio):
                 raw_id=raw_id,
                 cls_id=cls_id,
                 quality=min(quality, ocr_conf),
-                value=value
+                value=value,
             )

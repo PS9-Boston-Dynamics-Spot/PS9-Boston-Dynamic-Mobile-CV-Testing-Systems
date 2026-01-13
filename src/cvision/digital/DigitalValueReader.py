@@ -10,6 +10,7 @@ import easyocr
 
 NUM_RE = re.compile(r"-?\d+(?:[\.,]\d+)?")
 
+
 def bgr_from_jpg_bytes(jpg_bytes: bytes) -> np.ndarray:
     arr = np.frombuffer(jpg_bytes, dtype=np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
@@ -17,18 +18,17 @@ def bgr_from_jpg_bytes(jpg_bytes: bytes) -> np.ndarray:
         raise ValueError("Could not decode crop jpg bytes.")
     return img
 
+
 def _preprocess_variants(img_bgr: np.ndarray) -> list[np.ndarray]:
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     gray2 = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
     blur = cv2.GaussianBlur(gray2, (5, 5), 0)
     th = cv2.adaptiveThreshold(
-        blur, 255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        31, 5
+        blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 5
     )
     th_inv = cv2.bitwise_not(th)
     return [th, th_inv, gray2]
+
 
 def _clean_numeric_text(s: str) -> str:
     s = s.strip()
@@ -38,11 +38,15 @@ def _clean_numeric_text(s: str) -> str:
     s = re.sub(r"\.+", ".", s)
     return s
 
-def _roi_crop(img_bgr: np.ndarray, roi: Tuple[float, float, float, float]) -> np.ndarray:
+
+def _roi_crop(
+    img_bgr: np.ndarray, roi: Tuple[float, float, float, float]
+) -> np.ndarray:
     h, w, _ = img_bgr.shape
     x1, y1 = int(w * roi[0]), int(h * roi[1])
     x2, y2 = int(w * roi[2]), int(h * roi[3])
     return img_bgr[y1:y2, x1:x2]
+
 
 @dataclass(frozen=True)
 class OcrValueResult:
@@ -70,8 +74,14 @@ class OcrValueResult:
     ocr_confidence_hum: float
     ocr_confidence_ofen: float
 
+
 class EasyOcrDisplayValueReader:
-    def __init__(self, languages: list[str] = ["en", "de"], gpu: bool = False, verbose: bool = False):
+    def __init__(
+        self,
+        languages: list[str] = ["en", "de"],
+        gpu: bool = False,
+        verbose: bool = False,
+    ):
         self._reader = easyocr.Reader(languages, gpu=gpu)
         self._verbose = verbose
 
@@ -90,11 +100,7 @@ class EasyOcrDisplayValueReader:
         return best_joined, best_texts
 
     def _ocr_value(
-        self,
-        img: np.ndarray,
-        min_val=None,
-        max_val=None,
-        prefer_decimal=True
+        self, img: np.ndarray, min_val=None, max_val=None, prefer_decimal=True
     ) -> tuple[Optional[float], list[str], float]:
         best_val: Optional[float] = None
         best_raw: list[str] = []
@@ -164,11 +170,26 @@ class EasyOcrDisplayValueReader:
         crop = _roi_crop(img_bgr, title_roi)
         joined, raw = self._ocr_text(crop)
 
-        temp_patterns = ["temper", "temperatur", "temp", "tomp", "tamp", "mpst", "mpct", "mps", "tompa", "tompaa", "tompat"]
+        temp_patterns = [
+            "temper",
+            "temperatur",
+            "temp",
+            "tomp",
+            "tamp",
+            "mpst",
+            "mpct",
+            "mps",
+            "tompa",
+            "tompaa",
+            "tompat",
+        ]
         ofen_patterns = ["ofen", "öfen", "@fen", "ofcn", "oien", "of(ii", "ofe", "ofn"]
 
         is_temp = any(p in joined for p in temp_patterns)
-        is_ofen = any(p in joined for p in ofen_patterns) or (("ac" in joined or "aac" in joined) and ("of" in joined or "@f" in joined or "ö" in joined))
+        is_ofen = any(p in joined for p in ofen_patterns) or (
+            ("ac" in joined or "aac" in joined)
+            and ("of" in joined or "@f" in joined or "ö" in joined)
+        )
 
         if is_temp and not is_ofen:
             return "tempdisplay", joined, raw
@@ -176,7 +197,9 @@ class EasyOcrDisplayValueReader:
             return "ofen", joined, raw
         return "unknown", joined, raw
 
-    def read_from_crop_bytes(self, crop_jpg_bytes: bytes, fallback_cls_id: Optional[int] = None) -> OcrValueResult:
+    def read_from_crop_bytes(
+        self, crop_jpg_bytes: bytes, fallback_cls_id: Optional[int] = None
+    ) -> OcrValueResult:
         img = bgr_from_jpg_bytes(crop_jpg_bytes)
 
         display_type, title_text, title_raw = self._classify_display(img)
@@ -188,7 +211,9 @@ class EasyOcrDisplayValueReader:
                 display_type = "ofen"
 
         if self._verbose:
-            print(f"[EasyOCR] display_type={display_type} title='{title_text}' raw_title={title_raw}")
+            print(
+                f"[EasyOCR] display_type={display_type} title='{title_text}' raw_title={title_raw}"
+            )
 
         # Defaults (damit Result immer vollständig ist)
         temp_val = None
@@ -211,23 +236,33 @@ class EasyOcrDisplayValueReader:
             # Temperatur: nur obere Hälfte (oben)
             temp_roi = (0.10, 0.05, 0.90, 0.45)
             temp_img = _roi_crop(img, temp_roi)
-            temp_val, raw_temp, conf_temp = self._ocr_value(temp_img, min_val=-50, max_val=400, prefer_decimal=True)
+            temp_val, raw_temp, conf_temp = self._ocr_value(
+                temp_img, min_val=-50, max_val=400, prefer_decimal=True
+            )
 
             # Humidity: untere Hälfte (unten)
             # Achtung: Bereich bewusst tiefer, damit obere Zahl nicht nochmal gelesen wird
             hum_roi = (0.10, 0.55, 0.90, 0.95)
             hum_img = _roi_crop(img, hum_roi)
-            hum_val, raw_hum, conf_hum = self._ocr_value(hum_img, min_val=0, max_val=100, prefer_decimal=True)
+            hum_val, raw_hum, conf_hum = self._ocr_value(
+                hum_img, min_val=0, max_val=100, prefer_decimal=True
+            )
 
             if self._verbose:
-                print(f"[EasyOCR] temp={temp_val}{temp_unit} conf={conf_temp} raw={raw_temp}")
-                print(f"[EasyOCR] hum ={hum_val}{hum_unit} conf={conf_hum} raw={raw_hum}")
+                print(
+                    f"[EasyOCR] temp={temp_val}{temp_unit} conf={conf_temp} raw={raw_temp}"
+                )
+                print(
+                    f"[EasyOCR] hum ={hum_val}{hum_unit} conf={conf_hum} raw={raw_hum}"
+                )
 
         elif display_type == "ofen":
             # Ofen: Wert unten rechts
             ofen_roi = (0.55, 0.65, 0.98, 0.95)
             ofen_img = _roi_crop(img, ofen_roi)
-            ofen_val, raw_ofen, conf_ofen = self._ocr_value(ofen_img, min_val=-10, max_val=500, prefer_decimal=True)
+            ofen_val, raw_ofen, conf_ofen = self._ocr_value(
+                ofen_img, min_val=-10, max_val=500, prefer_decimal=True
+            )
 
             if self._verbose:
                 print(f"[EasyOCR] ofen={ofen_val} conf={conf_ofen} raw={raw_ofen}")
@@ -247,8 +282,9 @@ class EasyOcrDisplayValueReader:
             raw_text_ofen=raw_ofen,
             ocr_confidence_temp=conf_temp,
             ocr_confidence_hum=conf_hum,
-            ocr_confidence_ofen=conf_ofen
+            ocr_confidence_ofen=conf_ofen,
         )
+
 
 if __name__ == "__main__":
     from pathlib import Path
@@ -257,15 +293,18 @@ if __name__ == "__main__":
     print("[MAIN] starting digital_value_reader self-test (ALL crops)")
 
     # Pfade korrigiert: data (klein) statt Data
-    #CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    #CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+    # CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
+    # CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
     # Pfade korrigiert: data (klein) statt Data
-    CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+    CROP_DEBUG_DIR = Path(
+        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug"
+    )
+    CROP_DIR = Path(
+        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
+    )
 
-    #CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    #CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
-
+    # CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
+    # CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
 
     candidates = []
     if CROP_DEBUG_DIR.exists():
@@ -293,15 +332,24 @@ if __name__ == "__main__":
         fallback_cls_id = int(m.group(1)) if m else None
 
         print("\n==============================")
-        print("[MAIN] crop:", crop_path.name, "bytes=", len(crop_bytes), "fallback_cls_id=", fallback_cls_id)
+        print(
+            "[MAIN] crop:",
+            crop_path.name,
+            "bytes=",
+            len(crop_bytes),
+            "fallback_cls_id=",
+            fallback_cls_id,
+        )
 
-        result = reader.read_from_crop_bytes(crop_bytes, fallback_cls_id=fallback_cls_id)
+        result = reader.read_from_crop_bytes(
+            crop_bytes, fallback_cls_id=fallback_cls_id
+        )
 
         print("[MAIN] RESULT")
         print(" display_type:", result.display_type)
 
         if result.display_type == "tempdisplay":
-            print(" temperature:", result.temperature, result.temperature_unit)                                                                                                                                                                                                                 
+            print(" temperature:", result.temperature, result.temperature_unit)
             print(" humidity   :", result.humidity, result.humidity_unit)
             print(" conf_temp  :", result.ocr_confidence_temp)
             print(" conf_hum   :", result.ocr_confidence_hum)
@@ -321,6 +369,3 @@ if __name__ == "__main__":
             print(" (skipped) unknown display — no values read")
             print(" title_text :", result.title_text)
             print(" title_raw  :", result.title_raw)
-
-
-
