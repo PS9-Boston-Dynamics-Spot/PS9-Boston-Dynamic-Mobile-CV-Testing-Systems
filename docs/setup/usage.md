@@ -156,3 +156,16 @@ In this example, you would access MinIO at: `http://172.20.80.1:9001`
 - If you cannot find the WSL adapter, ensure WSL 2 is running
 - The IP address may change after system restarts
 - Ensure MinIO is running and bound to `0.0.0.0` or the WSL IP address
+
+# Using OPC UA Interfaces
+
+The OPC UA interfaces are only accessible via the internal network. To establish a connection, the physical device (e.g. a laptop) must be connected to the network via LAN. After that, the network has to be configured accordingly (further details can be provided by the project supervisor).
+
+This network may use different IP addresses, which are defined administratively in advance. These IP addresses correspond to the networks of the respective OPC UA nodes.
+
+The network configuration is as follows:
+
+- Network Mask: 255.255.255.0  
+- Gateway: 192.168.110.254  
+
+Accordingly, the PLC system is reachable at the address **192.168.2.1**.
