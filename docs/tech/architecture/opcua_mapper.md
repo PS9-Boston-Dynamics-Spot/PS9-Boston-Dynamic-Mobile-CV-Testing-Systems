@@ -63,6 +63,7 @@ flowchart TD
 - ArUco-Marker dienen als eindeutige Sensor-Identifikatoren und ermöglichen präzise Zuordnung
 
 **Phase 2: Datenabgleich**
+- **Siehe Hinweis**
 - Mapping der ArUco-ID auf die entsprechende OPC UA Node-ID
 - Paralleles Auslesen von Referenzdaten (OPC UA) und visuellen Daten (Computer Vision)
 
@@ -74,3 +75,22 @@ flowchart TD
 **Phase 4: Persistierung**
 - Objektspeicherung (MinIO): Originalbilder, verarbeitete Bilder
 - Metadatenspeicher: Siehe Dokumentationsordner `images/datasink`
+
+---
+
+## Hinweis
+
+Der Datenabgleich ist aktuell implementiert, jedoch noch nicht vollständig an der vorgesehenen Stelle im Code (App-Lifespan-Manager) integriert.  
+Dies liegt an der Nutzung drahtlosbasierter Netzwerke.
+
+Da für jede Node ein anderes Netzwerk verwendet werden muss und somit stets ein Netzwerkwechsel erforderlich ist, kann zur Simulation kein Produktivnetzwerk genutzt werden.
+
+Darüber hinaus ist die Anbindung bzw. Hinterlegung der OPC-UA-Nodes derzeit auf einen einzelnen Node beschränkt. Grund hierfür ist der zunächst notwendige administrative Dokumentationsaufwand, um alle relevanten Nodes eindeutig identifizieren zu können. Diese vollständige Dokumentation liegt aktuell nicht vor.
+
+Die einzige verfügbare Grundlage zur Identifikation der Nodes ist eine vom Projektbetreuer bereitgestellte XML-Datei aus dem Jahr 2019. Durch Überprüfung wurde festgestellt, dass diese nicht mehr aktuell ist.
+
+Aus diesen Gründen haben wir uns vorerst auf die Integration eines einzelnen Nodes beschränkt.
+
+### Verbesserungsvorschlag
+
+Da die Nodes in verschiedenen Netzwerken liegen, sollten diese in ein gemeinsames Netzwerk überführt werden. Dadurch ließe sich ein manueller oder skriptbasierter Wechsel der Netzwerke vermeiden und die Integration sowie der Betrieb deutlich vereinfachen.

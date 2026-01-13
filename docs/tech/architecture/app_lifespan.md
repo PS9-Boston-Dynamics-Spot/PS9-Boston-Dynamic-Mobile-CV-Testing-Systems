@@ -33,7 +33,7 @@ Führt die Anomalieerkennung durch und dokumentiert Ergebnisse:
 - Berechnung des Anomalie-Scores basierend auf konfigurierten Algorithmen
 - Klassifikation als normal oder anomal
 - Speicherung mit vollständigen Metadaten (verwendete Parameter, Schwellwerte)
-- Weitergabe an Alarm-System bei erkannten Abweichungen
+- Mögliche Umsetzung: Weitergabe an Alarm-System bei erkannten Abweichungen
 
 #### Daten-Persistierung
 Stellt sicher, dass alle Informationen strukturiert gespeichert werden:

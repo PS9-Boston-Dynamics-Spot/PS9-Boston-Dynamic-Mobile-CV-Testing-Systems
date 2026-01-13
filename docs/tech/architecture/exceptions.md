@@ -1,3 +1,10 @@
+# Exception Handling
+
+Aktuell wird ein traceback-ähnliches Exception-Logging bzw. -Handling eingesetzt. Dieses bietet beim Testen und Bugfixing den Vorteil, dass gezielt nach Fehlercodes gesucht werden kann, anstatt den gesamten Traceback analysieren zu müssen.
+
+Zwar entsteht dadurch ein höherer bzw. teilweise doppelter Overhead, jedoch ist dieser Ansatz für den Produktivbetrieb deutlich besser geeignet. Fehler lassen sich so schneller identifizieren, eindeutig zuordnen und gezielt an der entsprechenden Stelle im Code beheben.
+
+
 ## Error Codes
 
 Aktuell gibt es noch kein endgültiges Konzept für ein standardisiertes Error-Code-System.  
