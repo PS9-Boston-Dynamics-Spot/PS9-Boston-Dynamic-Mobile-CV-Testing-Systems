@@ -545,122 +545,122 @@ class GraphNavInterface(object):
                 graph_nav_pb2.NavigationFeedbackResponse.STATUS_ROBOT_IMPAIRED,
             ):
                 print(
-                    f"Navigation ended with status={nav_status}; skipping fine positioning."
+                    f"Navigation ended with status={nav_status}."
                 )
                 return False
             else:
                 is_finished = False
-
-        # Feinpositionierung nur bei REACHED_GOAL
-        if nav_status != graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL:
-            return False
-        # Stelle sicher, dass der Roboter wirklich steht, bevor du kleine SE2-Schritte sendest
+        #Feinpositionierung nicht notwendig, funktioniert auch nicht zuverlässig
+        # # Feinpositionierung nur bei REACHED_GOAL
+        # if nav_status != graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL:
+        #     return False
+        # # Stelle sicher, dass der Roboter wirklich steht, bevor du kleine SE2-Schritte sendest
         blocking_stand(self.rc.command_client)
-        POS_TOL = 0.02  # 3 cm
-        YAW_TOL = 0.05  # ~2.9°
-        MAX_STEP = 0.10  # 10 cm
+        # POS_TOL = 0.02  # 3 cm
+        # YAW_TOL = 0.05  # ~2.9°
+        # MAX_STEP = 0.10  # 10 cm
 
-        # destination_waypoint is an ID (string). Look up the waypoint object in the graph:
-        print("Lookup Waypoint for Fine Positioning...")
-        waypoint = next(
-            (
-                wp
-                for wp in self._current_graph.waypoints
-                if wp.id == destination_waypoint
-            ),
-            None,
-        )
-        if waypoint is None:
-            print(
-                f"Feinpositionierung: Waypoint '{destination_waypoint}' nicht im Graph gefunden."
-            )
-            return True  # Navigation war erfolgreich, Feinpositionierung übersprungen
+        # # destination_waypoint is an ID (string). Look up the waypoint object in the graph:
+        # print("Lookup Waypoint for Fine Positioning...")
+        # waypoint = next(
+        #     (
+        #         wp
+        #         for wp in self._current_graph.waypoints
+        #         if wp.id == destination_waypoint
+        #     ),
+        #     None,
+        # )
+        # if waypoint is None:
+        #     print(
+        #         f"Feinpositionierung: Waypoint '{destination_waypoint}' nicht im Graph gefunden."
+        #     )
+        #     return True  # Navigation war erfolgreich, Feinpositionierung übersprungen
 
-        last_timestamp = None
-        for i in range(10):  # iterativ
+        # last_timestamp = None
+        # for i in range(10):  # iterativ
 
-            # Once the robot’s location has been initialized in GraphNav, clients can use the GetLocalizationState RPC.
-            # The response message will contain a localization object which reports the pose of the robot relative to a particular waypoint on the map.
-            loc_state = None
-            for _ in range(10):  # Max 2 Sekunden warten (10 * 0.2s)
-                temp_state = self.rc.graph_nav_client.get_localization_state(
-                    waypoint_id=waypoint.id
-                )
-                current_ts = (
-                    temp_state.localization.timestamp.seconds
-                    + temp_state.localization.timestamp.nanos * 1e-9
-                )
+        #     # Once the robot’s location has been initialized in GraphNav, clients can use the GetLocalizationState RPC.
+        #     # The response message will contain a localization object which reports the pose of the robot relative to a particular waypoint on the map.
+        #     loc_state = None
+        #     for _ in range(10):  # Max 2 Sekunden warten (10 * 0.2s)
+        #         temp_state = self.rc.graph_nav_client.get_localization_state(
+        #             waypoint_id=waypoint.id
+        #         )
+        #         current_ts = (
+        #             temp_state.localization.timestamp.seconds
+        #             + temp_state.localization.timestamp.nanos * 1e-9
+        #         )
 
-                if last_timestamp is None or current_ts > last_timestamp:
-                    loc_state = temp_state
-                    last_timestamp = current_ts
-                    break
-                time.sleep(0.2)
+        #         if last_timestamp is None or current_ts > last_timestamp:
+        #             loc_state = temp_state
+        #             last_timestamp = current_ts
+        #             break
+        #         time.sleep(0.2)
 
-            if loc_state is None:
-                print(
-                    "Warnung: Keine neuen Lokalisierungsdaten erhalten. Verwende alte Daten."
-                )
-                loc_state = self.rc.graph_nav_client.get_localization_state(
-                    waypoint_id=waypoint.id
-                )
+        #     if loc_state is None:
+        #         print(
+        #             "Warnung: Keine neuen Lokalisierungsdaten erhalten. Verwende alte Daten."
+        #         )
+        #         loc_state = self.rc.graph_nav_client.get_localization_state(
+        #             waypoint_id=waypoint.id
+        #         )
 
-            localization = loc_state.localization
+        #     localization = loc_state.localization
 
-            # 3. Die Abweichung steht direkt in waypoint_tform_body
-            # Das ist die Position des Roboters im Koordinatensystem des Waypoints.
-            tform = localization.waypoint_tform_body
-            print("tform:")
-            print(tform)
+        #     # 3. Die Abweichung steht direkt in waypoint_tform_body
+        #     # Das ist die Position des Roboters im Koordinatensystem des Waypoints.
+        #     tform = localization.waypoint_tform_body
+        #     print("tform:")
+        #     print(tform)
 
-            # Aktuelle Abweichung (Ist-Zustand)
-            dev_x = tform.position.x
-            dev_y = tform.position.y
+        #     # Aktuelle Abweichung (Ist-Zustand)
+        #     dev_x = tform.position.x
+        #     dev_y = tform.position.y
 
-            # Distanz zum Ziel (0,0)
-            dist = math.hypot(dev_x, dev_y)
+        #     # Distanz zum Ziel (0,0)
+        #     dist = math.hypot(dev_x, dev_y)
 
-            # Aktueller Winkel des Roboters im Waypoint-Frame
-            yaw_robot = self.quat_to_yaw(tform.rotation)
+        #     # Aktueller Winkel des Roboters im Waypoint-Frame
+        #     yaw_robot = self.quat_to_yaw(tform.rotation)
 
-            # Wir wollen zu Yaw = 0 (Ausrichtung des Waypoints)
-            # Fehler = Soll - Ist = 0 - yaw_robot
-            yaw_err = -yaw_robot
+        #     # Wir wollen zu Yaw = 0 (Ausrichtung des Waypoints)
+        #     # Fehler = Soll - Ist = 0 - yaw_robot
+        #     yaw_err = -yaw_robot
 
-            # Winkel normalisieren auf [-pi, pi]
-            yaw_err = (yaw_err + math.pi) % (2.0 * math.pi) - math.pi
+        #     # Winkel normalisieren auf [-pi, pi]
+        #     yaw_err = (yaw_err + math.pi) % (2.0 * math.pi) - math.pi
 
-            print(
-                f"Iter {i}: Abweichung x={dev_x:.3f}m, y={dev_y:.3f}m | Dist={dist:.3f}m, YawErr={yaw_err:.3f}rad"
-            )
+        #     print(
+        #         f"Iter {i}: Abweichung x={dev_x:.3f}m, y={dev_y:.3f}m | Dist={dist:.3f}m, YawErr={yaw_err:.3f}rad"
+        #     )
 
-            # 4. Check ob wir gut genug stehen
-            if dist <= POS_TOL and abs(yaw_err) <= YAW_TOL:
-                print("Feinpositionierung erfolgreich: Toleranz erreicht.")
-                break
+        #     # 4. Check ob wir gut genug stehen
+        #     if dist <= POS_TOL and abs(yaw_err) <= YAW_TOL:
+        #         print("Feinpositionierung erfolgreich: Toleranz erreicht.")
+        #         break
 
-            # 5. Korrekturbewegung berechnen
-            # Wir wollen zum Ursprung, also müssen wir uns um (-dev_x, -dev_y) bewegen.
-            # Aber: Diese Bewegung muss in das Koordinatensystem des Roboters (Body Frame) gedreht werden.
-            # Der Roboter ist um 'yaw_robot' gedreht. Wir müssen also um '-yaw_robot' zurückdrehen.
+        #     # 5. Korrekturbewegung berechnen
+        #     # Wir wollen zum Ursprung, also müssen wir uns um (-dev_x, -dev_y) bewegen.
+        #     # Aber: Diese Bewegung muss in das Koordinatensystem des Roboters (Body Frame) gedreht werden.
+        #     # Der Roboter ist um 'yaw_robot' gedreht. Wir müssen also um '-yaw_robot' zurückdrehen.
 
-            move_x_map = -dev_x
-            move_y_map = -dev_y
+        #     move_x_map = -dev_x
+        #     move_y_map = -dev_y
 
-            c = math.cos(-yaw_robot)
-            s = math.sin(-yaw_robot)
+        #     c = math.cos(-yaw_robot)
+        #     s = math.sin(-yaw_robot)
 
-            dx_body = c * move_x_map - s * move_y_map
-            dy_body = s * move_x_map + c * move_y_map
+        #     dx_body = c * move_x_map - s * move_y_map
+        #     dy_body = s * move_x_map + c * move_y_map
 
-            # Begrenzung der Schrittweite für Sicherheit
-            dx_body = max(-MAX_STEP, min(MAX_STEP, dx_body))
-            dy_body = max(-MAX_STEP, min(MAX_STEP, dy_body))
-            yaw_cmd = max(-0.2, min(0.2, yaw_err))
+        #     # Begrenzung der Schrittweite für Sicherheit
+        #     dx_body = max(-MAX_STEP, min(MAX_STEP, dx_body))
+        #     dy_body = max(-MAX_STEP, min(MAX_STEP, dy_body))
+        #     yaw_cmd = max(-0.2, min(0.2, yaw_err))
 
-            print(
-                f" -> Korrektur: dx={dx_body:.3f}, dy={dy_body:.3f}, dyaw={yaw_cmd:.3f}"
-            )
+        #     print(
+        #         f" -> Korrektur: dx={dx_body:.3f}, dy={dy_body:.3f}, dyaw={yaw_cmd:.3f}"
+        #     )
 
             # self._move_relative(dx=dx_body, dy=dy_body, dyaw=yaw_cmd)
             # self.relative_move(dx_body, dy_body, yaw_cmd,
@@ -818,9 +818,8 @@ def main():
                 # Location setzen jetz nach undock -> Prüfen wie genau lokalisierung, was besser ist
                 print("Starte Undocking...")
 
-                if not rc.undock():
-                    print("Undocking fehlgeschlagen – Programm wird beendet.")
-                    return False
+                rc.undock()
+
 
                 print("Commanding robot to stand...")
                 blocking_stand(rc.command_client)
