@@ -62,3 +62,6 @@ Icon?
 
 # --- Database stuff ---
 *.db
+
+# --- dinov2 model file ---
+dinov2_vits14.pth
