@@ -259,6 +259,95 @@ class RobotController:
                 f"Kritischer Fehler bei der Kommunikation mit dem Roboter bei Gripper Cam Paramater einstellung: {e}"
             )
             return False
+        
+    def execute_arm_sequence(self):
+        """
+        Führt die Arm- und Greifer-Sequenz aus, inklusive Bildaufnahme.
+        """
+        print("Waypoint erreicht: Starte Arm- und Greifer-Sequenz")
+
+        # 1. Arm ausklappen / bereit machen
+        print("Arm wird ausgeklappt...")
+        command = RobotCommandBuilder.arm_ready_command()
+
+        # Get robot pose in vision frame from robot state (we want to send commands in vision
+        # frame relative to where the robot stands now)
+        robot_state = self.state_client.get_robot_state()
+
+        # 3. Arm bewegen (z.B. hochheben oder vorziehen)
+        print("Arm wird leicht nach vorne oben bewegt...")
+
+        x = 0.28563416004180908
+        y = -0.338711678981781
+        z = 0.70670175552368164
+
+        qx = 0.28764960169792175
+        qy = 0.33570674061775208
+        qz = -0.64407461881637573
+        qw = 0.62428086996078491
+
+        command = RobotCommandBuilder.arm_pose_command(
+            x, y, z, qw, qx, qy, qz, "body", seconds=3.0
+        )
+        self.command_client.robot_command(command)
+        time.sleep(3)
+
+        # 4. Greifer öffnen (z.B. wieder loslassen)
+        print("Greifer öffnet...")
+        command = RobotCommandBuilder.claw_gripper_open_command()
+        self.command_client.robot_command(command)
+        time.sleep(14)
+
+        # Bild aufnehmen
+        SCRIPT_DIR = os.path.dirname(
+            os.path.abspath(__file__)
+        )  # 1. Absoluten Pfad des Skript-Ordners bestimmen
+        OUTPUT_DIR = os.path.join(
+            SCRIPT_DIR, "spot_bilder"
+        )  # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
+
+        print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
+        try:
+            os.makedirs(OUTPUT_DIR, exist_ok=True)
+        except Exception as e:
+            print(
+                f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}"
+            )
+            OUTPUT_DIR = (
+                None  # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
+            )
+
+        self.set_high_res_auto_params()
+        time.sleep(4)
+        for i in range(1):
+            image_request = build_image_request(
+                "hand_color_image",
+                quality_percent=100,  # Maximum quality
+                image_format=image_pb2.Image.FORMAT_JPEG,
+                resize_ratio=1.0,  # No downsampling
+            )
+
+            # Request the image
+            image_response = self.image_client.get_image([image_request])[0]
+
+            self.maybe_save_image(image_response.shot.image, path=OUTPUT_DIR)
+            print("Bild erfolgreich gespeichert")
+            time.sleep(6)
+
+        time.sleep(4)
+
+        print("Greiferschließen...")
+        command = RobotCommandBuilder.claw_gripper_close_command()
+        self.command_client.robot_command(command)
+        time.sleep(2)
+
+        # 5. Arm wieder verstauen
+        print("Arm wird verstaut...")
+        command = RobotCommandBuilder.arm_stow_command()
+        self.command_client.robot_command(command)
+        time.sleep(3)
+        print("Arm-Sequenz erfolgreich abgeschlossen")
+
 
 
 class EstopNoGui:
@@ -672,94 +761,6 @@ class GraphNavInterface(object):
         return True
 
 
-def execute_arm_sequence(rc):
-    """
-    Führt die Arm- und Greifer-Sequenz aus, inklusive Bildaufnahme.
-    """
-    print("Waypoint erreicht: Starte Arm- und Greifer-Sequenz")
-
-    # 1. Arm ausklappen / bereit machen
-    print("Arm wird ausgeklappt...")
-    command = RobotCommandBuilder.arm_ready_command()
-
-    # Get robot pose in vision frame from robot state (we want to send commands in vision
-    # frame relative to where the robot stands now)
-    robot_state = rc.state_client.get_robot_state()
-
-    # 3. Arm bewegen (z.B. hochheben oder vorziehen)
-    print("Arm wird leicht nach vorne oben bewegt...")
-
-    x = 0.28563416004180908
-    y = -0.338711678981781
-    z = 0.70670175552368164
-
-    qx = 0.28764960169792175
-    qy = 0.33570674061775208
-    qz = -0.64407461881637573
-    qw = 0.62428086996078491
-
-    command = RobotCommandBuilder.arm_pose_command(
-        x, y, z, qw, qx, qy, qz, "body", seconds=3.0
-    )
-    rc.command_client.robot_command(command)
-    time.sleep(3)
-
-    # 4. Greifer öffnen (z.B. wieder loslassen)
-    print("Greifer öffnet...")
-    command = RobotCommandBuilder.claw_gripper_open_command()
-    rc.command_client.robot_command(command)
-    time.sleep(14)
-
-    # Bild aufnehmen
-    SCRIPT_DIR = os.path.dirname(
-        os.path.abspath(__file__)
-    )  # 1. Absoluten Pfad des Skript-Ordners bestimmen
-    OUTPUT_DIR = os.path.join(
-        SCRIPT_DIR, "spot_bilder"
-    )  # 2. Zielordner definieren (z.B. ein Unterordner "spot_bilder")
-
-    print(f"Bilder werden in folgendem Ordner gespeichert: {OUTPUT_DIR}")
-    try:
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-    except Exception as e:
-        print(
-            f"WARNUNG: Konnte Zielordner nicht erstellen. Verwende Standard-Speicherort. Fehler: {e}"
-        )
-        OUTPUT_DIR = (
-            None  # Setze auf None, um Fallback-Logik in maybe_save_image zu nutzen
-        )
-
-    rc.set_high_res_auto_params()
-    time.sleep(4)
-    for i in range(1):
-        image_request = build_image_request(
-            "hand_color_image",
-            quality_percent=100,  # Maximum quality
-            image_format=image_pb2.Image.FORMAT_JPEG,
-            resize_ratio=1.0,  # No downsampling
-        )
-
-        # Request the image
-        image_response = rc.image_client.get_image([image_request])[0]
-
-        rc.maybe_save_image(image_response.shot.image, path=OUTPUT_DIR)
-        print("Bild erfolgreich gespeichert")
-        time.sleep(6)
-
-    time.sleep(4)
-
-    print("Greiferschließen...")
-    command = RobotCommandBuilder.claw_gripper_close_command()
-    rc.command_client.robot_command(command)
-    time.sleep(2)
-
-    # 5. Arm wieder verstauen
-    print("Arm wird verstaut...")
-    command = RobotCommandBuilder.arm_stow_command()
-    rc.command_client.robot_command(command)
-    time.sleep(3)
-    print("Arm-Sequenz erfolgreich abgeschlossen")
-
 
 def main():
 
@@ -837,7 +838,7 @@ def main():
                 )  # default
 
                 if is_finished:
-                    execute_arm_sequence(rc)
+                    rc.execute_arm_sequence()
 
                 is_finished = False
                 is_finished = navigation._navigate_to(
