@@ -194,6 +194,10 @@ def process_digital_image(
         result = reader.read_from_crop_bytes(
             crop_jpg_bytes=cropped_digital_image.crop_bytes
         )
+        # Skip unknown display types (no config, no anomaly check)
+        if result.display_type == "unknown":
+            print("[INFO] Skipping unknown display type (no config, no anomaly check)")
+            continue
 
         # Select value and unit based on display_type, fallback to config unit if OCR unit is None
         config_unit = services.settings_manager.getUnit(
