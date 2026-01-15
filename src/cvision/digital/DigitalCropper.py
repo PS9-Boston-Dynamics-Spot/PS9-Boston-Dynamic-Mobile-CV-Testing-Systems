@@ -48,11 +48,12 @@ class CropResult:
 
 
 # ---------- DebugWriter ----------
+#optional output: img and txt with all crop informtations
 @dataclass
 class DebugWriter:
     out_dir: Path
     enabled: bool = True
-    verbose: bool = True  # <-- neu
+    verbose: bool = True
 
     def __post_init__(self) -> None:
         if not self.enabled:
@@ -84,7 +85,7 @@ class DebugWriter:
                 f"is_dir={self.out_dir.is_dir()} writable={writable}"
             )
 
-            # Häufiger Fehler: Data vs data
+            # data path error detection
             alt = (
                 Path(str(self.out_dir).replace("/Data/", "/data/"))
                 if "/Data/" in str(self.out_dir)
@@ -136,9 +137,10 @@ class DebugWriter:
 class YoloDisplayCropper:
     """
     Byte-in -> YOLO detect -> crop bytes out
-    Optional: DebugWriter schreibt Crop + TXT.
+    
+    DebugWriter schreibt Crop + TXT.
 
-    Änderung: gibt maximal 2 Crops zurück (beste Box pro Klasse, dann Top-2 nach Conf).
+    max. 2 Crops per Frame (beste Box per class).
     """
 
     def __init__(
@@ -269,10 +271,11 @@ if __name__ == "__main__":
     print(f"[MAIN] model_path={MODEL_PATH}")
     print(f"[MAIN] raw_dir={RAW_DIR} exists={RAW_DIR.exists()}")
 
-    # Nimmt das erste JPG aus RAW_DIR
-    # lokal debug Path
-    # images = sorted(list(RAW_DIR.glob("*.jpg")))
-    # projekt Path
+    #take the first images form path RAW_DIR
+
+    #lokal debug Path
+    #images = sorted(list(RAW_DIR.glob("*.jpg")))
+    #projekt Path
     images = sorted(list(RAW_DIR.glob("spot.jpg")))
     if not images:
         print(f"[MAIN] ERROR: no .jpg found in {RAW_DIR}")
