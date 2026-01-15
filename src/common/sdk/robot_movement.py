@@ -211,23 +211,23 @@ class RobotController:
 
         # 2. Parameter festlegen (Hardcoded für 4K und AUTO)
         camera_mode = gripper_camera_param_pb2.GripperCameraParams.MODE_4096_2160
-        print("Setze Auflösung auf: 4096x2160")
+        #print("Setze Auflösung auf: 4096x2160")
 
         # Auto-Fokus aktivieren
         auto_focus = wrappers_pb2.BoolValue(value=True)
-        print("Aktiviere Auto-Fokus")
+        #print("Aktiviere Auto-Fokus")
 
         # Auto-Exposure (Belichtung) aktivieren
         auto_exposure = wrappers_pb2.BoolValue(value=True)
-        print("Aktiviere Auto-Belichtung")
+        #print("Aktiviere Auto-Belichtung")
 
         # Auto-White-Balance (Weißabgleich) aktivieren
         white_balance_temperature_auto = wrappers_pb2.BoolValue(value=True)
-        print("Aktiviere Auto-Weißabgleich")
+        #print("Aktiviere Auto-Weißabgleich")
 
         # HDR-Modus auf Auto setzen (optional, kann aber helfen)
         hdr = gripper_camera_param_pb2.HDR_AUTO
-        print("Setze HDR-Modus auf Auto")
+        #print("Setze HDR-Modus auf Auto")
 
         # 3. Das GripperCameraParams-Objekt erstellen
         params = gripper_camera_param_pb2.GripperCameraParams(
