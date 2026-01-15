@@ -14,7 +14,7 @@
         "cweijan.vscode-database-client2"
     ],
     "remoteUser": "root",
-    "postCreateCommand": "git submodule update --init --recursive && python -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt && mkdir -p src/third_party/dinov2/checkpoints && curl -L https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_pretrain.pth -o src/third_party/dinov2/checkpoints/dinov2_vits14.pth",
+    "postCreateCommand": "git submodule update --init --recursive && python -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt && mkdir -p src/third_party/dinov2/checkpoints && curl -L https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_pretrain.pth -o src/third_party/dinov2/checkpoints/dinov2_vits14.pth && .venv/bin/python scripts/setup/download_easyocr_models.py",
     "customizations": {
         "vscode": {
             "settings": {

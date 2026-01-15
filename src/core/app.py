@@ -18,9 +18,9 @@ if __name__ == "__main__":
     graph_path = project_root / "data/map/downloaded_graph"
 
     subprocess.run(
-        [sys.executable, str(robot_script), "-u", str(graph_path)],
-        check=True,
-        cwd=str(robot_script.parent),
+         [sys.executable, str(robot_script), "-u", str(graph_path)],
+         check=True,
+         cwd=str(robot_script.parent),
     )
 
     path = project_root / "src/common/sdk/spot_bilder/spot.jpg"
@@ -74,12 +74,11 @@ if __name__ == "__main__":
             opcua_node_id=opcua_node_id,
             aruco_id=aruco_id,
         ):
-            is_anomaly = check_anomaly(
-                dal=dal,
-                analyzed_image_id=analyzed_image_id,
-                detected_value=detected_value,
+            # Get anomaly score and status
+            anomaly_score, is_anomaly = services.anomaly_checker.is_anomaly(
+                value_to_check=detected_value,
                 aruco_id=aruco_id,
                 category_name=category,
             )
-
+            print(f"[RESULT] {category}: value={detected_value} | score={anomaly_score} | anomaly={is_anomaly}")
             handle_anomaly(is_anomaly=is_anomaly)

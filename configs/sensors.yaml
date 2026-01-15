@@ -57,7 +57,7 @@ nodes:
           uncertain_range: !!float 0.5 # Möglicher Anomaliebereich
           anomaly_range: !!float 0.0 # Definitv Anomaliebereich
       
-      - name: !!str 'unknown'
+      - name: !!str 'humidity'
         opcua_node: !!str ''
         unit: !!str '%'
         value_tolerance: !!float 0.1

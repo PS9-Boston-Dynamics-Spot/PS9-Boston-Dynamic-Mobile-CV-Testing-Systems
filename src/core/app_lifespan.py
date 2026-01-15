@@ -195,31 +195,89 @@ def process_digital_image(
             crop_jpg_bytes=cropped_digital_image.crop_bytes
         )
 
-        unit = services.settings_manager.getUnit(
+        # Select value and unit based on display_type, fallback to config unit if OCR unit is None
+        config_unit = services.settings_manager.getUnit(
             aruco_id=aruco_id, category_name=result.display_type
         )
+        if result.display_type == "tempdisplay":
+            detected_value = result.temperature
+            unit = result.temperature_unit or config_unit
+            ocr_confidence = result.ocr_confidence_temp
 
+        # Always print debug info
         print("[MAIN] RESULT")
         print(" display_type:", result.display_type)
-        print(" value:", result.value)
-        print(" unit:", result.unit)
-        print(" ocr_confidence:", result.ocr_confidence)
+        print(" temperature value:", result.temperature)
+        print(" temperature unit:", result.temperature_unit or config_unit)
+        print(" temperature ocr_confidence:", result.ocr_confidence_temp)
+        print(" humidity value:", result.humidity)
+        print(" humidity unit:", result.humidity_unit or config_unit)
+        print(" humidity ocr_confidence:", result.ocr_confidence_hum)
+        print(" ofen value:", result.ofen_value)
+        print(" ofen unit:", result.ofen_unit or config_unit)
+        print(" ofen ocr_confidence:", result.ocr_confidence_ofen)
         print(" title_text:", result.title_text)
         print(" title_raw:", result.title_raw)
-        print(" raw_text:", result.raw_text)
+        print(" raw_text_temp:", result.raw_text_temp)
+        print(" raw_text_hum:", result.raw_text_hum)
+        print(" raw_text_ofen:", result.raw_text_ofen)
 
-        analyzed_image_id = safe_analyzed_image(
-            dal=dal,
-            image_bytes=cropped_digital_image.crop_bytes,
-            raw_image_id=raw_image_id,
-            sensor_type=result.display_type,
-            opcua_node_id=opcua_node_id,
-            aruco_id=aruco_id,
-            detected_value=result.value,
-            unit=unit,
-            category=result.display_type,
-        )
-
-        yield analyzed_image_id, result.value, result.display_type
-
-    return
+        # For tempdisplay, yield both temperature and humidity as separate results
+        if result.display_type == "tempdisplay":
+            # Temperature
+            if result.temperature is not None:
+                analyzed_image_id = safe_analyzed_image(
+                    dal=dal,
+                    image_bytes=cropped_digital_image.crop_bytes,
+                    raw_image_id=raw_image_id,
+                    sensor_type="tempdisplay",
+                    opcua_node_id=opcua_node_id,
+                    aruco_id=aruco_id,
+                    detected_value=result.temperature,
+                    unit=result.temperature_unit or config_unit,
+                    category="tempdisplay",
+                )
+                yield analyzed_image_id, result.temperature, "tempdisplay"
+            # Humidity
+            if result.humidity is not None:
+                analyzed_image_id = safe_analyzed_image(
+                    dal=dal,
+                    image_bytes=cropped_digital_image.crop_bytes,
+                    raw_image_id=raw_image_id,
+                    sensor_type="humidity",
+                    opcua_node_id=opcua_node_id,
+                    aruco_id=aruco_id,
+                    detected_value=result.humidity,
+                    unit=result.humidity_unit or "%",
+                    category="humidity",
+                )
+                yield analyzed_image_id, result.humidity, "humidity"
+        elif result.display_type == "ofen":
+            if result.ofen_value is not None:
+                analyzed_image_id = safe_analyzed_image(
+                    dal=dal,
+                    image_bytes=cropped_digital_image.crop_bytes,
+                    raw_image_id=raw_image_id,
+                    sensor_type="ofen",
+                    opcua_node_id=opcua_node_id,
+                    aruco_id=aruco_id,
+                    detected_value=result.ofen_value,
+                    unit=result.ofen_unit or config_unit,
+                    category="ofen",
+                )
+                yield analyzed_image_id, result.ofen_value, "ofen"
+        else:
+            # fallback: yield whatever was detected
+            if result.temperature is not None:
+                analyzed_image_id = safe_analyzed_image(
+                    dal=dal,
+                    image_bytes=cropped_digital_image.crop_bytes,
+                    raw_image_id=raw_image_id,
+                    sensor_type=result.display_type,
+                    opcua_node_id=opcua_node_id,
+                    aruco_id=aruco_id,
+                    detected_value=result.temperature,
+                    unit=result.temperature_unit or config_unit,
+                    category=result.display_type,
+                )
+                yield analyzed_image_id, result.temperature, result.display_type
