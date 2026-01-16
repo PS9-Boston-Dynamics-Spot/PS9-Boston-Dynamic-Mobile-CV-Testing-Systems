@@ -234,8 +234,13 @@ class EasyOcrDisplayValueReader:
             hum_unit = self._read_humidity_unit(img) or "%"
 
             # Temperatur: nur obere Hälfte (oben)
-            temp_roi = (0.10, 0.05, 0.90, 0.45)
+            # temp_roi = (0.10, 0.05, 0.90, 0.45) # vorher
+            temp_roi = (0.30, 0.20, 0.70, 0.45) # nacher angepasst 
             temp_img = _roi_crop(img, temp_roi)
+
+            if self._verbose:
+                 print(f"[DEBUG] Temp crop size: {temp_img.shape}")
+
             temp_val, raw_temp, conf_temp = self._ocr_value(
                 temp_img, min_val=-50, max_val=400, prefer_decimal=True
             )
@@ -296,15 +301,16 @@ if __name__ == "__main__":
     # CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
     # CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
     # Pfade korrigiert: data (klein) statt Data
-    CROP_DEBUG_DIR = Path(
-        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug"
-    )
-    CROP_DIR = Path(
-        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
-    )
+    # CROP_DEBUG_DIR = Path(
+    #     "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug"
+    # )
+    # CROP_DIR = Path(
+    #     "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
+    # )
 
-    # CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    # CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+    CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
+    CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+
 
     candidates = []
     if CROP_DEBUG_DIR.exists():
