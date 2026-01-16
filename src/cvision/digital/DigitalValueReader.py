@@ -202,13 +202,26 @@ class EasyOcrDisplayValueReader:
     ) -> OcrValueResult:
         img = bgr_from_jpg_bytes(crop_jpg_bytes)
 
-        display_type, title_text, title_raw = self._classify_display(img)
+        # display_type, title_text, title_raw = self._classify_display(img)
 
-        if display_type == "unknown" and fallback_cls_id is not None:
-            if fallback_cls_id == 1:
-                display_type = "tempdisplay"
-            elif fallback_cls_id == 0:
-                display_type = "ofen"
+        # if display_type == "unknown" and fallback_cls_id is not None:
+        #     if fallback_cls_id == 1:
+        #         display_type = "tempdisplay"
+        #     elif fallback_cls_id == 0:
+        #         display_type = "ofen"
+
+        # Display-Typ kommt aus dem Crop/Model -> OCR-Klassifikation überspringen
+        if fallback_cls_id == 0:
+            display_type = "tempdisplay"
+        elif fallback_cls_id == 1:
+            display_type = "ofen"
+        else:
+            display_type = "unknown"
+
+        # Titel-Infos nur noch als leere Debug-Felder (oder optional später)
+        title_text = ""
+        title_raw: list[str] = []
+
 
         if self._verbose:
             print(
@@ -239,7 +252,7 @@ class EasyOcrDisplayValueReader:
             temp_img = _roi_crop(img, temp_roi)
 
             if self._verbose:
-                 print(f"[DEBUG] Temp crop size: {temp_img.shape}")
+                     print(f"[DEBUG] Temp crop size: {temp_img.shape}")
 
             temp_val, raw_temp, conf_temp = self._ocr_value(
                 temp_img, min_val=-50, max_val=400, prefer_decimal=True
