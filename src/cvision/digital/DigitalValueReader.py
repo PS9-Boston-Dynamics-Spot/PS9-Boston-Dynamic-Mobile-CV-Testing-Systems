@@ -165,52 +165,12 @@ class EasyOcrDisplayValueReader:
         # Falls OCR das % nicht sieht, trotzdem "%" default für Humidity
         return "%"
 
-    def _classify_display(self, img_bgr: np.ndarray) -> tuple[str, str, list[str]]:
-        title_roi = (0.00, 0.00, 0.65, 0.32)
-        crop = _roi_crop(img_bgr, title_roi)
-        joined, raw = self._ocr_text(crop)
-
-        temp_patterns = [
-            "temper",
-            "temperatur",
-            "temp",
-            "tomp",
-            "tamp",
-            "mpst",
-            "mpct",
-            "mps",
-            "tompa",
-            "tompaa",
-            "tompat",
-        ]
-        ofen_patterns = ["ofen", "öfen", "@fen", "ofcn", "oien", "of(ii", "ofe", "ofn"]
-
-        is_temp = any(p in joined for p in temp_patterns)
-        is_ofen = any(p in joined for p in ofen_patterns) or (
-            ("ac" in joined or "aac" in joined)
-            and ("of" in joined or "@f" in joined or "ö" in joined)
-        )
-
-        if is_temp and not is_ofen:
-            return "tempdisplay", joined, raw
-        if is_ofen and not is_temp:
-            return "ofen", joined, raw
-        return "unknown", joined, raw
-
     def read_from_crop_bytes(
         self, crop_jpg_bytes: bytes, fallback_cls_id: Optional[int] = None
     ) -> OcrValueResult:
         img = bgr_from_jpg_bytes(crop_jpg_bytes)
 
-        # display_type, title_text, title_raw = self._classify_display(img)
-
-        # if display_type == "unknown" and fallback_cls_id is not None:
-        #     if fallback_cls_id == 1:
-        #         display_type = "tempdisplay"
-        #     elif fallback_cls_id == 0:
-        #         display_type = "ofen"
-
-        # Display-Typ kommt aus dem Crop/Model -> OCR-Klassifikation überspringen
+        # Display-Typ kommt aus dem Crop/Model
         if fallback_cls_id == 0:
             display_type = "tempdisplay"
         elif fallback_cls_id == 1:
@@ -222,11 +182,8 @@ class EasyOcrDisplayValueReader:
         title_text = ""
         title_raw: list[str] = []
 
-
         if self._verbose:
-            print(
-                f"[EasyOCR] display_type={display_type} title='{title_text}' raw_title={title_raw}"
-            )
+            print(f"[EasyOCR] display_type={display_type} (from cls_id={fallback_cls_id})")
 
         # Defaults (damit Result immer vollständig ist)
         temp_val = None
