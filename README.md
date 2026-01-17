@@ -123,7 +123,7 @@ Um das Projekt einzurichten und zu nutzen, folge den Anleitungen in den jeweilig
       </td>
       <td>
         <a href="https://github.com/AxdeExpe"><kbd>Kevin Pietzsch</kbd></a><br/>
-        <sub>DevOps · Tooling · Computer Vision · Anomaly Detection · Datapipeline</sub>
+        <sub>Infrastructure & Tooling · Computer Vision · Anomaly Detection · Datapipeline</sub>
       </td>
     </tr>
   </tbody>
@@ -133,3 +133,4 @@ Um das Projekt einzurichten und zu nutzen, folge den Anleitungen in den jeweilig
 
 
 ---
+
