@@ -46,6 +46,90 @@ Um das Projekt einzurichten und zu nutzen, folge den Anleitungen in den jeweilig
 - **Felix Fritzsche** - Projektbetreuer
 
 ### Entwicklungsteam
-[![Contributors](https://contrib.rocks/image?repo=PS9-Boston-Dynamics-Spot/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems)](https://github.com/PS9-Boston-Dynamics-Spot/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/graphs/contributors)
+
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://github.com/laurenzzzzzz">
+          <img src="https://avatars.githubusercontent.com/laurenzzzzzz" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/laurenzzzzzz"><kbd>Laurenz Born</kbd></a><br/>
+        <sub>Robot Motion · Control / Software</sub>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/Johann0001">
+          <img src="https://avatars.githubusercontent.com/Johann0001" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/Johann0001"><kbd>Johann Schmidt</kbd></a><br/>
+        <sub>Robot Motion · Control / Software</sub>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/Jannes05">
+          <img src="https://avatars.githubusercontent.com/Jannes05" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/Jannes05"><kbd>Jannes Lehmann</kbd></a><br/>
+        <sub>Machine Learning · Computer Vision · Config + Env Manager</sub>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/s87089">
+          <img src="https://avatars.githubusercontent.com/s87089" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/s87089"><kbd>Justus Müller</kbd></a><br/>
+        <sub>Machine Learning · Computer Vision · Project Management</sub>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/paulagra">
+          <img src="https://avatars.githubusercontent.com/paulagra" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/paulagra"><kbd>Paula Grahlow</kbd></a><br/>
+        <sub>Testing</sub>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/TilG7">
+          <img src="https://avatars.githubusercontent.com/TilG7" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/TilG7"><kbd>Til Guhlmann</kbd></a><br/>
+        <sub>Project Recorder</sub>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/AxdeExpe">
+          <img src="https://avatars.githubusercontent.com/AxdeExpe" width="56" style="border-radius:50%;" />
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/AxdeExpe"><kbd>Kevin Pietzsch</kbd></a><br/>
+        <sub>DevOps · Tooling · Computer Vision · Anomaly Detection · Datapipeline</sub>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
 
 ---
