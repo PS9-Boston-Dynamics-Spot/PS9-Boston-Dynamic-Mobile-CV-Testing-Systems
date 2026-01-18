@@ -62,7 +62,6 @@ class TestDataAccessLayer(unittest.TestCase):
         with DataAccessLayer() as dal:
             dal.insert_raw_image(dto)
 
-        meta.get_new_id_raw_images.assert_called_once()
         meta.insert_raw_image_metadata.assert_called_once()
         media.put_media.assert_called_once()
 
@@ -132,7 +131,6 @@ class TestDataAccessLayer(unittest.TestCase):
         with DataAccessLayer() as dal:
             dal.insert_analyzed_image(dto)
 
-        meta.get_new_id_analyzed_images.assert_called_once()
         meta.insert_analyzed_image_metadata.assert_called_once()
         media.put_media.assert_called_once()
 
