@@ -5,37 +5,10 @@ from db.meta.repository.MetaRepository import MetaRepository
 from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 
-
-class TestMetaRepositoryIds(unittest.TestCase):
-
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
-    def test_get_new_id_raw_images_delegates_to_reader(self, mock_reader_cls):
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.get_new_id_raw_images.return_value = 10
-
-        repo = MetaRepository()
-        result = repo.get_new_id_raw_images()
-
-        self.assertEqual(result, 10)
-        mock_reader.get_new_id_raw_images.assert_called_once()
-
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
-    def test_get_new_id_analyzed_images_delegates_to_reader(self, mock_reader_cls):
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.get_new_id_analyzed_images.return_value = 5
-
-        repo = MetaRepository()
-        result = repo.get_new_id_analyzed_images()
-
-        self.assertEqual(result, 5)
-        mock_reader.get_new_id_analyzed_images.assert_called_once()
-
-
 class TestMetaRepositoryInsertRaw(unittest.TestCase):
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
-    def test_insert_raw_image_metadata_success(self, mock_reader_cls, mock_writer_cls):
+    def test_insert_raw_image_metadata_success(self, mock_writer_cls):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_raw_image_metadata.return_value = (1, "img.png")
 
@@ -67,9 +40,8 @@ class TestMetaRepositoryInsertRaw(unittest.TestCase):
         )
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
     def test_insert_raw_image_metadata_wraps_databasewritererror(
-        self, mock_reader_cls, mock_writer_cls
+        self, mock_writer_cls
     ):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_raw_image_metadata.side_effect = DatabaseWriterError(
@@ -94,9 +66,8 @@ class TestMetaRepositoryInsertRaw(unittest.TestCase):
             repo.insert_raw_image_metadata(metadata)
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
     def test_insert_raw_image_metadata_wraps_generic_exception(
-        self, mock_reader_cls, mock_writer_cls
+        self, mock_writer_cls
     ):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_raw_image_metadata.side_effect = RuntimeError("boom")
@@ -122,9 +93,8 @@ class TestMetaRepositoryInsertRaw(unittest.TestCase):
 class TestMetaRepositoryInsertAnalyzed(unittest.TestCase):
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
     def test_insert_analyzed_image_metadata_success(
-        self, mock_reader_cls, mock_writer_cls
+        self, mock_writer_cls
     ):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_analyzed_image_metadata.return_value = (2, "img.png")
@@ -145,9 +115,10 @@ class TestMetaRepositoryInsertAnalyzed(unittest.TestCase):
         metadata.compression_method = None
         metadata.sensor_type = "cam"
         metadata.category = "cat"
-        metadata.quality = 0.9
         metadata.value = 42.0
         metadata.unit = "mm"
+        metadata.opcua_node_id = "node/test"
+        metadata.aruco_id = 41
 
         result = repo.insert_analyzed_image_metadata(metadata)
 
@@ -163,15 +134,15 @@ class TestMetaRepositoryInsertAnalyzed(unittest.TestCase):
             compression_method=None,
             sensor_type="cam",
             category="cat",
-            quality=0.9,
             value=42.0,
             unit="mm",
+            opcua_node_id = "node/test",
+            aruco_id = 41
         )
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
     def test_insert_analyzed_image_metadata_wraps_databasewritererror(
-        self, mock_reader_cls, mock_writer_cls
+        self, mock_writer_cls
     ):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_analyzed_image_metadata.side_effect = DatabaseWriterError(
@@ -202,9 +173,8 @@ class TestMetaRepositoryInsertAnalyzed(unittest.TestCase):
             repo.insert_analyzed_image_metadata(metadata)
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    @patch("db.meta.repository.MetaRepository.DatabaseReader")
     def test_insert_analyzed_image_metadata_wraps_generic_exception(
-        self, mock_reader_cls, mock_writer_cls
+        self, mock_writer_cls
     ):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_analyzed_image_metadata.side_effect = RuntimeError("boom")

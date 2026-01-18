@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
-from configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
-from configs.enum.ConfigEnum import MINIO_BUCKETS
+from credentials.configs.reader.MinioBucketConfigReader import MinioBucketConfigReader
+from credentials.configs.enum.ConfigEnum import MINIO_BUCKETS
 
 
 class TestMinioBucketConfigReader(unittest.TestCase):

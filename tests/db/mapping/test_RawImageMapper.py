@@ -74,9 +74,9 @@ class TestRawImageMapper(unittest.TestCase):
             "bucket": "bucket",
         }
 
-    @patch("db.mapping.RawImageMapper.MapperHelper.get_bytes_length")
-    @patch("db.mapping.RawImageMapper.MapperHelper.guess_content_type")
-    @patch("db.mapping.RawImageMapper.MapperHelper.guess_file_extension")
+    @patch("db.mapping.input.RawImageMapper.MapperHelper.get_bytes_length")
+    @patch("db.mapping.input.RawImageMapper.MapperHelper.guess_content_type")
+    @patch("db.mapping.input.RawImageMapper.MapperHelper.guess_file_extension")
     def test_map_image_uses_mapperhelper(
         self,
         mock_guess_ext,
@@ -97,9 +97,9 @@ class TestRawImageMapper(unittest.TestCase):
         self.assertEqual(dto.content_type, "image/jpeg")
         self.assertEqual(dto.size, 999)
 
-    @patch("db.mapping.RawImageMapper.MapperHelper.get_bytes_length")
-    @patch("db.mapping.RawImageMapper.MapperHelper.guess_content_type")
-    @patch("db.mapping.RawImageMapper.MapperHelper.guess_file_extension")
+    @patch("db.mapping.input.RawImageMapper.MapperHelper.get_bytes_length")
+    @patch("db.mapping.input.RawImageMapper.MapperHelper.guess_content_type")
+    @patch("db.mapping.input.RawImageMapper.MapperHelper.guess_file_extension")
     def test_map_image_uses_explicit_values(
         self,
         mock_guess_ext,

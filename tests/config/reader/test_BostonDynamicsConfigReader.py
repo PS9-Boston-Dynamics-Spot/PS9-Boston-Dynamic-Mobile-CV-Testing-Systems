@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
-from configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
-from configs.enum.ConfigEnum import ROBOT_KEYS
+from credentials.configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
+from credentials.configs.enum.ConfigEnum import ROBOT_KEYS
 
 
 class TestBostonDynamicsConfigReader(unittest.TestCase):
@@ -12,7 +12,6 @@ class TestBostonDynamicsConfigReader(unittest.TestCase):
                 ROBOT_KEYS.IP: "192.168.0.101",
                 ROBOT_KEYS.WIFI: "MyWifi",
                 ROBOT_KEYS.USER: "robotuser",
-                ROBOT_KEYS.PASSWORD: "robotpass",
             }
         }
 
@@ -28,7 +27,6 @@ class TestBostonDynamicsConfigReader(unittest.TestCase):
         self.assertEqual(reader.getIP(), "192.168.0.101")
         self.assertEqual(reader.getWifi(), "MyWifi")
         self.assertEqual(reader.getUser(), "robotuser")
-        self.assertEqual(reader.getPassword(), "robotpass")
 
     @patch.object(BostonDynamicsConfigReader, "load_config")
     def test_missing_robot_section(self, mock_load_config):
@@ -38,7 +36,6 @@ class TestBostonDynamicsConfigReader(unittest.TestCase):
         self.assertIsNone(reader.getIP())
         self.assertIsNone(reader.getWifi())
         self.assertIsNone(reader.getUser())
-        self.assertIsNone(reader.getPassword())
 
     @patch.object(BostonDynamicsConfigReader, "load_config")
     def test_partial_robot_config(self, mock_load_config):
@@ -48,7 +45,6 @@ class TestBostonDynamicsConfigReader(unittest.TestCase):
         self.assertEqual(reader.getIP(), "10.0.0.1")
         self.assertIsNone(reader.getWifi())
         self.assertIsNone(reader.getUser())
-        self.assertIsNone(reader.getPassword())
 
     @patch.object(BostonDynamicsConfigReader, "load_config")
     def test_boston_edge_none_robot_section(self, mock_load_config):
@@ -57,7 +53,6 @@ class TestBostonDynamicsConfigReader(unittest.TestCase):
         self.assertIsNone(reader.getIP())
         self.assertIsNone(reader.getWifi())
         self.assertIsNone(reader.getUser())
-        self.assertIsNone(reader.getPassword())
 
     @patch.object(BostonDynamicsConfigReader, "load_config")
     def test_boston_edge_wrong_type_robot_section(self, mock_load_config):
@@ -68,4 +63,3 @@ class TestBostonDynamicsConfigReader(unittest.TestCase):
         self.assertIsNone(reader.getIP())
         self.assertIsNone(reader.getWifi())
         self.assertIsNone(reader.getUser())
-        self.assertIsNone(reader.getPassword())

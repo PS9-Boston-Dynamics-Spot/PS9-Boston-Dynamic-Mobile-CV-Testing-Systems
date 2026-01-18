@@ -9,14 +9,16 @@ from db.media.exceptions.MinioConnectionError import MinioConnectionError
 
 class TestMinioConnectorInit(unittest.TestCase):
 
-    @patch("db.media.connector.MinioConnector.MinioConfigReader")
-    def test_init_success_sets_attributes_and_endpoint(self, mock_reader_cls):
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.getHost.return_value = "localhost"
-        mock_reader.getPort.return_value = "9000"
-        mock_reader.getAccessKey.return_value = "access"
-        mock_reader.getSecretKey.return_value = "secret"
-        mock_reader.getTls.return_value = True
+    @patch("db.media.connector.MinioConnector.CredentialsManager")
+    def test_init_success_sets_attributes_and_endpoint(self, mock_config_cls):
+        mock_config = mock_config_cls.return_value
+        mock_config.getMinioCredentials.return_value = {
+            "host": "localhost",
+            "port": "9000",
+            "tls": True,
+            "access_key": "access",
+            "secret_key": "secret",
+        }
 
         connector = MinioConnector()
 
@@ -27,26 +29,30 @@ class TestMinioConnectorInit(unittest.TestCase):
         self.assertTrue(connector.tls)
         self.assertEqual(connector.endpoint, "localhost:9000")
 
-    @patch("db.media.connector.MinioConnector.MinioConfigReader")
-    def test_init_sets_tls_false_if_not_truthy(self, mock_reader_cls):
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.getHost.return_value = "localhost"
-        mock_reader.getPort.return_value = "9000"
-        mock_reader.getAccessKey.return_value = "access"
-        mock_reader.getSecretKey.return_value = "secret"
-        mock_reader.getTls.return_value = None
+    @patch("db.media.connector.MinioConnector.CredentialsManager")
+    def test_init_sets_tls_false_if_not_truthy(self, mock_config_cls):
+        mock_config = mock_config_cls.return_value
+        mock_config.getMinioCredentials.return_value = {
+            "host": "localhost",
+            "port": "9000",
+            "tls": None,
+            "access_key": "access",
+            "secret_key": "secret",
+        }
 
         connector = MinioConnector()
         self.assertFalse(connector.tls)
 
-    @patch("db.media.connector.MinioConnector.MinioConfigReader")
-    def test_init_raises_minioiniterror_if_config_missing(self, mock_reader_cls):
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.getHost.return_value = None
-        mock_reader.getPort.return_value = "9000"
-        mock_reader.getAccessKey.return_value = "access"
-        mock_reader.getSecretKey.return_value = "secret"
-        mock_reader.getTls.return_value = False
+    @patch("db.media.connector.MinioConnector.CredentialsManager")
+    def test_init_raises_minioiniterror_if_config_missing(self, mock_config_cls):
+        mock_config = mock_config_cls.return_value
+        mock_config.getMinioCredentials.return_value = {
+            "host": None,
+            "port": "9000",
+            "tls": False,
+            "access_key": "access",
+            "secret_key": "secret",
+        }
 
         with self.assertRaises(MinioInitError):
             MinioConnector()
@@ -55,16 +61,17 @@ class TestMinioConnectorInit(unittest.TestCase):
 class TestMinioConnectorConnect(unittest.TestCase):
 
     def setUp(self):
-        patcher = patch("db.media.connector.MinioConnector.MinioConfigReader")
+        patcher = patch("db.media.connector.MinioConnector.CredentialsManager")
         self.addCleanup(patcher.stop)
-        mock_reader_cls = patcher.start()
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.getHost.return_value = "localhost"
-        mock_reader.getPort.return_value = "9000"
-        mock_reader.getAccessKey.return_value = "access"
-        mock_reader.getSecretKey.return_value = "secret"
-        mock_reader.getTls.return_value = False
-
+        mock_config_cls = patcher.start()
+        mock_config = mock_config_cls.return_value
+        mock_config.getMinioCredentials.return_value = {
+            "host": "localhost",
+            "port": "9000",
+            "tls": False,
+            "access_key": "access",
+            "secret_key": "secret",
+        }
         self.connector = MinioConnector()
 
     @patch("db.media.connector.MinioConnector.Minio")
@@ -111,14 +118,16 @@ class TestMinioConnectorConnect(unittest.TestCase):
 class TestMinioConnectorContextManager(unittest.TestCase):
 
     @patch("db.media.connector.MinioConnector.Minio")
-    @patch("db.media.connector.MinioConnector.MinioConfigReader")
-    def test_context_manager_enters_and_exits(self, mock_reader_cls, mock_minio_cls):
-        mock_reader = mock_reader_cls.return_value
-        mock_reader.getHost.return_value = "localhost"
-        mock_reader.getPort.return_value = "9000"
-        mock_reader.getAccessKey.return_value = "access"
-        mock_reader.getSecretKey.return_value = "secret"
-        mock_reader.getTls.return_value = False
+    @patch("db.media.connector.MinioConnector.CredentialsManager")
+    def test_context_manager_enters_and_exits(self, mock_config_cls, mock_minio_cls):
+        mock_config = mock_config_cls.return_value
+        mock_config.getMinioCredentials.return_value = {
+            "host": "localhost",
+            "port": "9000",
+            "tls": False,
+            "access_key": "access",
+            "secret_key": "secret",
+        }
 
         mock_client = MagicMock()
         mock_minio_cls.return_value = mock_client

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
-from configs.reader.SqliteConfigReader import SqliteConfigReader
-from configs.enum.ConfigEnum import SQLITE_KEYS
+from credentials.configs.reader.SqliteConfigReader import SqliteConfigReader
+from credentials.configs.enum.ConfigEnum import SQLITE_KEYS
 
 
 class TestSqliteConfigReader(unittest.TestCase):

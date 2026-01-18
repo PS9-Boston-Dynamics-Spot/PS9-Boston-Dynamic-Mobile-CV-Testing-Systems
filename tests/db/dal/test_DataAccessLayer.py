@@ -36,7 +36,6 @@ class TestDataAccessLayer(unittest.TestCase):
             size=len(image_data),
             sensor_type="camera",
             category="test-category",
-            quality=1.0,
             value=42.0,
             unit="units",
         )
@@ -45,8 +44,8 @@ class TestDataAccessLayer(unittest.TestCase):
 
     def test_create_object_name(self):
         dal = DataAccessLayer()
-        got = dal.create_object_name(42, "Mein Bild 1", "jpg")
-        self.assertEqual(got, "42_mein_bild_1.jpg")
+        got = dal.create_object_name(name="Mein Bild 1", format="jpg")
+        self.assertEqual(got, "Mein Bild 1.jpg")
 
     # ---------- insert_raw_image: Success ----------
 

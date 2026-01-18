@@ -17,7 +17,6 @@ class TestAnalyzedImageDTO(unittest.TestCase):
             "size": 1234,
             "sensor_type": "camera",
             "category": "test-category",
-            "quality": 0.95,
             "value": 42.0,
             "unit": "score",
             "compressed": False,
@@ -53,10 +52,9 @@ class TestAnalyzedImageDTO(unittest.TestCase):
             "size",
             "content_type",
             "sensor_type",
-            "category",
-            "quality",
             "value",
             "unit",
+            "category",
         ]
 
         for field_name in not_null_fields:
@@ -85,13 +83,7 @@ class TestAnalyzedImageDTO(unittest.TestCase):
         kwargs["size"] = 12.34
         with self.assertRaises(TypeError):
             AnalyzedImageDTO(**kwargs)
-
-        # quality muss float sein
-        kwargs = self.valid_kwargs.copy()
-        kwargs["quality"] = 1  # int
-        with self.assertRaises(TypeError):
-            AnalyzedImageDTO(**kwargs)
-
+        
         # value muss float sein
         kwargs = self.valid_kwargs.copy()
         kwargs["value"] = 10  # int
@@ -123,14 +115,13 @@ class TestAnalyzedImageMapper(unittest.TestCase):
             "bucket": "test-bucket",
             "sensor_type": "camera",
             "category": "test-category",
-            "quality": 0.9,
             "value": 100.0,
             "unit": "EUR",
         }
 
-    @patch("db.mapping.AnalyzedImageMapper.MapperHelper.get_bytes_length")
-    @patch("db.mapping.AnalyzedImageMapper.MapperHelper.guess_content_type")
-    @patch("db.mapping.AnalyzedImageMapper.MapperHelper.guess_file_extension")
+    @patch("db.mapping.input.AnalyzedImageMapper.MapperHelper.get_bytes_length")
+    @patch("db.mapping.input.AnalyzedImageMapper.MapperHelper.guess_content_type")
+    @patch("db.mapping.input.AnalyzedImageMapper.MapperHelper.guess_file_extension")
     def test_map_image_uses_mapperhelper_when_optional_params_missing(
         self,
         mock_guess_file_extension,
@@ -153,9 +144,9 @@ class TestAnalyzedImageMapper(unittest.TestCase):
         self.assertEqual(dto.content_type, "image/jpeg")
         self.assertEqual(dto.size, 999)
 
-    @patch("db.mapping.AnalyzedImageMapper.MapperHelper.get_bytes_length")
-    @patch("db.mapping.AnalyzedImageMapper.MapperHelper.guess_content_type")
-    @patch("db.mapping.AnalyzedImageMapper.MapperHelper.guess_file_extension")
+    @patch("db.mapping.input.AnalyzedImageMapper.MapperHelper.get_bytes_length")
+    @patch("db.mapping.input.AnalyzedImageMapper.MapperHelper.guess_content_type")
+    @patch("db.mapping.input.AnalyzedImageMapper.MapperHelper.guess_file_extension")
     def test_map_image_uses_explicit_values_if_provided(
         self,
         mock_guess_file_extension,
@@ -189,7 +180,6 @@ class TestAnalyzedImageMapper(unittest.TestCase):
         self.assertEqual(dto.bucket, "test-bucket")
         self.assertEqual(dto.sensor_type, "camera")
         self.assertEqual(dto.category, "test-category")
-        self.assertEqual(dto.quality, 0.9)
         self.assertEqual(dto.value, 100.0)
         self.assertEqual(dto.unit, "EUR")
 

@@ -115,9 +115,10 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
             compression_method=None,
             sensor_type="cam",
             category="cat",
-            quality=0.9,
             value=42.0,
             unit="mm",
+            opcua_node_id="node/test",
+            aruco_id=41                    
         )
 
         self.assertEqual(result, (7, "img.png"))
@@ -136,10 +137,11 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
                 False,
                 None,
                 "cam",
-                "cat",
-                0.9,
+                "node/test",
+                41,
                 42.0,
                 "mm",
+                "cat",
             ),
         )
 
@@ -162,6 +164,7 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
                 0.9,
                 42.0,
                 "mm",
+                "cam"
             )
 
     def test_insert_analyzed_image_metadata_operational_error(self):
@@ -183,6 +186,7 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
                 0.9,
                 42.0,
                 "mm",
+                "cam"
             )
 
     def test_insert_analyzed_image_metadata_database_error(self):
@@ -204,6 +208,7 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
                 0.9,
                 42.0,
                 "mm",
+                "cam"
             )
 
     def test_insert_analyzed_image_metadata_sqlite_connection_error(self):
@@ -227,6 +232,7 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
                 0.9,
                 42.0,
                 "mm",
+                "cam"
             )
 
     def test_insert_analyzed_image_metadata_generic_exception(self):
@@ -248,6 +254,7 @@ class TestInsertAnalyzedImageMetadata(DatabaseWriterTestBase):
                 0.9,
                 42.0,
                 "mm",
+                "cam"
             )
 
 

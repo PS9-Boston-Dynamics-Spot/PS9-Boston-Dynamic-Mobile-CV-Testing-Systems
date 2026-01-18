@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
-from configs.reader.MinioConfigReader import MinioConfigReader
-from configs.enum.ConfigEnum import MINIO_KEYS
+from credentials.configs.reader.MinioConfigReader import MinioConfigReader
+from credentials.configs.enum.ConfigEnum import MINIO_KEYS
 
 
 class TestMinioConfigReader(unittest.TestCase):
@@ -12,7 +12,6 @@ class TestMinioConfigReader(unittest.TestCase):
                 MINIO_KEYS.HOST: "localhost",
                 MINIO_KEYS.PORT: "9000",
                 MINIO_KEYS.ACCESS_KEY: "minioadmin",
-                MINIO_KEYS.SECRET_KEY: "miniosecret",
                 MINIO_KEYS.TLS: True,
             }
         }
@@ -29,7 +28,6 @@ class TestMinioConfigReader(unittest.TestCase):
         self.assertEqual(reader.getHost(), "localhost")
         self.assertEqual(reader.getPort(), "9000")
         self.assertEqual(reader.getAccessKey(), "minioadmin")
-        self.assertEqual(reader.getSecretKey(), "miniosecret")
         self.assertTrue(reader.getTls())
 
     @patch.object(MinioConfigReader, "load_config")
@@ -40,7 +38,6 @@ class TestMinioConfigReader(unittest.TestCase):
         self.assertIsNone(reader.getHost())
         self.assertIsNone(reader.getPort())
         self.assertIsNone(reader.getAccessKey())
-        self.assertIsNone(reader.getSecretKey())
         self.assertIsNone(reader.getTls())
 
     @patch.object(MinioConfigReader, "load_config")
@@ -53,7 +50,6 @@ class TestMinioConfigReader(unittest.TestCase):
         self.assertEqual(reader.getHost(), "minio")
         self.assertEqual(reader.getPort(), "9001")
         self.assertIsNone(reader.getAccessKey())
-        self.assertIsNone(reader.getSecretKey())
         self.assertIsNone(reader.getTls())
 
     @patch.object(MinioConfigReader, "load_config")
@@ -63,7 +59,6 @@ class TestMinioConfigReader(unittest.TestCase):
         self.assertIsNone(reader.getHost())
         self.assertIsNone(reader.getPort())
         self.assertIsNone(reader.getAccessKey())
-        self.assertIsNone(reader.getSecretKey())
         self.assertIsNone(reader.getTls())
 
     @patch.object(MinioConfigReader, "load_config")
@@ -73,5 +68,4 @@ class TestMinioConfigReader(unittest.TestCase):
         self.assertIsNone(reader.getHost())
         self.assertIsNone(reader.getPort())
         self.assertIsNone(reader.getAccessKey())
-        self.assertIsNone(reader.getSecretKey())
         self.assertIsNone(reader.getTls())

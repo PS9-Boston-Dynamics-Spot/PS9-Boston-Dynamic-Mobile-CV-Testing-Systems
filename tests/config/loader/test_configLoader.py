@@ -2,10 +2,10 @@ import unittest
 import tempfile
 from pathlib import Path
 import yaml
-from configs.loader.ConfigLoader import ConfigLoader
-from configs.exceptions.ConfigLoadError import ConfigLoadError
-from configs.exceptions.ConfigNotFound import ConfigNotFound
-from configs.exceptions.ConfigParseError import ConfigParseError
+from credentials.configs.loader.ConfigLoader import ConfigLoader
+from credentials.configs.exceptions.ConfigLoadError import ConfigLoadError
+from credentials.configs.exceptions.ConfigNotFound import ConfigNotFound
+from credentials.configs.exceptions.ConfigParseError import ConfigParseError
 
 
 class TestConfigLoader(unittest.TestCase):
