@@ -14,8 +14,7 @@ RUN apt-get update && apt-get install -y \
     && ldconfig \
     && rm -rf /var/lib/apt/lists/*
 
-# 🔹 Torch Hub Cache Location
-#ENV TORCH_HOME=/opt/torch
+ENV TORCH_HOME=/opt/torch
 
 COPY requirements.txt .
 
@@ -23,23 +22,16 @@ RUN python3 -m venv /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.ve
     && /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/pip install --upgrade pip \
     && /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# # 🔥 DINOv2 beim Build vorladen
-# RUN /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python - <<'EOF'
-# import torch
-# torch.hub.load(
-#     "facebookresearch/dinov2",
-#     "dinov2_vits14",
-#     pretrained=True
-# )
-# EOF
+RUN /workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin/python - <<'EOF'
+import torch
+torch.hub.load(
+    "facebookresearch/dinov2",
+    "dinov2_vits14",
+    pretrained=True
+)
+EOF
 
 COPY . .
-
-ARG DINOV2_URL="https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_pretrain.pth"
-ENV DINOV2_WEIGHTS="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/src/third_party/dinov2/checkpoints/dinov2_vits14.pth"
-RUN mkdir -p "$(dirname "$DINOV2_WEIGHTS")" \
-    && curl -L "$DINOV2_URL" -o "$DINOV2_WEIGHTS" \
-    && sha256sum "$DINOV2_WEIGHTS"
 
 ENV PATH="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv/bin:$PATH"
 ENV VIRTUAL_ENV="/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/.venv"
