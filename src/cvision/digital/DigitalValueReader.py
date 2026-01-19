@@ -165,55 +165,25 @@ class EasyOcrDisplayValueReader:
         # Falls OCR das % nicht sieht, trotzdem "%" default für Humidity
         return "%"
 
-    def _classify_display(self, img_bgr: np.ndarray) -> tuple[str, str, list[str]]:
-        title_roi = (0.00, 0.00, 0.65, 0.32)
-        crop = _roi_crop(img_bgr, title_roi)
-        joined, raw = self._ocr_text(crop)
-
-        temp_patterns = [
-            "temper",
-            "temperatur",
-            "temp",
-            "tomp",
-            "tamp",
-            "mpst",
-            "mpct",
-            "mps",
-            "tompa",
-            "tompaa",
-            "tompat",
-        ]
-        ofen_patterns = ["ofen", "öfen", "@fen", "ofcn", "oien", "of(ii", "ofe", "ofn"]
-
-        is_temp = any(p in joined for p in temp_patterns)
-        is_ofen = any(p in joined for p in ofen_patterns) or (
-            ("ac" in joined or "aac" in joined)
-            and ("of" in joined or "@f" in joined or "ö" in joined)
-        )
-
-        if is_temp and not is_ofen:
-            return "tempdisplay", joined, raw
-        if is_ofen and not is_temp:
-            return "ofen", joined, raw
-        return "unknown", joined, raw
-
     def read_from_crop_bytes(
         self, crop_jpg_bytes: bytes, fallback_cls_id: Optional[int] = None
     ) -> OcrValueResult:
         img = bgr_from_jpg_bytes(crop_jpg_bytes)
 
-        display_type, title_text, title_raw = self._classify_display(img)
+        # Display-Typ kommt aus dem Crop/Model
+        if fallback_cls_id == 0:
+            display_type = "tempdisplay"
+        elif fallback_cls_id == 1:
+            display_type = "ofen"
+        else:
+            display_type = "unknown"
 
-        if display_type == "unknown" and fallback_cls_id is not None:
-            if fallback_cls_id == 1:
-                display_type = "tempdisplay"
-            elif fallback_cls_id == 0:
-                display_type = "ofen"
+        # Titel-Infos nur noch als leere Debug-Felder (oder optional später)
+        title_text = ""
+        title_raw: list[str] = []
 
         if self._verbose:
-            print(
-                f"[EasyOCR] display_type={display_type} title='{title_text}' raw_title={title_raw}"
-            )
+            print(f"[EasyOCR] display_type={display_type} (from cls_id={fallback_cls_id})")
 
         # Defaults (damit Result immer vollständig ist)
         temp_val = None
@@ -234,8 +204,13 @@ class EasyOcrDisplayValueReader:
             hum_unit = self._read_humidity_unit(img) or "%"
 
             # Temperatur: nur obere Hälfte (oben)
-            temp_roi = (0.10, 0.05, 0.90, 0.45)
+            # temp_roi = (0.10, 0.05, 0.90, 0.45) # vorher
+            temp_roi = (0.30, 0.20, 0.70, 0.45) # nacher angepasst 
             temp_img = _roi_crop(img, temp_roi)
+
+            if self._verbose:
+                     print(f"[DEBUG] Temp crop size: {temp_img.shape}")
+
             temp_val, raw_temp, conf_temp = self._ocr_value(
                 temp_img, min_val=-50, max_val=400, prefer_decimal=True
             )
@@ -296,15 +271,16 @@ if __name__ == "__main__":
     # CROP_DEBUG_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
     # CROP_DIR = Path("/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
     # Pfade korrigiert: data (klein) statt Data
-    CROP_DEBUG_DIR = Path(
-        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug"
-    )
-    CROP_DIR = Path(
-        "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
-    )
+    # CROP_DEBUG_DIR = Path(
+    #     "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug"
+    # )
+    # CROP_DIR = Path(
+    #     "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
+    # )
 
-    # CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    # CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+    CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
+    CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
+
 
     candidates = []
     if CROP_DEBUG_DIR.exists():
