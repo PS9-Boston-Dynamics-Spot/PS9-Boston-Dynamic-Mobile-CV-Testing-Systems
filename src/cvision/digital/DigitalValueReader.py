@@ -172,9 +172,9 @@ class EasyOcrDisplayValueReader:
 
         # Display-Typ kommt aus dem Crop/Model
         if fallback_cls_id == 0:
-            display_type = "tempdisplay"
-        elif fallback_cls_id == 1:
             display_type = "ofen"
+        elif fallback_cls_id == 1:
+            display_type = "tempdisplay"
         else:
             display_type = "unknown"
 

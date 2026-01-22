@@ -192,7 +192,8 @@ def process_digital_image(
     for cropped_digital_image in cropped_digital_images:
 
         result = reader.read_from_crop_bytes(
-            crop_jpg_bytes=cropped_digital_image.crop_bytes
+            crop_jpg_bytes=cropped_digital_image.crop_bytes,
+            fallback_cls_id=cropped_digital_image.cls_id
         )
         # Skip unknown display types (no config, no anomaly check)
         if result.display_type == "unknown":
