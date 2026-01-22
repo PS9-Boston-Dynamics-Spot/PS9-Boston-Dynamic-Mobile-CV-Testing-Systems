@@ -183,7 +183,9 @@ class EasyOcrDisplayValueReader:
         title_raw: list[str] = []
 
         if self._verbose:
-            print(f"[EasyOCR] display_type={display_type} (from cls_id={fallback_cls_id})")
+            print(
+                f"[EasyOCR] display_type={display_type} (from cls_id={fallback_cls_id})"
+            )
 
         # Defaults (damit Result immer vollständig ist)
         temp_val = None
@@ -205,11 +207,11 @@ class EasyOcrDisplayValueReader:
 
             # Temperatur: nur obere Hälfte (oben)
             # temp_roi = (0.10, 0.05, 0.90, 0.45) # vorher
-            temp_roi = (0.30, 0.20, 0.70, 0.45) # nacher angepasst 
+            temp_roi = (0.30, 0.20, 0.70, 0.45)  # nacher angepasst
             temp_img = _roi_crop(img, temp_roi)
 
             if self._verbose:
-                     print(f"[DEBUG] Temp crop size: {temp_img.shape}")
+                print(f"[DEBUG] Temp crop size: {temp_img.shape}")
 
             temp_val, raw_temp, conf_temp = self._ocr_value(
                 temp_img, min_val=-50, max_val=400, prefer_decimal=True
@@ -278,9 +280,12 @@ if __name__ == "__main__":
     #     "/workspaces/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
     # )
 
-    CROP_DEBUG_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug")
-    CROP_DIR = Path("/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop")
-
+    CROP_DEBUG_DIR = Path(
+        "/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop_debug"
+    )
+    CROP_DIR = Path(
+        "/Users/janneslehmann/Documents/PS9/PS9-Boston-Dynamic-Mobile-CV-Testing-Systems/data/images/crop"
+    )
 
     candidates = []
     if CROP_DEBUG_DIR.exists():

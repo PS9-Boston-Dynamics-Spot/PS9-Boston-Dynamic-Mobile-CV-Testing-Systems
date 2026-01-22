@@ -31,7 +31,9 @@ def _md5(path: pathlib.Path) -> str:
     return hasher.hexdigest()
 
 
-def _download_and_extract(url: str, filename: str, destination_dir: pathlib.Path) -> pathlib.Path:
+def _download_and_extract(
+    url: str, filename: str, destination_dir: pathlib.Path
+) -> pathlib.Path:
     destination_dir.mkdir(parents=True, exist_ok=True)
     tmp_fd, tmp_path = tempfile.mkstemp(suffix=".zip")
     os.close(tmp_fd)
@@ -75,7 +77,10 @@ def ensure_model(name: str, meta: dict[str, str]) -> None:
 
 if __name__ == "__main__":
     if not REQUIRED_MODELS["recognizer_english_g2"]:
-        print("[EasyOCR] english_g2 metadata missing; please update easyocr.config", file=sys.stderr)
+        print(
+            "[EasyOCR] english_g2 metadata missing; please update easyocr.config",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     for model_name, metadata in REQUIRED_MODELS.items():

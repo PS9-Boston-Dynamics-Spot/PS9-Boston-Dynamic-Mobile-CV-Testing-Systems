@@ -211,23 +211,23 @@ class RobotController:
 
         # 2. Parameter festlegen (Hardcoded für 4K und AUTO)
         camera_mode = gripper_camera_param_pb2.GripperCameraParams.MODE_4096_2160
-        #print("Setze Auflösung auf: 4096x2160")
+        # print("Setze Auflösung auf: 4096x2160")
 
         # Auto-Fokus aktivieren
         auto_focus = wrappers_pb2.BoolValue(value=True)
-        #print("Aktiviere Auto-Fokus")
+        # print("Aktiviere Auto-Fokus")
 
         # Auto-Exposure (Belichtung) aktivieren
         auto_exposure = wrappers_pb2.BoolValue(value=True)
-        #print("Aktiviere Auto-Belichtung")
+        # print("Aktiviere Auto-Belichtung")
 
         # Auto-White-Balance (Weißabgleich) aktivieren
         white_balance_temperature_auto = wrappers_pb2.BoolValue(value=True)
-        #print("Aktiviere Auto-Weißabgleich")
+        # print("Aktiviere Auto-Weißabgleich")
 
         # HDR-Modus auf Auto setzen (optional, kann aber helfen)
         hdr = gripper_camera_param_pb2.HDR_AUTO
-        #print("Setze HDR-Modus auf Auto")
+        # print("Setze HDR-Modus auf Auto")
 
         # 3. Das GripperCameraParams-Objekt erstellen
         params = gripper_camera_param_pb2.GripperCameraParams(
@@ -259,7 +259,7 @@ class RobotController:
                 f"Kritischer Fehler bei der Kommunikation mit dem Roboter bei Gripper Cam Paramater einstellung: {e}"
             )
             return False
-        
+
     def execute_arm_sequence(self):
         """
         Führt die Arm- und Greifer-Sequenz aus, inklusive Bildaufnahme.
@@ -347,7 +347,6 @@ class RobotController:
         self.command_client.robot_command(command)
         time.sleep(3)
         print("Arm-Sequenz erfolgreich abgeschlossen")
-
 
 
 class EstopNoGui:
@@ -633,13 +632,11 @@ class GraphNavInterface(object):
                 graph_nav_pb2.NavigationFeedbackResponse.STATUS_STUCK,
                 graph_nav_pb2.NavigationFeedbackResponse.STATUS_ROBOT_IMPAIRED,
             ):
-                print(
-                    f"Navigation ended with status={nav_status}."
-                )
+                print(f"Navigation ended with status={nav_status}.")
                 return False
             else:
                 is_finished = False
-        #Feinpositionierung nicht notwendig, funktioniert auch nicht zuverlässig
+        # Feinpositionierung nicht notwendig, funktioniert auch nicht zuverlässig
         # # Feinpositionierung nur bei REACHED_GOAL
         # if nav_status != graph_nav_pb2.NavigationFeedbackResponse.STATUS_REACHED_GOAL:
         #     return False
@@ -751,15 +748,14 @@ class GraphNavInterface(object):
         #         f" -> Korrektur: dx={dx_body:.3f}, dy={dy_body:.3f}, dyaw={yaw_cmd:.3f}"
         #     )
 
-            # self._move_relative(dx=dx_body, dy=dy_body, dyaw=yaw_cmd)
-            # self.relative_move(dx_body, dy_body, yaw_cmd,
-            #                    frame_name=ODOM_FRAME_NAME,
-            #                    robot_command_client=self.rc.command_client,
-            #                    robot_state_client=self.rc.state_client,
-            #                    stairs=False)
+        # self._move_relative(dx=dx_body, dy=dy_body, dyaw=yaw_cmd)
+        # self.relative_move(dx_body, dy_body, yaw_cmd,
+        #                    frame_name=ODOM_FRAME_NAME,
+        #                    robot_command_client=self.rc.command_client,
+        #                    robot_state_client=self.rc.state_client,
+        #                    stairs=False)
 
         return True
-
 
 
 def main():
@@ -820,7 +816,6 @@ def main():
                 print("Starte Undocking...")
 
                 rc.undock()
-
 
                 print("Commanding robot to stand...")
                 blocking_stand(rc.command_client)

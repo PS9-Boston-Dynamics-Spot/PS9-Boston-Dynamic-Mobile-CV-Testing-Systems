@@ -83,7 +83,7 @@ class TestAnalyzedImageDTO(unittest.TestCase):
         kwargs["size"] = 12.34
         with self.assertRaises(TypeError):
             AnalyzedImageDTO(**kwargs)
-        
+
         # value muss float sein
         kwargs = self.valid_kwargs.copy()
         kwargs["value"] = 10  # int

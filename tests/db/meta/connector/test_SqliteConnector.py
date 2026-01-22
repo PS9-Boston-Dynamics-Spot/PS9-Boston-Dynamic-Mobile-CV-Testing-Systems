@@ -33,7 +33,9 @@ class TestSqliteConnectorInit(unittest.TestCase):
 
         connector = SqliteConnector()
 
-        mock_connect.assert_called_once_with(**mock_credentials.getDBCredentials.return_value)
+        mock_connect.assert_called_once_with(
+            **mock_credentials.getDBCredentials.return_value
+        )
         self.assertIs(SqliteConnector._shared_connection, mock_connection)
         self.assertIs(connector.connection, mock_connection)
 

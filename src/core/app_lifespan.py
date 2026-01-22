@@ -73,9 +73,6 @@ def process_analog_image(
 ) -> Tuple[int, float]:
 
     cropped_analog_gauge_image = services.analog_gauge_cropper.process(img=image_bytes)
-    with open("demofile.png", "wb") as f:
-        f.write(cropped_analog_gauge_image)
-
     analog_unit = services.settings_manager.getUnit(
         aruco_id=aruco_id, category_name=category_name
     )
@@ -196,7 +193,7 @@ def process_digital_image(
 
         result = reader.read_from_crop_bytes(
             crop_jpg_bytes=cropped_digital_image.crop_bytes,
-            fallback_cls_id=cropped_digital_image.cls_id
+            fallback_cls_id=cropped_digital_image.cls_id,
         )
         # Skip unknown display types (no config, no anomaly check)
         if result.display_type == "unknown":

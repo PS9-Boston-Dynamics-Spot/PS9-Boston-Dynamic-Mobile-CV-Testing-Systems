@@ -1,5 +1,3 @@
-import subprocess
-import sys
 from pathlib import Path
 
 from db.dal.DataAccessLayer import DataAccessLayer
@@ -80,5 +78,7 @@ if __name__ == "__main__":
                 aruco_id=aruco_id,
                 category_name=category,
             )
-            print(f"[RESULT] {category}: value={detected_value} | score={anomaly_score} | anomaly={is_anomaly}")
+            print(
+                f"[RESULT] {category}: value={detected_value} | score={anomaly_score} | anomaly={is_anomaly}"
+            )
             handle_anomaly(is_anomaly=is_anomaly)

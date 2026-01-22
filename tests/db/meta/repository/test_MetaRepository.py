@@ -5,6 +5,7 @@ from db.meta.repository.MetaRepository import MetaRepository
 from db.meta.exceptions.DatabaseWriterError import DatabaseWriterError
 from db.meta.exceptions.MetaRepositoryError import MetaRepositoryError
 
+
 class TestMetaRepositoryInsertRaw(unittest.TestCase):
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
@@ -40,9 +41,7 @@ class TestMetaRepositoryInsertRaw(unittest.TestCase):
         )
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    def test_insert_raw_image_metadata_wraps_databasewritererror(
-        self, mock_writer_cls
-    ):
+    def test_insert_raw_image_metadata_wraps_databasewritererror(self, mock_writer_cls):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_raw_image_metadata.side_effect = DatabaseWriterError(
             exception=RuntimeError("db"), error_code=123
@@ -66,9 +65,7 @@ class TestMetaRepositoryInsertRaw(unittest.TestCase):
             repo.insert_raw_image_metadata(metadata)
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    def test_insert_raw_image_metadata_wraps_generic_exception(
-        self, mock_writer_cls
-    ):
+    def test_insert_raw_image_metadata_wraps_generic_exception(self, mock_writer_cls):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_raw_image_metadata.side_effect = RuntimeError("boom")
 
@@ -93,9 +90,7 @@ class TestMetaRepositoryInsertRaw(unittest.TestCase):
 class TestMetaRepositoryInsertAnalyzed(unittest.TestCase):
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")
-    def test_insert_analyzed_image_metadata_success(
-        self, mock_writer_cls
-    ):
+    def test_insert_analyzed_image_metadata_success(self, mock_writer_cls):
         mock_writer = mock_writer_cls.return_value
         mock_writer.insert_analyzed_image_metadata.return_value = (2, "img.png")
 
@@ -136,8 +131,8 @@ class TestMetaRepositoryInsertAnalyzed(unittest.TestCase):
             category="cat",
             value=42.0,
             unit="mm",
-            opcua_node_id = "node/test",
-            aruco_id = 41
+            opcua_node_id="node/test",
+            aruco_id=41,
         )
 
     @patch("db.meta.repository.MetaRepository.DatabaseWriter")

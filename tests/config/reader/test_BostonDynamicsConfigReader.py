@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
-from credentials.configs.reader.BostonDynamicsConfigReader import BostonDynamicsConfigReader
+from credentials.configs.reader.BostonDynamicsConfigReader import (
+    BostonDynamicsConfigReader,
+)
 from credentials.configs.enum.ConfigEnum import ROBOT_KEYS
 
 

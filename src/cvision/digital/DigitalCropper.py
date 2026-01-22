@@ -48,7 +48,7 @@ class CropResult:
 
 
 # ---------- DebugWriter ----------
-#optional output: img and txt with all crop informtations
+# optional output: img and txt with all crop informtations
 @dataclass
 class DebugWriter:
     out_dir: Path
@@ -137,7 +137,7 @@ class DebugWriter:
 class YoloDisplayCropper:
     """
     Byte-in -> YOLO detect -> crop bytes out
-    
+
     DebugWriter schreibt Crop + TXT.
 
     max. 2 Crops per Frame (beste Box per class).
@@ -271,11 +271,11 @@ if __name__ == "__main__":
     print(f"[MAIN] model_path={MODEL_PATH}")
     print(f"[MAIN] raw_dir={RAW_DIR} exists={RAW_DIR.exists()}")
 
-    #take the first images form path RAW_DIR
+    # take the first images form path RAW_DIR
 
-    #lokal debug Path
-    #images = sorted(list(RAW_DIR.glob("*.jpg")))
-    #projekt Path
+    # lokal debug Path
+    # images = sorted(list(RAW_DIR.glob("*.jpg")))
+    # projekt Path
     images = sorted(list(RAW_DIR.glob("spot.jpg")))
     if not images:
         print(f"[MAIN] ERROR: no .jpg found in {RAW_DIR}")

@@ -27,20 +27,20 @@ class AnalogGaugeCropper:
     def __detect_gauge_face(self, img: MatLike) -> tuple[np.ndarray, list[np.ndarray]]:
         results = self.model(img)
         boxes = results[0].boxes
-        
+
         if len(boxes) == 0:
             raise GaugeDetectionFailed(error_code=1765392590)
-        
+
         analog_boxes = [box for box in boxes if int(box.cls[0]) == 74]  # 74 = 'clock'
-        
+
         if len(analog_boxes) == 0:
             raise GaugeDetectionFailed(error_code=1765392590)
-        
+
         analog_boxes.sort(key=lambda x: x.conf[0], reverse=True)
-        
+
         main_box = analog_boxes[0]
         all_boxes = [box.xyxy[0].int() for box in analog_boxes]
-        
+
         return main_box.xyxy[0].int(), all_boxes
 
     def __crop(self, box, img: MatLike) -> MatLike:
