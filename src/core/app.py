@@ -14,14 +14,14 @@ from app_lifespan import (
 if __name__ == "__main__":
 
     project_root = Path(__file__).resolve().parents[2]
-    # robot_script = project_root / "src/common/sdk/robot_movement.py"
-    # graph_path = project_root / "data/map/downloaded_graph"
+    robot_script = project_root / "src/common/sdk/robot_movement.py"
+    graph_path = project_root / "data/map/downloaded_graph"
 
-    # subprocess.run(
-    #      [sys.executable, str(robot_script), "-u", str(graph_path)],
-    #      check=True,
-    #      cwd=str(robot_script.parent),
-    # )
+    subprocess.run(
+         [sys.executable, str(robot_script), "-u", str(graph_path)],
+         check=True,
+         cwd=str(robot_script.parent),
+    )
 
     path = project_root / "src/common/sdk/spot_bilder/spot.jpg"
 
