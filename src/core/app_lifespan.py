@@ -73,6 +73,9 @@ def process_analog_image(
 ) -> Tuple[int, float]:
 
     cropped_analog_gauge_image = services.analog_gauge_cropper.process(img=image_bytes)
+    with open("demofile.png", "wb") as f:
+        f.write(cropped_analog_gauge_image)
+
     analog_unit = services.settings_manager.getUnit(
         aruco_id=aruco_id, category_name=category_name
     )
