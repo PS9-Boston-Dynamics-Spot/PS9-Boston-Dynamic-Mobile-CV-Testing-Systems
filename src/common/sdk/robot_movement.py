@@ -260,7 +260,7 @@ class RobotController:
             )
             return False
 
-    def execute_arm_sequence(self):
+    def execute_arm_sequence(self, x, y, z, qx, qy, qz, qw):
         """
         Führt die Arm- und Greifer-Sequenz aus, inklusive Bildaufnahme.
         """
@@ -276,15 +276,6 @@ class RobotController:
 
         # 3. Arm bewegen (z.B. hochheben oder vorziehen)
         print("Arm wird leicht nach vorne oben bewegt...")
-
-        x = 0.28563416004180908
-        y = -0.338711678981781
-        z = 0.70670175552368164
-
-        qx = 0.28764960169792175
-        qy = 0.33570674061775208
-        qz = -0.64407461881637573
-        qw = 0.62428086996078491
 
         command = RobotCommandBuilder.arm_pose_command(
             x, y, z, qw, qx, qy, qz, "body", seconds=3.0
@@ -833,7 +824,16 @@ def main():
                 )  # default
 
                 if is_finished:
-                    rc.execute_arm_sequence()
+                    
+                    x = 0.28563416004180908
+                    y = -0.338711678981781
+                    z = 0.70670175552368164
+                    qx = 0.28764960169792175
+                    qy = 0.33570674061775208
+                    qz = -0.64407461881637573
+                    qw = 0.62428086996078491
+                    
+                    rc.execute_arm_sequence(x,y,z,qx,qy,qz,qw)
 
                 is_finished = False
                 is_finished = navigation._navigate_to(
